@@ -1,0 +1,6 @@
+*.out
+*.png
+*.gz
+*.pyc
+*~
+non_git

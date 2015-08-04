@@ -1,0 +1,42 @@
+# configuration file for ep3.py
+
+title:      Uncharted
+subtitle:
+author:     Anna Lowe
+series:     A Serendipity Adventure romance
+publisher:  Twin Moon Press
+editor:
+    name:       Erika Mustermann
+    website:    http://www.erika.com
+cover-art:
+    name:       Max Mueller
+    website:    http://www.mueller.com
+
+Blurb: >
+    Don’t despair! Our Wicked Alphas are about to get even wilder
+    in a second sizzling collection heading your way soon. {ww2_link_snippet}
+    releases on October 30, 2015 and features ALL-NEW, previously
+    unpublished scenes from your favorite paranormal romance authors,
+    including New York Times and USA Today bestsellers. We’re writing red-hot
+    scenes with werewolves, shapeshifting bears, ghosts, and more just for
+    this great new collection!
+
+
+headings:
+    - Chapter One
+    - Chapter Two
+    - Chapter Three
+    - Chapter Four
+    - Chapter Five
+    - Chapter Six
+    - Chapter Seven
+    - Chapter Eight
+    - Chapter Nine
+    - Chapter Ten
+    - Chapter Eleven
+    - Chapter Twelve
+    - Chapter Thirteen
+    - Chapter Fourteen
+    - Chapter Fifteen
+    - Chapter Sixteen
+    - Chapter One
