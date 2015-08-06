@@ -1,20 +1,31 @@
 #!/usr/bin/env python
 
-"""
-ep3: utilities for converting Scrivener projects into good looking EPUbs
-"""
+"""ep3.py: EPUB Pre-Processor - utilities for converting Scrivener
+projects into good looking EPUBs (written for Python 3)
 
-# tested with Python 3.4
+Run `python ep3.py -h` for more info
+"""
 
 import sys
-import os.path
+import os
 import xml.etree.ElementTree as ET
 import argparse
 import pandas as pd
 import yaml
+import jinja2
+from num2eng import num2eng
+
+
+_PATH_PREFIX = os.path.dirname(os.path.realpath(__file__))
+_TEMPLATE_PATH = os.path.join(_PATH_PREFIX, 'templates')
+_EPUB_SKELETON_PATH = os.path.join(_PATH_PREFIX, 'epub')
 
 
 class ParsingError(Exception):
+    pass
+
+
+class ExternalScriptError(Exception):
     pass
 
 
@@ -68,7 +79,102 @@ def get_chapters(top, type_filter=None):
     return bi
 
 
-def chapters_to_df(chapters, src_dir='Files/Docs', src_type='content',
+def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
+        headings=None, sub_headings=None, norm_level=True, key_mask=None):
+    """
+    Converts chapter list to dict that can be serialized as YAML for
+    mainmatter.
+
+    Arguments:
+    ----------
+
+    chapters: list of dicts
+        List with metadate extracted from Scrivener project file. Each dict
+        must be keyed by 'ID', 'Type', 'Title', 'IncludeInCompile' and 'Level'
+    src_dir: str
+        Path to the Scrivener (*.rtf) source files
+    src_type: str
+        'Type' entry to be used for these records in resulting tsv file.  Note
+        that this 'Type' is different from the 'Type' in the Scrivener project
+        XML file. The latter will be renamed to 'ScrivType' in the resulting
+        dict.
+    headings: sequence
+        List of chapter headings to be used.
+    sub_headings: sequence
+        List of chapter sub-headings to be used.
+    norm_level: boolean
+        If `True` level values will be shifted such that `1` becomes the
+        highest level.
+    key_mask: list
+        If provided, only keys listed in `key_mask` will be returned for each
+        list item (see below).
+
+    Returns a list of dicts (one per chapter), keyed by unique labels generated
+    from chapter titles. The label for each list element is mapped to a dict
+    with the following keys (selection can be controlled via `key_mask`
+    argument):
+
+        scrivID: int
+            Scrivener ID attribute value
+        scrivType: str
+            Scrivener 'Type' atribute ('Text' or 'Folder')
+        scrivTitle: str
+            Title tag text in Scrivener
+        ScrivInCompile: str
+            Value of Scrivener IncludeInCompile tag
+        src: str
+            Path to Scrivener rtf source file
+        level: int
+            Level in nested Scrivener XML structure
+        type: str
+            Value of `src_type` argument
+        heading: str
+            Heading text if list with headings was provided
+        subheading: str
+            Subheading text if list with subheadings was provided
+    """
+    def fix_length(a, length, filler=''):
+        if len(a) > length:
+            b = a[:length]
+        elif len(a) < length:
+            b = a + ((length - len(a)) * [filler])
+        else:
+            b = a
+        return b
+
+    col_map = {'ID': 'scrivID', 'Type': 'scrivType', 'Title': 'scrivTitle',
+            'Level': 'level', 'IncludeInCompile': 'scrivInCompile'}
+
+    df = pd.DataFrame(chapters)
+    df = df.rename(columns=col_map)
+
+    df['type'] = src_type
+    df['src'] = [os.path.join(src_dir, '{}.rtf'.format(i)) for i in
+                      df['scrivID']]
+    df['heading'] = fix_length(headings, len(df)) if headings else ''
+    df['subheading'] = fix_length(sub_headings, len(df)) if sub_headings else ''
+    if norm_level:
+        df['level'] = df['level'] - df['level'].min() + 1
+
+    ids = []
+    for t in df['scrivTitle']:
+        id_str = t.lower().replace(' ', '_')
+        suffix = 0
+        while id_str in ids:
+            if suffix >= 1:
+                id_str.replace('_{}'.format(suffix), '')
+            suffix += 1
+            id_str += '_{}'.format(suffix)
+        ids.append(id_str)
+
+    if key_mask is not None:
+        drops = set(df.columns) - set(key_mask)
+        df = df.drop(drops, axis=1)
+
+    return [{i: d} for i, d in zip(ids, df.to_dict(orient='records'))]
+
+
+def chapters_to_df(chapters, src_dir='Files/Docs', src_type='chapter',
         headings=None, sub_headings=None, norm_level=True):
     """
     Converts chapter list to Dataframe and returns same.
@@ -161,7 +267,50 @@ def chapters_to_df(chapters, src_dir='Files/Docs', src_type='content',
     return df.set_index('ScrivSeq', drop=True)
 
 
-def handle_scriv2tsv(args):
+def run_script(script, *args):
+    """
+    Runs external executable `script` with list of arguments in `args`. Raises
+    `ExternalScriptError` with call to `script` via `os.system()` returns
+    non-zero value.
+    """
+    cmd = '{0} {1}'.format(script, ' '.join(args))
+    exit_status = os.system(cmd)
+    if exit_status != 0:
+        raise ExternalScriptError("Non-zero status {status} returned by "
+                " '{cmd}'".format(status=exit_status, cmd=cmd))
+
+    return exit_status
+
+
+def handle_init(args):
+    """
+    Intializes basic EPUB directory structure. Raises `ExternalScriptError` if
+    call to system returns non-zero status.
+    """
+    return run_script('cp -ar', _EPUB_SKELETON_PATH, args.target)
+
+
+def handle_scriv2md(args):
+    """
+    Generates markdown files from Scrivener RTF sources. Wrapper around
+    `scriv2md.sh`. Raises `ExternalScriptError` if call to bash script returns
+    non-zero status.
+    """
+    script=os.path.join(_PATH_PREFIX, 'scriv2md.sh')
+    return run_script(script, args.tsv, args.mddir)
+
+
+def handle_md2htsnip(args):
+    """
+    Generates HTML snippets for each content chapter file from markdown
+    sources. Wrapper around `md2htsnip.sh`. Raises `ExternalScriptError` if
+    call to bash script returns non-zero status.
+    """
+    script=os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
+    return run_script(script, args.srcdir)
+
+
+def handle_scrivx2tsv(args):
     """
     Converts the 'Manuscript' section a Scrivener project XML file into tab
     separated records, augmenting same with additional info such as rtf source
@@ -187,6 +336,31 @@ def handle_scriv2tsv(args):
             args.output.close()
 
 
+def handle_scrivx2yaml(args):
+    """
+    Converts the 'Manuscript' section a Scrivener project XML file into a YAML
+    file, augmenting with additional info such as rtf source
+    file location, level, unique label.
+    """
+    xml_path = os.path.join(args.projdir, args.scrivxml)
+    ms_bi = get_top_bi(scriv_xml=xml_path, top_title=args.toptitle)
+    ch = get_chapters(top=ms_bi, type_filter=args.typefilter)
+
+    if getattr(args, 'headings', False):
+        headings = ['Chapter ' + num2eng(i + 1).title().replace(' ', '-')
+                    for i in range(len(ch))]
+    else:
+        headings = None
+
+    yd = chapters_to_dict(ch, src_dir=args.rtfdir, src_type=args.type,
+            headings=headings, key_mask=['src', 'heading', 'level', 'type'])
+
+    foo = args.output if args.output else sys.stdout
+    yaml.dump({'mainmatter': yd}, stream=foo, default_flow_style=False)
+    if args.output:
+            args.output.close()
+
+
 def handle_genep(args):
     """
     Generates the files required for an EPUB ebook
@@ -194,8 +368,27 @@ def handle_genep(args):
     pass
 
 
-def setup_parser_scriv2tsv(p):
-    p.add_argument('--projdir', help="path to Scrivener project directory")
+def setup_parser_init(p):
+    p.add_argument('--target', required=True,
+            help="directory in which to set up EPUB structure")
+
+
+def setup_parser_scriv2md(p):
+    p.add_argument('--tsv', required=True,
+            help="tsv file with page list")
+    p.add_argument('--mddir', required=True,
+            help="directory to which to write markdown output")
+
+
+def setup_parser_md2htsnip(p):
+    p.add_argument('--srcdir', required=True,
+            help="directory from which to read markdown and"
+            " to which to write HTML snippets")
+
+
+def setup_parser_scrivx2tsv(p):
+    p.add_argument('--projdir', required=True,
+            help="path to Scrivener project directory")
     p.add_argument('--scrivxml', default='project.scrivx',
             help="Scrivener project XML file, relative to Scrivener project"
             " directory; defaults to 'project.scrivx'")
@@ -207,15 +400,40 @@ def setup_parser_scriv2tsv(p):
             " not specified")
     p.add_argument('--meta', type=argparse.FileType('r'), default=None,
             help="YAML metadata file")
-    p.add_argument('--type', default='content',
+    p.add_argument('--type', default='chapter',
             help="string to used as 'Type' attribute for chapters; "
-            "defaults to 'content'")
+            "defaults to 'chapter'")
     p.add_argument('--toptitle', default='Manuscript',
             help="Title element text of the top BinderItem to be used from"
             " Scrivener project file, defaults to 'Manuscript'")
     p.add_argument('--typefilter', default=None,
             help="Title element text of the top BinderItem to be used from"
             " Scrivener project file")
+
+
+def setup_parser_scrivx2yaml(p):
+    p.add_argument('--projdir', required=True,
+            help="path to Scrivener project directory")
+    p.add_argument('--scrivxml', default='project.scrivx',
+            help="Scrivener project XML file, relative to Scrivener project"
+            " directory; defaults to 'project.scrivx'")
+    p.add_argument('--rtfdir', default='Files/Docs',
+            help="path to Scrivener rtf directory, relative to Scrivener"
+            " project directory; defaults to 'Files/Docs'")
+    p.add_argument('--output', type=argparse.FileType('w'), default=None,
+            help="file to save YAML output to, defaults to STDOUT if"
+            " not specified")
+    p.add_argument('--type', default='chapter',
+            help="string to used as 'Type' attribute for chapters; "
+            "defaults to 'chapter'")
+    p.add_argument('--toptitle', default='Manuscript',
+            help="Title element text of the top BinderItem to be used from"
+            " Scrivener project file, defaults to 'Manuscript'")
+    p.add_argument('--typefilter', default=None,
+            help="Title element text of the top BinderItem to be used from"
+            " Scrivener project file")
+    p.add_argument('--headings', action='store_true',
+            help="will add headings to for each chapter as 'Chapter Num'")
 
 
 def setup_parser_genep(p):
@@ -226,17 +444,17 @@ def setup_parser_genep(p):
 # parser_setup_handler) tuple.  Subparsers are initialized in __main__  (with
 # the handler function's doc string as help text) and then the appropriate
 # setup handler is called to add the details.
-_task_handler = {'scriv2tsv': (handle_scriv2tsv, setup_parser_scriv2tsv),
+_task_handler = {'init': (handle_init, setup_parser_init),
+                 'scriv2md': (handle_scriv2md, setup_parser_scriv2md),
+                 'md2htsnip': (handle_md2htsnip, setup_parser_md2htsnip),
+                 'scrivx2tsv': (handle_scrivx2tsv, setup_parser_scrivx2tsv),
+                 'scrivx2yaml': (handle_scrivx2yaml, setup_parser_scrivx2yaml),
                  'genep': (handle_genep, setup_parser_genep),}
 
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(
-            description="""
-            {}: EPUB pre-processing - utilities to turn Scrivener project into
-            an EPUB ebook
-            """.format(__file__))
+    parser = argparse.ArgumentParser(description=__doc__)
 
     # add subparser for each task
     subparsers = parser.add_subparsers()

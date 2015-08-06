@@ -1,0 +1,13 @@
+*.epub
+*.mobi
+.gitignore
+.git
+.git/*
+*~
+exclude.list
+*.sed
+*.bak
+*.out
+*.tsv
+*.yaml
+__pychache__

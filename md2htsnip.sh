@@ -18,8 +18,9 @@ fi
 
 css_basic=par-indent
 css_center=center-par-tb-space
-center_pattern="\&lt;\&lt;\&lt;\&gt;\&gt;\&gt;"   # paragraphs matching this pattern
-                                                  # will be styled wit css_center
+center_pattern="\&lt;\&lt;\&lt;\&gt;\&gt;\&gt;"   # paragraphs matching this
+                                                  # pattern will be styled 
+                                                  # with css_center
 
 for mdf in $(ls -d $1/*.md)
 do

@@ -1,7 +1,6 @@
-*.out
-*.png
-*.gz
-*.pyc
 *~
+*.epub
+*.mobi
+*.out
 non-git
 __pychache__

@@ -1,18 +1,26 @@
 # configuration file for ep3.py
 
-title:      Uncharted
-subtitle:
-author:     Anna Lowe
-series:     A Serendipity Adventure romance
-publisher:  Twin Moon Press
+#------------------------------------------------------------------------------
+# Metadata
+#------------------------------------------------------------------------------
+
+title:          Uncharted
+# subtitle:
+author:         Anna Lowe
+authorweb:      www.annalowebooks.com
+authoremail:    author@annalowebooks.com
+# authorlist:
+series:         A Serendipity Adventure romance
+publisher:      Twin Moon Press
+pubdate:        2015-07-30
 editor:
     name:       Erika Mustermann
-    website:    http://www.erika.com
-cover-art:
-    name:       Max Mueller
-    website:    http://www.mueller.com
+    web:        http://www.erika.com
+coverart:
+    name:       Fiona Jayde Media
+    web:        www.FionaJaydeMedia.com
 
-Blurb: >
+blurb: >
     Don’t despair! Our Wicked Alphas are about to get even wilder
     in a second sizzling collection heading your way soon. {ww2_link_snippet}
     releases on October 30, 2015 and features ALL-NEW, previously
@@ -21,22 +29,46 @@ Blurb: >
     scenes with werewolves, shapeshifting bears, ghosts, and more just for
     this great new collection!
 
+keywords:
+    - Romance
+    - Paranormal
 
-headings:
-    - Chapter One
-    - Chapter Two
-    - Chapter Three
-    - Chapter Four
-    - Chapter Five
-    - Chapter Six
-    - Chapter Seven
-    - Chapter Eight
-    - Chapter Nine
-    - Chapter Ten
-    - Chapter Eleven
-    - Chapter Twelve
-    - Chapter Thirteen
-    - Chapter Fourteen
-    - Chapter Fifteen
-    - Chapter Sixteen
-    - Chapter One
+#------------------------------------------------------------------------------
+# Book contents
+#------------------------------------------------------------------------------
+# book will be assembled as
+# - cover page (not listed in this file)
+# - frontmatter
+# - toc (not listed in this file)
+# - mainmatter
+# - backmatter
+
+# label for each item will become page-id with href={label}.xhtml
+# for type == template a template {label}.jinja must exist in templates folder
+frontmatter:
+    - title:
+        type:   template
+    - copyright:
+        type:   template
+    - freebook:
+        type:   static
+    - booksinseries:
+        type:   static
+
+backmatter:
+    - otherbooksbyauthor:
+        type:   static
+    - recommendedreads:
+        type:   static
+    - sneakpeek1:
+        type:   static
+    - sneakpeek2:
+        type:   static
+    - morefromauthor:
+        type:   static
+
+mainmatter:
+
+
+
+

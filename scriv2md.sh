@@ -25,6 +25,6 @@ for line in $(tail -n +2 $1 | grep "[1-9][0-9]*\.rtf" | \
 do
     infile=${line%|*}
     outfile=$2/${line#*|}.md
-
+    echo "converting $infile to $outfile"
     unrtf --html $infile | pandoc -f html -t markdown | sed 's/\\$/\n/g' > $outfile
 done

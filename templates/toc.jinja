@@ -1,0 +1,9 @@
+{% extends "xhtml_skeleton.html" %}
+{% block body %}
+<h1 class="toc-heading">Contents</h1>
+
+{% for t in toc %}
+<p class="toc-item"><a href="{{ t.href|e }}">{{ t.label|e }}</a>{{ t.suffix|e }}</p>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "xhtml_skeleton.jinja" %}
+{% block body %}
+<div class="center">
+    <p class="title">{{ title|e }}</p>
+    {% if subtitle is defined %}
+        <p class="subtitle">{{ subtitle|e }}</p>
+    {% endif %}
+    {% if sub_plain is defined %}
+        <p class="center-par">{{ sub_plain|e }}</p>
+    {% endif %}
+    <p class="author">by {{ author|e }}</p>
+    {% if series_text is defined %}
+        <p class="series">{{ series_text|e }}</p>
+    {% endif %}
+</div>
+{% endblock %}

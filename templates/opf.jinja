@@ -1,0 +1,86 @@
+{# jinja2 template #}
+<?xml version="1.0" encoding="utf-8" ?>
+<package version="2.0" xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId">
+
+  <!-- *** Metadata Section *** -->
+
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+
+    <dc:title>{{ title|e }}</dc:title>
+    <dc:language>{{ language|default('en-us') }}</dc:language>
+    <dc:identifier id="BookId" opf:scheme="uuid">urn:uuid:{{ uuid }}</dc:identifier>
+    {% if author is defined %}
+        <dc:creator opf:role="aut" file-as="Last, First">{{ author|e }}</dc:creator>
+    {% endif %}
+    {% if authorlist is defined %}
+        {% for aut in authorlist %}
+            <dc:creator opf:role="aut" file-as="Last, First">{{ aut|e }}</dc:creator>
+        {% endfor %}
+    {% endif %}
+    <dc:publisher>{{ publisher|e }}</dc:publisher> <!--Name of Publisher or yourself if self-published-->
+    <dc:date>{{ pubdate }}</dc:date> <!--Published Date in the format YYYY-MM-DD-->
+    <meta name="cover" content="cover-img" /> <!--Required for KindleGen, Barnes and Noble, and iBookstore-->
+    <dc:description>{{ description|e }}</dc:description>
+    {% if keywords is defined %}
+        {% for kw in keywords %}
+            <dc:subject>{{ kw|e }}</dc:subject>
+        {% endfor %}
+    {% endif %}
+    <dc:rights>{{ rights|default('All rights reserved')|e }}</dc:rights>
+    <dc:type>Text</dc:type>
+    <dc:coverage>Worldwide</dc:coverage>
+    {% if editor.name is defined %}
+        <dc:contributor opf:file-as="Last, First" opf:role="edt">{{ editor.name|e }}</dc:contributor>
+    {% endif %}
+    {% if coverart.name is defined %}
+        <dc:contributor opf:file-as="Last, First" opf:role="art">{{ coverartist.name|e }}</dc:contributor>
+    {% endif %}
+
+  </metadata>
+
+  <!-- *** Manifest Section *** -->
+
+
+    <item href="{{ cover_img_file|default('cover.jpg')|e }}" id="cover-img" media-type="image/jpeg" /> <!-- Required for KindleGen, Barnes and Noble, and iBooks -->
+    <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml" />
+    <item href="coverpage.xhtml" id="coverpage" media-type="application/xhtml+xml" /> <!-- Remove for Kindle -->
+    <item href="toc.xhtml" id="htmltoc" media-type="application/xhtml+xml" />
+    {% for pg in pages %}
+        <item href="{{ pg.href|e }}" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
+    {% endfor %}
+    <item href="{{ css_file|default('css/stylesheet.css')|e }}" id="css-epub" media-type="text/css" />
+    {% for img in images %}
+        <item href="{{ img.href|e }}" id="{{ img.id|e }}" media-type="image/jpeg" />
+    {% endfor %}
+
+  </manifest>
+
+  <!-- *** Spine Section *** -->
+
+  <spine toc="ncx">
+
+    <itemref idref="coverpage" /> <!-- Remove for Kindle -->
+    {% for pg in frontmatter %}
+        <itemref idref="{{ pg.id|e }}" />
+    {% endfor %}
+    <itemref idref="htmltoc" />
+    {% for pg in mainmatter %}
+        <itemref idref="{{ pg.id|e }}" />
+    {% endfor %}
+    {% for pg in backmatter %}
+        <itemref idref="{{ pg.id|e }}" />
+    {% endfor %}
+
+  </spine>
+
+  <!-- *** Guide Section *** -->
+
+  <guide>
+
+    <reference href="coverpage.xhtml" type="cover" title="Cover" /> <!-- Remove for Kindle -->
+    <reference href="content/toc.xhtml" type="toc" title="Table of Contents" />
+    <reference href="{{ beginning_href|default('toc.xhtml')|e }}" type="text" title="Beginning" />
+
+  </guide>
+
+</package>
