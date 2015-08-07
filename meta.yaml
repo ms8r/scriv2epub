@@ -5,7 +5,8 @@
 #------------------------------------------------------------------------------
 
 title:          Uncharted
-# subtitle:
+subtitle:       Hedgehogs reloaded
+# subplain:
 author:         Anna Lowe
 authorweb:      www.annalowebooks.com
 authoremail:    author@annalowebooks.com
@@ -20,7 +21,7 @@ coverart:
     name:       Fiona Jayde Media
     web:        www.FionaJaydeMedia.com
 
-blurb: >
+description: >
     Don’t despair! Our Wicked Alphas are about to get even wilder
     in a second sizzling collection heading your way soon. {ww2_link_snippet}
     releases on October 30, 2015 and features ALL-NEW, previously
@@ -43,32 +44,193 @@ keywords:
 # - mainmatter
 # - backmatter
 
+# for opf guide section: id of page to open to:
+start_id:   title
+
 # label for each item will become page-id with href={label}.xhtml
-# for type == template a template {label}.jinja must exist in templates folder
+# for type == template a template {id}.jinja must exist in templates folder
 frontmatter:
-    - title:
-        type:   template
-    - copyright:
-        type:   template
-    - freebook:
-        type:   static
-    - booksinseries:
-        type:   static
+    - id:       title
+      type:     template
+      heading:  Titel Page
+    - id:       copyright
+      type:     template
+      heading:  Copyright
+    - id:       freebook
+      type:     static
+      heading:  Free Book
+    - id:       booksinseries
+      type:     static
+      heading:  Other Books in this Series
 
 backmatter:
-    - otherbooksbyauthor:
-        type:   static
-    - recommendedreads:
-        type:   static
-    - sneakpeek1:
-        type:   static
-    - sneakpeek2:
-        type:   static
-    - morefromauthor:
-        type:   static
+    - id:       sneakpeek1
+      type:     static
+      heading:  Sneak Peak I
+    - id:       sneakpeek2
+      type:     static
+      heading:  Sneak Peak II
+    - id:       morefromauthor
+      type:     static
+      heading:  More from Anna Lowe
 
 mainmatter:
-
-
-
-
+    - heading: Chapter One
+      id: pro2
+      level: 1
+      src: Files/Docs/122.rtf
+      type: chapter
+    - heading: Chapter Two
+      id: her2
+      level: 1
+      src: Files/Docs/123.rtf
+      type: chapter
+      children:
+        - id:       otherbooksbyauthor
+          level:    2
+          type:     static
+          heading:  Other Books by the Author
+        - id:       recommendedreads
+          level:    2
+          type:     static
+          heading:  Recommended Reads
+    - heading: Chapter Three
+      id: his_pov
+      level: 1
+      src: Files/Docs/33.rtf
+      type: chapter
+    - heading: Chapter Four
+      id: his_pov_more
+      level: 1
+      src: Files/Docs/93.rtf
+      type: chapter
+    - heading: Chapter Five
+      id: on_bike
+      level: 1
+      src: Files/Docs/90.rtf
+      type: chapter
+    - heading: Chapter Six
+      id: on_boat
+      level: 1
+      src: Files/Docs/65.rtf
+      type: chapter
+    - heading: Chapter Seven
+      id: sees_card
+      level: 1
+      src: Files/Docs/80.rtf
+      type: chapter
+    - heading: Chapter Eight
+      id: anchor
+      level: 1
+      src: Files/Docs/30.rtf
+      type: chapter
+    - heading: Chapter Nine
+      id: his_pov_1
+      level: 1
+      src: Files/Docs/75.rtf
+      type: chapter
+    - heading: Chapter Ten
+      id: on_island
+      level: 1
+      src: Files/Docs/51.rtf
+      type: chapter
+    - heading: Chapter Eleven
+      id: explain
+      level: 1
+      src: Files/Docs/76.rtf
+      type: chapter
+    - heading: Chapter Twelve
+      id: sex
+      level: 1
+      src: Files/Docs/31.rtf
+      type: chapter
+    - heading: Chapter Thirteen
+      id: more_sex
+      level: 1
+      src: Files/Docs/77.rtf
+      type: chapter
+    - heading: Chapter Fourteen
+      id: more_sex_1
+      level: 1
+      src: Files/Docs/54.rtf
+      type: chapter
+    - heading: Chapter Fifteen
+      id: bad_guys
+      level: 1
+      src: Files/Docs/43.rtf
+      type: chapter
+    - heading: Chapter Sixteen
+      id: more_bad_guys
+      level: 1
+      src: Files/Docs/89.rtf
+      type: chapter
+    - heading: Chapter Seventeen
+      id: get_free
+      level: 1
+      src: Files/Docs/34.rtf
+      type: chapter
+    - heading: Chapter Eighteen
+      id: her_pov
+      level: 1
+      src: Files/Docs/78.rtf
+      type: chapter
+    - heading: Chapter Nineteen
+      id: open_box
+      level: 1
+      src: Files/Docs/40.rtf
+      type: chapter
+    - heading: Chapter Twenty
+      id: options
+      level: 1
+      src: Files/Docs/88.rtf
+      type: chapter
+    - heading: Chapter Twenty-One
+      id: to_nuns
+      level: 1
+      src: Files/Docs/48.rtf
+      type: chapter
+    - heading: Chapter Twenty-Two
+      id: cloister
+      level: 1
+      src: Files/Docs/58.rtf
+      type: chapter
+    - heading: Chapter Twenty-Three
+      id: inside
+      level: 1
+      src: Files/Docs/79.rtf
+      type: chapter
+    - heading: Chapter Twenty-Four
+      id: finish
+      level: 1
+      src: Files/Docs/63.rtf
+      type: chapter
+    - heading: Chapter Twenty-Five
+      id: epilogue
+      level: 1
+      src: Files/Docs/37.rtf
+      type: chapter
+    - heading: Chapter Twenty-Six
+      id: thank_you
+      level: 1
+      src: Files/Docs/126.rtf
+      type: chapter
+    - heading: Chapter Twenty-Seven
+      id: blurb
+      level: 1
+      src: Files/Docs/141.rtf
+      type: chapter
+    - heading: Chapter Twenty-Eight
+      id: ch_1
+      level: 1
+      src: Files/Docs/140.rtf
+      type: chapter
+    - heading: Chapter Twenty-Nine
+      id: cara_stuck_on_a_smile_and_wandered_down_the...
+      level: 1
+      src: Files/Docs/143.rtf
+      type: chapter
+    - heading: Chapter Thirty
+      id: other_books
+      level: 1
+      src: Files/Docs/139.rtf
+      type: chapter

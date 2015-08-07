@@ -1,9 +1,19 @@
-{% extends "xhtml_skeleton.html" %}
+{% extends "xhtml_skeleton.jinja" %}
 {% block body %}
 <h1 class="toc-heading">Contents</h1>
 
-{% for t in toc %}
-<p class="toc-item"><a href="{{ t.href|e }}">{{ t.label|e }}</a>{{ t.suffix|e }}</p>
+<p class="toc-item-1"><a href="cover.xhtml">Cover</a></p>
+
+{% for pg in frontmatter %}
+<p class="toc-item-1"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e }}</a></p>
+{% endfor %}
+<p class="toc-item-1"><a href="Contents.xhtml">Contents</a></p>
+{% for pg in mainmatter recursive %}
+<p class="toc-item-{{ pg.level|default('1') }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((pg.level - 1) * 4, true) }}</a> {{ pg.suffix|e }}</p>
+{%- if pg.children -%}{{ loop(pg.children) }}{%- endif %}
+{% endfor %}
+{% for pg in backmatter %}
+<p class="toc-item-1"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e }}</a></p>
 {% endfor %}
 
 {% endblock %}

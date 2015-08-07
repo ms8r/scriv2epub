@@ -1,4 +1,3 @@
-{# jinja2 template #}
 <?xml version="1.0" encoding="utf-8" ?>
 <package version="2.0" xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId">
 
@@ -33,24 +32,31 @@
         <dc:contributor opf:file-as="Last, First" opf:role="edt">{{ editor.name|e }}</dc:contributor>
     {% endif %}
     {% if coverart.name is defined %}
-        <dc:contributor opf:file-as="Last, First" opf:role="art">{{ coverartist.name|e }}</dc:contributor>
+        <dc:contributor opf:file-as="Last, First" opf:role="art">{{ coverart.name|e }}</dc:contributor>
     {% endif %}
 
   </metadata>
 
   <!-- *** Manifest Section *** -->
 
+  <manifest>
 
     <item href="{{ cover_img_file|default('cover.jpg')|e }}" id="cover-img" media-type="image/jpeg" /> <!-- Required for KindleGen, Barnes and Noble, and iBooks -->
     <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml" />
     <item href="coverpage.xhtml" id="coverpage" media-type="application/xhtml+xml" /> <!-- Remove for Kindle -->
     <item href="toc.xhtml" id="htmltoc" media-type="application/xhtml+xml" />
-    {% for pg in pages %}
-        <item href="{{ pg.href|e }}" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
+    {% for pg in frontmatter %}
+    <item href="{{ pg.id|e }}.xhtml" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
+    {% endfor %}
+    {% for pg in mainmatter %}
+    <item href="{{ pg.id|e }}.xhtml" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
+    {% endfor %}
+    {% for pg in backmatter %}
+    <item href="{{ pg.id|e }}.xhtml" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
     {% endfor %}
     <item href="{{ css_file|default('css/stylesheet.css')|e }}" id="css-epub" media-type="text/css" />
     {% for img in images %}
-        <item href="{{ img.href|e }}" id="{{ img.id|e }}" media-type="image/jpeg" />
+    <item href="{{ img.href|e }}" id="{{ img.id|e }}" media-type="image/{{ img.format }}" />
     {% endfor %}
 
   </manifest>
@@ -61,14 +67,14 @@
 
     <itemref idref="coverpage" /> <!-- Remove for Kindle -->
     {% for pg in frontmatter %}
-        <itemref idref="{{ pg.id|e }}" />
+        <itemref idref="{{ pg.id|e }}" linear="yes"/>
     {% endfor %}
     <itemref idref="htmltoc" />
     {% for pg in mainmatter %}
-        <itemref idref="{{ pg.id|e }}" />
+        <itemref idref="{{ pg.id|e }}" linear="yes"/>
     {% endfor %}
     {% for pg in backmatter %}
-        <itemref idref="{{ pg.id|e }}" />
+        <itemref idref="{{ pg.id|e }}" linear="yes"/>
     {% endfor %}
 
   </spine>
@@ -79,7 +85,7 @@
 
     <reference href="coverpage.xhtml" type="cover" title="Cover" /> <!-- Remove for Kindle -->
     <reference href="content/toc.xhtml" type="toc" title="Table of Contents" />
-    <reference href="{{ beginning_href|default('toc.xhtml')|e }}" type="text" title="Beginning" />
+    <reference href="{{ start_id|default('toc')|e }}.xhtml" type="text" title="Beginning" />
 
   </guide>
 

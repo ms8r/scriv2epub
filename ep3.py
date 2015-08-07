@@ -10,14 +10,17 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 import argparse
+from datetime import datetime as dt
+from hashlib import md5
 import pandas as pd
 import yaml
-import jinja2
+import jinja2 as j2
 from num2eng import num2eng
 
 
 _PATH_PREFIX = os.path.dirname(os.path.realpath(__file__))
 _TEMPLATE_PATH = os.path.join(_PATH_PREFIX, 'templates')
+_TEMPLATE_EXT = '.jinja'
 _EPUB_SKELETON_PATH = os.path.join(_PATH_PREFIX, 'epub')
 
 
@@ -63,7 +66,8 @@ def get_chapters(top, type_filter=None):
             rec['ID'] = e.get('ID')
             rec['Type'] = e.get('Type')
             rec['Title'] = e.findtext('Title')
-            rec['IncludeInCompile'] = e.find('MetaData').findtext('IncludeInCompile')
+            rec['IncludeInCompile'] = e.find('MetaData').findtext(
+                    'IncludeInCompile')
             rec['Level'] = level
             if type_filter is None or rec['Type'] == type_filter:
                 bi.append(rec)
@@ -109,10 +113,8 @@ def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
         If provided, only keys listed in `key_mask` will be returned for each
         list item (see below).
 
-    Returns a list of dicts (one per chapter), keyed by unique labels generated
-    from chapter titles. The label for each list element is mapped to a dict
-    with the following keys (selection can be controlled via `key_mask`
-    argument):
+    Returns a list of dicts (one per chapter), keyed by (selection can be
+    controlled via `key_mask` argument):
 
         scrivID: int
             Scrivener ID attribute value
@@ -122,6 +124,8 @@ def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
             Title tag text in Scrivener
         ScrivInCompile: str
             Value of Scrivener IncludeInCompile tag
+        id: str
+            Unique label, generated from Scrivener Title tag text
         src: str
             Path to Scrivener rtf source file
         level: int
@@ -152,7 +156,8 @@ def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
     df['src'] = [os.path.join(src_dir, '{}.rtf'.format(i)) for i in
                       df['scrivID']]
     df['heading'] = fix_length(headings, len(df)) if headings else ''
-    df['subheading'] = fix_length(sub_headings, len(df)) if sub_headings else ''
+    df['subheading'] = fix_length(
+            sub_headings, len(df)) if sub_headings else ''
     if norm_level:
         df['level'] = df['level'] - df['level'].min() + 1
 
@@ -171,7 +176,9 @@ def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
         drops = set(df.columns) - set(key_mask)
         df = df.drop(drops, axis=1)
 
-    return [{i: d} for i, d in zip(ids, df.to_dict(orient='records'))]
+    df['id'] = ids
+
+    return df.to_dict(orient='records')
 
 
 def chapters_to_df(chapters, src_dir='Files/Docs', src_type='chapter',
@@ -236,8 +243,6 @@ def chapters_to_df(chapters, src_dir='Files/Docs', src_type='chapter',
             b = a
         return b
 
-
-
     col_map = {'ID': 'ScrivID', 'Type': 'ScrivType', 'Title': 'ScrivTitle',
             'Level': 'ScrivLevel', 'IncludeInCompile': 'ScrivInCompile'}
 
@@ -249,7 +254,8 @@ def chapters_to_df(chapters, src_dir='Files/Docs', src_type='chapter',
     df['ScrivSrc'] = [os.path.join(src_dir, '{}.rtf'.format(i)) for i in
                       df['ScrivID']]
     df['Heading'] = fix_length(headings, len(df)) if headings else ''
-    df['SubHeading'] = fix_length(sub_headings, len(df)) if sub_headings else ''
+    df['SubHeading'] = fix_length(
+            sub_headings, len(df)) if sub_headings else ''
     ids = []
     for t in df['ScrivTitle']:
         id_str = t.lower().replace(' ', '_')
@@ -296,7 +302,7 @@ def handle_scriv2md(args):
     `scriv2md.sh`. Raises `ExternalScriptError` if call to bash script returns
     non-zero status.
     """
-    script=os.path.join(_PATH_PREFIX, 'scriv2md.sh')
+    script = os.path.join(_PATH_PREFIX, 'scriv2md.sh')
     return run_script(script, args.tsv, args.mddir)
 
 
@@ -306,7 +312,7 @@ def handle_md2htsnip(args):
     sources. Wrapper around `md2htsnip.sh`. Raises `ExternalScriptError` if
     call to bash script returns non-zero status.
     """
-    script=os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
+    script = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
     return run_script(script, args.srcdir)
 
 
@@ -353,7 +359,8 @@ def handle_scrivx2yaml(args):
         headings = None
 
     yd = chapters_to_dict(ch, src_dir=args.rtfdir, src_type=args.type,
-            headings=headings, key_mask=['src', 'heading', 'level', 'type'])
+            headings=headings, key_mask=['id', 'src', 'heading', 'level',
+                                         'type'])
 
     foo = args.output if args.output else sys.stdout
     yaml.dump({'mainmatter': yd}, stream=foo, default_flow_style=False)
@@ -361,11 +368,72 @@ def handle_scrivx2yaml(args):
             args.output.close()
 
 
+def gen_uuid(message):
+    uuid = md5(message.encode('utf-8')).hexdigest()
+    return '{0}-{1}-{2}-{3}-{4}'.format(
+            uuid[:8], uuid[8:12], uuid[12:16],
+            uuid[16:20], uuid[20:])
+
+
 def handle_genep(args):
     """
     Generates the files required for an EPUB ebook
     """
-    pass
+    epub_meta = {
+            'opf': ('opf.jinja', os.path.join(args.htmldir, 'content.opf')),
+            'ncx': ('ncx.jinja', os.path.join(args.htmldir, 'toc.ncx')),
+            'toc': ('toc.jinja', os.path.join(args.htmldir, 'toc.xhtml')),
+    }
+
+    img_ext2fmt = {'jpg': 'jpeg',
+            'jpeg': 'jpeg',
+            'png': 'png',
+            'gif': 'gif',
+            'svg': 'svg'}
+
+    with open(os.path.join(args.epubdir, args.yaml), 'r') as foi:
+        meta = yaml.load(foi)
+
+    tmplLoader = j2.FileSystemLoader(searchpath=_TEMPLATE_PATH)
+    tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True)
+
+    # build images dict for opf manifest:
+    img_dir = os.path.join(args.epubdir, args.imgdir)
+    opf_dir = os.path.join(args.epubdir, os.path.dirname(epub_meta['opf'][1]))
+    opf2img_path = os.path.relpath(img_dir, opf_dir)
+    images = []
+    for item in os.listdir(img_dir):
+        # ignore subdirectories in image directory (can add walk later)
+        if os.path.isdir(os.path.join(img_dir, item)):
+            continue
+        img = {}
+        img['href'] = os.path.join(opf2img_path, item)
+        img['id'] = '-'.join(item.split('.')[:-1]) + '-img'
+        img['format'] = img_ext2fmt[item.split('.')[-1]]
+        images.append(img)
+
+    # generate metadata files:
+    uuid = gen_uuid(meta.__str__() + dt.utcnow().__str__())
+    kwargs = {'images': images, 'uuid': uuid}
+    for tmpl_file, out_file in epub_meta.values():
+        tmpl = tmplEnv.get_template(tmpl_file)
+        with open(os.path.join(args.epubdir, out_file), 'w') as foo:
+            foo.write(tmpl.render(meta, **kwargs))
+
+    # now content:
+    for pg in meta['frontmatter'] + meta['backmatter']:
+        if pg['type'] != 'template':
+            continue
+        tmpl = tmplEnv.get_template(pg['id'] + _TEMPLATE_EXT)
+        with open(os.path.join(args.epubdir, args.htmldir, pg['id'] +
+                  '.xhtml'), 'w') as foo:
+            foo.write(tmpl.render(meta))
+
+
+
+
+
+
 
 
 def setup_parser_init(p):
@@ -437,7 +505,16 @@ def setup_parser_scrivx2yaml(p):
 
 
 def setup_parser_genep(p):
-    pass
+    p.add_argument('--yaml', required=True,
+            help="path to YAML metadata file")
+    p.add_argument('--epubdir', default='.',
+            help="""path to EPUB root directory; defaults to '.'""")
+    p.add_argument('--imgdir', default='OPS/img',
+            help="""path to image directory relative to EPUB root directory;
+            defaults to 'OPS/img'""")
+    p.add_argument('--htmldir', default='OPS',
+            help="""path to write (x)html output files to, relative to EPUB
+            root directory; defaults to 'OPS'""")
 
 
 # The _task_handler dictionary maps each 'command' to a (task_handler,

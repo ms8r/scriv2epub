@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en">
+
+  <!-- *** Metadata Section *** -->
+  <head>
+    <meta content="{{ uuid }}" name="dtb:uid" />
+    <meta content="{{ toc_depth|default('1') }}" name="dtb:depth" />
+    <meta content="0" name="dtb:totalPageCount" /> <!-- Do Not change -->
+    <meta content="0" name="dtb:maxPageNumber" /> <!-- Do Not change -->
+  </head>
+
+  <!-- *** Title and Author Section *** -->
+  <docTitle>
+    <text>{{ title|e }}</text>
+  </docTitle>
+  <docAuthor>
+    <text>{{ author|e }}</text>
+  </docAuthor>
+
+  <!-- *** Navigation Map Section *** -->
+  {% set po_counter = [1] %}
+  <navMap>
+    <navPoint id="coverpage" playOrder="{{ po_counter|length }}">
+        <navLabel>
+            <text>Cover</text>
+        </navLabel>
+        <content src="cover.xhtml"></content>
+    </navPoint>
+  {% for pg in frontmatter %}
+    {% if po_counter.append(1) %}{% endif %}
+    <navPoint id="{{ pg.id|e }}" playOrder="{{ po_counter|length }}">
+      <navLabel>
+        <text>{{ pg.heading|e }}</text>
+      </navLabel>
+      <content src="{{ pg.id|e }}.xhtml"></content>
+    </navPoint>
+  {% endfor %}
+  {% if po_counter.append(1) %}{% endif %}
+    <navPoint id="toc" playOrder="{{ po_counter|length }}">
+      <navLabel>
+        <text>Contents</text>
+      </navLabel>
+      <content src="toc.xhtml"></content>
+    </navPoint>
+  {% for pg in mainmatter recursive %}
+    {% if po_counter.append(1) %}{% endif %}
+    <navPoint id="{{ pg.id|e }}" playOrder="{{ po_counter|length }}">
+      <navLabel>
+        <text>{{ pg.heading|e }}</text>
+      </navLabel>
+      <content src="{{ pg.id|e }}.xhtml"></content>
+      {%- if pg.children -%}{{ loop(pg.children)|indent(4, true) }}{%- endif %}
+    </navPoint>
+  {% endfor %}
+  {% for pg in backmatter %}
+    {% if po_counter.append(1) %}{% endif %}
+    <navPoint id="{{ pg.id|e }}" playOrder="{{ po_counter|length }}">
+      <navLabel>
+        <text>{{ pg.heading|e }}</text>
+      </navLabel>
+      <content src="{{ pg.id|e }}.xhtml"></content>
+    </navPoint>
+  {% endfor %}
+
+  </navMap>
+</ncx>

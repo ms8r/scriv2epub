@@ -1,5 +1,7 @@
-ptoc-empty {margin: 0em 0em 0em 0em; text-indent: 0em; font-size: 100%; min-height: 0.938em}
-p.toc-item {margin: 0em 0em 0em 0em; text-indent: 0em; font-size: 100%; text-align: left}
+.toc-empty {margin: 0em 0em 0em 0em; text-indent: 0em; font-size: 100%; min-height: 0.938em}
+.toc-item-1{margin: 0em 0em 0em 0em; text-indent: 0em; font-size: 100%; text-align: left}
+.toc-item-2{margin: 0em 0em 0em 0em; text-indent: 1em; font-size: 100%; text-align: left}
+.toc-item-3{margin: 0em 0em 0em 0em; text-indent: 2em; font-size: 100%; text-align: left}
 table {border-collapse: collapse}
 td  {padding: 0em 0.3125em 0em 0.3125em}
 .basic-par {
