@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 import argparse
 from datetime import datetime as dt
 from hashlib import md5
+from tempfile import NamedTemporaryFile
 import pandas as pd
 import yaml
 import jinja2 as j2
@@ -305,12 +306,46 @@ def handle_init(args):
 
 def handle_scriv2md(args):
     """
-    Generates markdown files from Scrivener RTF sources. Wrapper around
-    `scriv2md.sh`. Raises `ExternalScriptError` if call to bash script returns
-    non-zero status.
+    Generates markdown files from Scrivener RTF sources. Raises
+    `ExternalScriptError` if call to `os.system` returns non-zero status.
     """
-    script = os.path.join(_PATH_PREFIX, 'scriv2md.sh')
-    return run_script(script, args.tsv, args.mddir)
+    with open(args.yaml, 'r') as foi:
+        meta = yaml.load(foi)
+
+    src = []
+    target = []
+    # quick and dirty recursion to turn yaml into lists
+    def mk_mm_list(mm):
+        for m in mm:
+            src.append(m['src'])
+            target.append(m['id'])
+            if 'children' in m:
+                mk_mm_list(m['children'])
+
+    mk_mm_list(meta['mainmatter'])
+
+    for s, t in zip(src, target):
+        infile = os.path.join(args.projdir, s)
+        outfile = os.path.join(args.mddir, t + '.md')
+        script = r"""unrtf --html {infile} | \
+                pandoc --normalize -f html -t markdown | sed 's/\\$/\n/g' | \
+                pandoc --no-wrap -f markdown -t markdown > {outfile}""".format(
+                infile=infile, outfile=outfile)
+        print('converting {infile} to {outfile}...'.format(infile=infile,
+                                                           outfile=outfile))
+        run_script(script)
+
+    # foo = NamedTemporaryFile('w+t', delete=False, suffix='.tsv')
+    # for s, t in zip(src, target):
+    #     foo.write('{src}\t{target}\n'.format(src=s, target=t))
+    # tmp_file = foo.name
+    # foo.close()
+
+    # script = os.path.join(_PATH_PREFIX, 'scriv2md.sh')
+    # run_script(script, tmp_file, args.projdir, args.mddir)
+    # os.remove(tmp_file)
+
+    return
 
 
 def handle_md2htsnip(args):
@@ -441,22 +476,18 @@ def handle_genep(args):
             foo.write(tmpl.render(pg, chapter_content=chapter_content))
 
 
-
-
-
-
-
-
 def setup_parser_init(p):
     p.add_argument('--target', required=True,
             help="directory in which to set up EPUB structure")
 
 
 def setup_parser_scriv2md(p):
-    p.add_argument('--tsv', required=True,
-            help="tsv file with page list")
+    p.add_argument('--yaml', required=True,
+            help="YAML file with book metada and page inventory")
     p.add_argument('--mddir', required=True,
             help="directory to which to write markdown output")
+    p.add_argument('--projdir', required=True,
+            help="path to Scrivener project directory")
 
 
 def setup_parser_md2htsnip(p):

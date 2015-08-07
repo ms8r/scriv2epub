@@ -18,7 +18,7 @@ fi
 
 css_basic=par-indent
 css_center=center-par-tb-space
-center_pattern="\&lt;\&lt;\&lt;\&gt;\&gt;\&gt;"   # paragraphs matching this
+center_pattern="\&lt;\&lt;\&lt;[ ]*\&gt;\&gt;\&gt;"   # paragraphs matching this
                                                   # pattern will be styled 
                                                   # with css_center
 

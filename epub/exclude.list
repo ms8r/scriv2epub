@@ -1,5 +1,6 @@
 *.epub
 *.mobi
+src
 .gitignore
 .git
 .git/*
@@ -10,4 +11,5 @@ exclude.list
 *.out
 *.tsv
 *.yaml
+*.scriv
 __pychache__
