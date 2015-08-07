@@ -8,6 +8,7 @@ Run `python ep3.py -h` for more info
 
 import sys
 import os
+import subprocess
 import xml.etree.ElementTree as ET
 import argparse
 from datetime import datetime as dt
@@ -274,19 +275,16 @@ def chapters_to_df(chapters, src_dir='Files/Docs', src_type='chapter',
     return df.set_index('ScrivSeq', drop=True)
 
 
-def run_script(script, *args):
+def run_script(*args):
     """
-    Runs external executable `script` with list of arguments in `args`. Raises
-    `ExternalScriptError` with call to `script` via `os.system()` returns
-    non-zero value.
-    """
-    cmd = '{0} {1}'.format(script, ' '.join(args))
-    exit_status = os.system(cmd)
-    if exit_status != 0:
-        raise ExternalScriptError("Non-zero status {status} returned by "
-                " '{cmd}'".format(status=exit_status, cmd=cmd))
+    Runs external executable `script` with list of arguments in `args`.
 
-    return exit_status
+    Returns a tuple (stdout, stderr) with script output.
+    """
+    # cmd = '{0} {1}'.format(script, ' '.join(args))
+    # print(cmd)
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+    return proc.communicate()
 
 
 def gen_uuid(message):
@@ -301,7 +299,10 @@ def handle_init(args):
     Intializes basic EPUB directory structure. Raises `ExternalScriptError` if
     call to system returns non-zero status.
     """
-    return run_script('cp -ar', _EPUB_SKELETON_PATH, args.target)
+    std, err = run_script('cp -ar', _EPUB_SKELETON_PATH, args.target)
+    if err:
+        print(err)
+    print(std)
 
 
 def handle_scriv2md(args):
@@ -327,13 +328,12 @@ def handle_scriv2md(args):
     for s, t in zip(src, target):
         infile = os.path.join(args.projdir, s)
         outfile = os.path.join(args.mddir, t + '.md')
-        script = r"""unrtf --html {infile} | \
-                pandoc --normalize -f html -t markdown | sed 's/\\$/\n/g' | \
-                pandoc --no-wrap -f markdown -t markdown > {outfile}""".format(
-                infile=infile, outfile=outfile)
         print('converting {infile} to {outfile}...'.format(infile=infile,
                                                            outfile=outfile))
-        run_script(script)
+        cmd = os.path.join(_PATH_PREFIX, 'rtf2md.sh')
+        std, err = run_script(cmd, infile, outfile)
+        if err: print(err)
+        if std: print(std.decode('utf-8'))
 
     # foo = NamedTemporaryFile('w+t', delete=False, suffix='.tsv')
     # for s, t in zip(src, target):
@@ -346,16 +346,6 @@ def handle_scriv2md(args):
     # os.remove(tmp_file)
 
     return
-
-
-def handle_md2htsnip(args):
-    """
-    Generates HTML snippets for each content chapter file from markdown
-    sources. Wrapper around `md2htsnip.sh`. Raises `ExternalScriptError` if
-    call to bash script returns non-zero status.
-    """
-    script = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
-    return run_script(script, args.srcdir)
 
 
 def handle_scrivx2tsv(args):
@@ -468,12 +458,13 @@ def handle_genep(args):
     for pg in meta['mainmatter']:
         if pg['type'] != 'chapter':
             continue
-        with open(os.path.join(args.epubdir, args.htsnip, pg['id'] +
-                  '.htsnippet'), 'r') as foi:
-            chapter_content = foi.read()
+        mdfile = os.path.join(args.epubdir, args.mdsrc, pg['id'] + '.md')
+        cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
+        std, err = run_script(cmd, mdfile)
+        if err: print(err)
         with open(os.path.join(args.epubdir, args.htmldir, pg['id'] +
                   '.xhtml'), 'w') as foo:
-            foo.write(tmpl.render(pg, chapter_content=chapter_content))
+            foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8')))
 
 
 def setup_parser_init(p):
@@ -488,12 +479,6 @@ def setup_parser_scriv2md(p):
             help="directory to which to write markdown output")
     p.add_argument('--projdir', required=True,
             help="path to Scrivener project directory")
-
-
-def setup_parser_md2htsnip(p):
-    p.add_argument('--srcdir', required=True,
-            help="directory from which to read markdown and"
-            " to which to write HTML snippets")
 
 
 def setup_parser_scrivx2tsv(p):
@@ -557,10 +542,10 @@ def setup_parser_genep(p):
     p.add_argument('--htmldir', default='OPS',
             help="""path to write (x)html output files to, relative to EPUB
             root directory; defaults to 'OPS'""")
-    p.add_argument('--htsnip', default='src',
-            help="""path to HTML snippets for mainmatter chapter content
-            (relative to EPUB root directory); dafaults to 'src'
-            root directory; defaults to 'OPS'""")
+    p.add_argument('--mdsrc', default='src',
+            help="""path to markdown source files for mainmatter chapter
+            content (relative to EPUB root directory); dafaults to 'src'
+            directory""")
 
 
 # The _task_handler dictionary maps each 'command' to a (task_handler,
@@ -569,8 +554,6 @@ def setup_parser_genep(p):
 # setup handler is called to add the details.
 _task_handler = {'init': (handle_init, setup_parser_init),
                  'scriv2md': (handle_scriv2md, setup_parser_scriv2md),
-                 'md2htsnip': (handle_md2htsnip, setup_parser_md2htsnip),
-                 'scrivx2tsv': (handle_scrivx2tsv, setup_parser_scrivx2tsv),
                  'scrivx2yaml': (handle_scrivx2yaml, setup_parser_scrivx2yaml),
                  'genep': (handle_genep, setup_parser_genep),}
 
