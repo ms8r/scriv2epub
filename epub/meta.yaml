@@ -64,6 +64,12 @@ frontmatter:
       heading:  Other Books in this Series
 
 backmatter:
+    - id:       otherbooksbyauthor
+      type:     static
+      heading:  Other Books by the Author
+    - id:       recommendedreads
+      type:     static
+      heading:  Recommended Reads
     - id:       sneakpeek1
       type:     static
       heading:  Sneak Peak I
@@ -85,15 +91,6 @@ mainmatter:
       level: 1
       src: Files/Docs/123.rtf
       type: chapter
-      children:
-        - id:       otherbooksbyauthor
-          level:    2
-          type:     static
-          heading:  Other Books by the Author
-        - id:       recommendedreads
-          level:    2
-          type:     static
-          heading:  Recommended Reads
     - heading: Chapter Three
       id: his_pov
       level: 1

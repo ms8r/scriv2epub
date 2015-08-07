@@ -288,6 +288,13 @@ def run_script(script, *args):
     return exit_status
 
 
+def gen_uuid(message):
+    uuid = md5(message.encode('utf-8')).hexdigest()
+    return '{0}-{1}-{2}-{3}-{4}'.format(
+            uuid[:8], uuid[8:12], uuid[12:16],
+            uuid[16:20], uuid[20:])
+
+
 def handle_init(args):
     """
     Intializes basic EPUB directory structure. Raises `ExternalScriptError` if
@@ -368,13 +375,6 @@ def handle_scrivx2yaml(args):
             args.output.close()
 
 
-def gen_uuid(message):
-    uuid = md5(message.encode('utf-8')).hexdigest()
-    return '{0}-{1}-{2}-{3}-{4}'.format(
-            uuid[:8], uuid[8:12], uuid[12:16],
-            uuid[16:20], uuid[20:])
-
-
 def handle_genep(args):
     """
     Generates the files required for an EPUB ebook
@@ -428,6 +428,17 @@ def handle_genep(args):
         with open(os.path.join(args.epubdir, args.htmldir, pg['id'] +
                   '.xhtml'), 'w') as foo:
             foo.write(tmpl.render(meta))
+
+    tmpl = tmplEnv.get_template('chapter' + _TEMPLATE_EXT)
+    for pg in meta['mainmatter']:
+        if pg['type'] != 'chapter':
+            continue
+        with open(os.path.join(args.epubdir, args.htsnip, pg['id'] +
+                  '.htsnippet'), 'r') as foi:
+            chapter_content = foi.read()
+        with open(os.path.join(args.epubdir, args.htmldir, pg['id'] +
+                  '.xhtml'), 'w') as foo:
+            foo.write(tmpl.render(pg, chapter_content=chapter_content))
 
 
 
@@ -514,6 +525,10 @@ def setup_parser_genep(p):
             defaults to 'OPS/img'""")
     p.add_argument('--htmldir', default='OPS',
             help="""path to write (x)html output files to, relative to EPUB
+            root directory; defaults to 'OPS'""")
+    p.add_argument('--htsnip', default='src',
+            help="""path to HTML snippets for mainmatter chapter content
+            (relative to EPUB root directory); dafaults to 'src'
             root directory; defaults to 'OPS'""")
 
 
