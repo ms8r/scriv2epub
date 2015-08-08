@@ -2,8 +2,6 @@
 {% block body %}
 <h1 class="toc-heading">Contents</h1>
 
-<p class="toc-item-1"><a href="cover.xhtml">Cover</a></p>
-
 {% if frontmatter %}
 {% for pg in frontmatter %}
 <p class="toc-item-1"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e }}</a></p>

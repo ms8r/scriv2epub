@@ -38,8 +38,7 @@ keywords:
 # Book contents
 #------------------------------------------------------------------------------
 # book will be assembled as
-# - cover page (not listed in this file)
-# - frontmatter
+# - frontmatter (incl. cover page)
 # - toc (not listed in this file)
 # - mainmatter
 # - backmatter
@@ -50,6 +49,9 @@ start_id:   title
 # label for each item will become page-id with href={label}.xhtml
 # for type == template a template {id}.jinja must exist in templates folder
 frontmatter:
+    - id:       cover
+      type:     static
+      heading:  Cover Page
     - id:       title
       type:     template
       heading:  Titel Page

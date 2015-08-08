@@ -8,6 +8,7 @@ Run `python ep3.py -h` for more info
 
 import sys
 import os
+import shutil
 import subprocess
 import xml.etree.ElementTree as ET
 import argparse
@@ -447,11 +448,34 @@ def handle_genep(args):
             foo.write(tmpl.render(meta, **kwargs))
 
     # now content:
+    def cp_static(pg):
+        source = os.path.join(args.epubdir, args.mdsrc, pg['id'] + '.xhtml')
+        target = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
+        shutil.copy(source, target)
+
+    def gen_chapter(pg):
+        mdfile = os.path.join(args.epubdir, args.mdsrc, pg['id'] + '.md')
+        outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] +
+                               '.xhtml')
+        print('generating {0} from {1}...'.format(outfile, mdfile))
+        cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
+        std, err = run_script(cmd, mdfile)
+        if err: print(err)
+        with open(outfile, 'w') as foo:
+            foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
+                header_title=meta['title'] + ' | ' + pg['heading']))
+
     fm = meta.get('frontmatter', [])
     bm = meta.get('backmatter', [])
     pages = (fm if fm else []) + (bm if bm else [])
     for pg in pages:
-        if pg['type'] != 'template':
+        if pg['type'] == 'chapter':
+            gen_chapter(pg)
+            continue
+        elif pg['type'] == 'static':
+            cp_static(pg)
+            continue
+        elif pg['type'] != 'template':
             continue
         tmpl = tmplEnv.get_template(pg['id'] + _TEMPLATE_EXT)
         outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
@@ -465,23 +489,13 @@ def handle_genep(args):
         for pg in pages:
             if pg['type'] != 'chapter':
                 continue
-            mdfile = os.path.join(args.epubdir, args.mdsrc, pg['id'] + '.md')
-            outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] +
-                                   '.xhtml')
-            print('generating {0} from {1}...'.format(outfile, mdfile))
-            cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
-            std, err = run_script(cmd, mdfile)
-            if err: print(err)
-            with open(outfile, 'w') as foo:
-                foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
-                    header_title=meta['title'] + ' | ' + pg['heading']))
+            gen_chapter(pg)
             if 'children' in pg:
                 mm_gen(pg['children'])
 
     mm_gen(meta['mainmatter'])
 
     return
-
 
 def setup_parser_init(p):
     p.add_argument('--target', required=True,

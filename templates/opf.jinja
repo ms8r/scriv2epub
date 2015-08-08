@@ -41,9 +41,7 @@
 
   <manifest>
 
-    {# <item href="{{ cover_img_file|default('cover.jpg')|e }}" id="cover-img" media-type="image/jpeg" /> <!-- Required for KindleGen, Barnes and Noble, and iBooks --> will be generated as part of image inventory #}
     <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml" />
-    <item href="cover.xhtml" id="coverpage" media-type="application/xhtml+xml" /> <!-- Remove for Kindle -->
     <item href="toc.xhtml" id="htmltoc" media-type="application/xhtml+xml" />
     {% if frontmatter %}
     {% for pg in frontmatter %}
@@ -74,7 +72,6 @@
 
   <spine toc="ncx">
 
-    <itemref idref="coverpage" /> <!-- Remove for Kindle -->
     {% if frontmatter %}
     {% for pg in frontmatter %}
     <itemref idref="{{ pg.id|e }}" linear="yes"/>
