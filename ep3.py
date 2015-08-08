@@ -15,6 +15,7 @@ import argparse
 from datetime import datetime as dt
 from hashlib import md5
 from tempfile import NamedTemporaryFile
+import logging
 import pandas as pd
 import yaml
 import jinja2 as j2
@@ -26,12 +27,10 @@ _TEMPLATE_PATH = os.path.join(_PATH_PREFIX, 'templates')
 _TEMPLATE_EXT = '.jinja'
 _EPUB_SKELETON_PATH = os.path.join(_PATH_PREFIX, 'epub')
 
+logging.basicConfig(level=logging.INFO)
+
 
 class ParsingError(Exception):
-    pass
-
-
-class ExternalScriptError(Exception):
     pass
 
 
@@ -282,8 +281,7 @@ def run_script(*args):
 
     Returns a tuple (stdout, stderr) with script output.
     """
-    # cmd = '{0} {1}'.format(script, ' '.join(args))
-    # print(cmd)
+    logging.debug('calling Popen with args: %s', ' '.join(args))
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     return proc.communicate()
 
@@ -297,18 +295,18 @@ def gen_uuid(message):
 
 def handle_init(args):
     """
-    Intializes basic EPUB directory structure. Raises `ExternalScriptError` if
-    call to system returns non-zero status.
+    Intializes basic EPUB directory structure.
     """
     std, err = run_script('cp', '-ar', _EPUB_SKELETON_PATH, args.target)
-    if err: print(err)
-    if std: print(std)
+    if err: logging.error(err.decode('utf-8'))
+    if std: logging.info(std.decode('utf-8'))
 
 
 def handle_scriv2md(args):
     """
-    Generates markdown files from Scrivener RTF sources. Raises
-    `ExternalScriptError` if call to `os.system` returns non-zero status.
+    Generates markdown files from Scrivener RTF sources.
+
+    Returns number of items written.
     """
     with open(args.yaml, 'r') as foi:
         meta = yaml.load(foi)
@@ -325,27 +323,16 @@ def handle_scriv2md(args):
 
     mk_mm_list(meta['mainmatter'])
 
-    for s, t in zip(src, target):
+    for i, (s, t) in enumerate(zip(src, target)):
         infile = os.path.join(args.projdir, s)
         outfile = os.path.join(args.mddir, t + '.md')
-        print('converting {infile} to {outfile}...'.format(infile=infile,
-                                                           outfile=outfile))
+        logging.info('converting %s to %s...', infile, outfile)
         cmd = os.path.join(_PATH_PREFIX, 'rtf2md.sh')
         std, err = run_script(cmd, infile, outfile)
-        if err: print(err)
-        if std: print(std.decode('utf-8'))
+        if err: logging.error(err.decode('utf-8'))
+        if std: logging.info(std.decode('utf-8'))
 
-    # foo = NamedTemporaryFile('w+t', delete=False, suffix='.tsv')
-    # for s, t in zip(src, target):
-    #     foo.write('{src}\t{target}\n'.format(src=s, target=t))
-    # tmp_file = foo.name
-    # foo.close()
-
-    # script = os.path.join(_PATH_PREFIX, 'scriv2md.sh')
-    # run_script(script, tmp_file, args.projdir, args.mddir)
-    # os.remove(tmp_file)
-
-    return
+    return i
 
 
 def handle_scrivx2tsv(args):
@@ -423,7 +410,7 @@ def handle_genep(args):
     tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True)
 
     # build images dict for opf manifest:
-    print('building image inventory...')
+    logging.info('building image inventory...')
     img_dir = os.path.join(args.epubdir, args.imgdir)
     opf_dir = os.path.join(args.epubdir, os.path.dirname(epub_meta['opf'][1]))
     opf2img_path = os.path.relpath(img_dir, opf_dir)
@@ -442,25 +429,26 @@ def handle_genep(args):
     uuid = gen_uuid(meta.__str__() + dt.utcnow().__str__())
     kwargs = {'images': images, 'uuid': uuid}
     for tmpl_file, out_file in epub_meta.values():
-        print('generating {}...'.format(out_file))
+        logging.info('generating %s...', out_file)
         tmpl = tmplEnv.get_template(tmpl_file)
         with open(os.path.join(args.epubdir, out_file), 'w') as foo:
             foo.write(tmpl.render(meta, **kwargs))
 
     # now content:
     def cp_static(pg):
-        source = os.path.join(args.epubdir, args.mdsrc, pg['id'] + '.xhtml')
+        source = os.path.join(args.epubdir, args.srcdir, pg['id'] + '.xhtml')
         target = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
+        logging.info('copying %s to %s...', source, target)
         shutil.copy(source, target)
 
     def gen_chapter(pg):
-        mdfile = os.path.join(args.epubdir, args.mdsrc, pg['id'] + '.md')
+        mdfile = os.path.join(args.epubdir, args.srcdir, pg['id'] + '.md')
         outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] +
                                '.xhtml')
-        print('generating {0} from {1}...'.format(outfile, mdfile))
+        logging.info('generating %s from %s...', outfile, mdfile)
         cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
         std, err = run_script(cmd, mdfile)
-        if err: print(err)
+        if err: logging.error(err.decode('utf-8'))
         with open(outfile, 'w') as foo:
             foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
                 header_title=meta['title'] + ' | ' + pg['heading']))
@@ -479,7 +467,7 @@ def handle_genep(args):
             continue
         tmpl = tmplEnv.get_template(pg['id'] + _TEMPLATE_EXT)
         outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
-        print('generating {}...'.format(outfile))
+        logging.info('generating %s...', outfile)
         with open(outfile, 'w') as foo:
             foo.write(tmpl.render(meta))
 
@@ -572,10 +560,10 @@ def setup_parser_genep(p):
     p.add_argument('--htmldir', default='OPS',
             help="""path to write (x)html output files to, relative to EPUB
             root directory; defaults to 'OPS'""")
-    p.add_argument('--mdsrc', default='src',
-            help="""path to markdown source files for mainmatter chapter
-            content (relative to EPUB root directory); dafaults to 'src'
-            directory""")
+    p.add_argument('--srcdir', default='src',
+            help="""path to markdown and statis xhtml ource files for
+            mainmatter chapter content (relative to EPUB root directory);
+            dafaults to 'src'""")
 
 
 # The _task_handler dictionary maps each 'command' to a (task_handler,
