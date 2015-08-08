@@ -9,7 +9,7 @@
     <dc:language>{{ language|default('en-us') }}</dc:language>
     <dc:identifier id="BookId" opf:scheme="uuid">urn:uuid:{{ uuid }}</dc:identifier>
     {% if author is defined %}
-        <dc:creator opf:role="aut" file-as="Last, First">{{ author|e }}</dc:creator>
+        <dc:creator opf:role="aut" opf:file-as="Last, First">{{ author|e }}</dc:creator>
     {% endif %}
     {% if authorlist is defined %}
         {% for aut in authorlist %}
@@ -41,23 +41,32 @@
 
   <manifest>
 
-    <item href="{{ cover_img_file|default('cover.jpg')|e }}" id="cover-img" media-type="image/jpeg" /> <!-- Required for KindleGen, Barnes and Noble, and iBooks -->
+    {# <item href="{{ cover_img_file|default('cover.jpg')|e }}" id="cover-img" media-type="image/jpeg" /> <!-- Required for KindleGen, Barnes and Noble, and iBooks --> will be generated as part of image inventory #}
     <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml" />
-    <item href="coverpage.xhtml" id="coverpage" media-type="application/xhtml+xml" /> <!-- Remove for Kindle -->
+    <item href="cover.xhtml" id="coverpage" media-type="application/xhtml+xml" /> <!-- Remove for Kindle -->
     <item href="toc.xhtml" id="htmltoc" media-type="application/xhtml+xml" />
+    {% if frontmatter %}
     {% for pg in frontmatter %}
     <item href="{{ pg.id|e }}.xhtml" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
     {% endfor %}
-    {% for pg in mainmatter %}
+    {% endif %}
+    {% if mainmatter %}
+    {% for pg in mainmatter recursive %}
     <item href="{{ pg.id|e }}.xhtml" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
+    {% if pg.children %}{{ loop(pg.children) }}{% endif %}
     {% endfor %}
+    {% endif %}
+    {% if backmatter %}
     {% for pg in backmatter %}
     <item href="{{ pg.id|e }}.xhtml" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
     {% endfor %}
+    {% endif %}
     <item href="{{ css_file|default('css/stylesheet.css')|e }}" id="css-epub" media-type="text/css" />
+    {% if images %}
     {% for img in images %}
     <item href="{{ img.href|e }}" id="{{ img.id|e }}" media-type="image/{{ img.format }}" />
     {% endfor %}
+    {% endif %}
 
   </manifest>
 
@@ -66,16 +75,23 @@
   <spine toc="ncx">
 
     <itemref idref="coverpage" /> <!-- Remove for Kindle -->
+    {% if frontmatter %}
     {% for pg in frontmatter %}
-        <itemref idref="{{ pg.id|e }}" linear="yes"/>
+    <itemref idref="{{ pg.id|e }}" linear="yes"/>
     {% endfor %}
+    {% endif %}
     <itemref idref="htmltoc" />
-    {% for pg in mainmatter %}
-        <itemref idref="{{ pg.id|e }}" linear="yes"/>
+    {% if mainmatter %}
+    {% for pg in mainmatter recursive %}
+    <itemref idref="{{ pg.id|e }}" linear="yes"/>
+    {% if pg.children %}{{ loop(pg.children) }}{% endif %}
     {% endfor %}
+    {% endif %}
+    {% if backmatter %}
     {% for pg in backmatter %}
-        <itemref idref="{{ pg.id|e }}" linear="yes"/>
+    <itemref idref="{{ pg.id|e }}" linear="yes"/>
     {% endfor %}
+    {% endif %}
 
   </spine>
 
@@ -83,8 +99,8 @@
 
   <guide>
 
-    <reference href="coverpage.xhtml" type="cover" title="Cover" /> <!-- Remove for Kindle -->
-    <reference href="content/toc.xhtml" type="toc" title="Table of Contents" />
+    <reference href="cover.xhtml" type="cover" title="Cover" /> <!-- Remove for Kindle -->
+    <reference href="toc.xhtml" type="toc" title="Table of Contents" />
     <reference href="{{ start_id|default('toc')|e }}.xhtml" type="text" title="Beginning" />
 
   </guide>

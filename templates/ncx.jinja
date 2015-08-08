@@ -27,6 +27,7 @@
         </navLabel>
         <content src="cover.xhtml"></content>
     </navPoint>
+  {% if frontmatter %}
   {% for pg in frontmatter %}
     {% if po_counter.append(1) %}{% endif %}
     <navPoint id="{{ pg.id|e }}" playOrder="{{ po_counter|length }}">
@@ -36,6 +37,7 @@
       <content src="{{ pg.id|e }}.xhtml"></content>
     </navPoint>
   {% endfor %}
+  {% endif %}
   {% if po_counter.append(1) %}{% endif %}
     <navPoint id="toc" playOrder="{{ po_counter|length }}">
       <navLabel>
@@ -43,6 +45,7 @@
       </navLabel>
       <content src="toc.xhtml"></content>
     </navPoint>
+  {% if mainmatter %}
   {% for pg in mainmatter recursive %}
     {% if po_counter.append(1) %}{% endif %}
     <navPoint id="{{ pg.id|e }}" playOrder="{{ po_counter|length }}">
@@ -50,9 +53,11 @@
         <text>{{ pg.heading|e }}</text>
       </navLabel>
       <content src="{{ pg.id|e }}.xhtml"></content>
-      {%- if pg.children -%}{{ loop(pg.children)|indent(4, true) }}{%- endif %}
+      {% if pg.children %}{{ loop(pg.children)|indent(4, true) }}{% endif %}
     </navPoint>
   {% endfor %}
+  {% endif %}
+  {% if backmatter %}
   {% for pg in backmatter %}
     {% if po_counter.append(1) %}{% endif %}
     <navPoint id="{{ pg.id|e }}" playOrder="{{ po_counter|length }}">
@@ -62,6 +67,7 @@
       <content src="{{ pg.id|e }}.xhtml"></content>
     </navPoint>
   {% endfor %}
+  {% endif %}
 
   </navMap>
 </ncx>

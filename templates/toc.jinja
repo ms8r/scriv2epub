@@ -4,16 +4,22 @@
 
 <p class="toc-item-1"><a href="cover.xhtml">Cover</a></p>
 
+{% if frontmatter %}
 {% for pg in frontmatter %}
 <p class="toc-item-1"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e }}</a></p>
 {% endfor %}
-<p class="toc-item-1"><a href="Contents.xhtml">Contents</a></p>
+{% endif %}
+<p class="toc-item-1"><a href="toc.xhtml">Contents</a></p>
+{% if mainmatter %}
 {% for pg in mainmatter recursive %}
 <p class="toc-item-{{ pg.level|default('1') }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((pg.level - 1) * 4, true) }}</a> {{ pg.suffix|e }}</p>
-{%- if pg.children -%}{{ loop(pg.children) }}{%- endif %}
+{% if pg.children %}{{ loop(pg.children) }}{% endif %}
 {% endfor %}
+{% endif %}
+{% if backmatter %}
 {% for pg in backmatter %}
 <p class="toc-item-1"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e }}</a></p>
 {% endfor %}
+{% endif %}
 
 {% endblock %}

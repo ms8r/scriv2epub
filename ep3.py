@@ -299,10 +299,9 @@ def handle_init(args):
     Intializes basic EPUB directory structure. Raises `ExternalScriptError` if
     call to system returns non-zero status.
     """
-    std, err = run_script('cp -ar', _EPUB_SKELETON_PATH, args.target)
-    if err:
-        print(err)
-    print(std)
+    std, err = run_script('cp', '-ar', _EPUB_SKELETON_PATH, args.target)
+    if err: print(err)
+    if std: print(std)
 
 
 def handle_scriv2md(args):
@@ -423,6 +422,7 @@ def handle_genep(args):
     tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True)
 
     # build images dict for opf manifest:
+    print('building image inventory...')
     img_dir = os.path.join(args.epubdir, args.imgdir)
     opf_dir = os.path.join(args.epubdir, os.path.dirname(epub_meta['opf'][1]))
     opf2img_path = os.path.relpath(img_dir, opf_dir)
@@ -441,30 +441,46 @@ def handle_genep(args):
     uuid = gen_uuid(meta.__str__() + dt.utcnow().__str__())
     kwargs = {'images': images, 'uuid': uuid}
     for tmpl_file, out_file in epub_meta.values():
+        print('generating {}...'.format(out_file))
         tmpl = tmplEnv.get_template(tmpl_file)
         with open(os.path.join(args.epubdir, out_file), 'w') as foo:
             foo.write(tmpl.render(meta, **kwargs))
 
     # now content:
-    for pg in meta['frontmatter'] + meta['backmatter']:
+    fm = meta.get('frontmatter', [])
+    bm = meta.get('backmatter', [])
+    pages = (fm if fm else []) + (bm if bm else [])
+    for pg in pages:
         if pg['type'] != 'template':
             continue
         tmpl = tmplEnv.get_template(pg['id'] + _TEMPLATE_EXT)
-        with open(os.path.join(args.epubdir, args.htmldir, pg['id'] +
-                  '.xhtml'), 'w') as foo:
+        outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
+        print('generating {}...'.format(outfile))
+        with open(outfile, 'w') as foo:
             foo.write(tmpl.render(meta))
 
     tmpl = tmplEnv.get_template('chapter' + _TEMPLATE_EXT)
-    for pg in meta['mainmatter']:
-        if pg['type'] != 'chapter':
-            continue
-        mdfile = os.path.join(args.epubdir, args.mdsrc, pg['id'] + '.md')
-        cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
-        std, err = run_script(cmd, mdfile)
-        if err: print(err)
-        with open(os.path.join(args.epubdir, args.htmldir, pg['id'] +
-                  '.xhtml'), 'w') as foo:
-            foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8')))
+
+    def mm_gen(pages):
+        for pg in pages:
+            if pg['type'] != 'chapter':
+                continue
+            mdfile = os.path.join(args.epubdir, args.mdsrc, pg['id'] + '.md')
+            outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] +
+                                   '.xhtml')
+            print('generating {0} from {1}...'.format(outfile, mdfile))
+            cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
+            std, err = run_script(cmd, mdfile)
+            if err: print(err)
+            with open(outfile, 'w') as foo:
+                foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
+                    header_title=meta['title'] + ' | ' + pg['heading']))
+            if 'children' in pg:
+                mm_gen(pg['children'])
+
+    mm_gen(meta['mainmatter'])
+
+    return
 
 
 def setup_parser_init(p):
