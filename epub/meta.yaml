@@ -48,6 +48,19 @@ start_id:   title
 
 # label for each item will become page-id with href={label}.xhtml
 # for type == template a template {id}.jinja must exist in templates folder
+# `type` attribute:
+#       static      -   a file {id}.xhtml will be copied from source to target
+#                       directory (source and target can be specified as cmd
+#                       line parameters)
+#       template    -   either a template {id}.jinja must exist in templates
+#                       folder or a 'template' attribute must provide the name
+#                       of the template to be used (without .ninja suffix); the
+#                       root of the data structure generated from this YAML
+#                       will be passed into the template
+#       chapter     -   will use 'chapter.jinja' in templates directory ad
+#                       generate xhtml content from {id}.md in source directory
+#                       (specified as command line parameter); the dict with
+#                       the page parameters will be passed into the template
 frontmatter:
     - id:       cover
       type:     static
@@ -62,8 +75,53 @@ frontmatter:
       type:     static
       heading:  Free Book
     - id:       booksinseries
-      type:     static
-      heading:  Other Books in this Series
+      type:     template
+      template: book_list
+      heading:  More from Anna Lowe
+
+booksinseries:
+    serieslist:
+    - name:       Serendipity Adventure Romances
+      titlelist:
+      - title:    Uncharted
+        url:      http://annalowebooks.com
+        img:      img/desert_moon.jpg
+        subtitle: Book 1 in the hedgehog series
+      - title:    Entangled
+        url:      http://annalowebooks.com
+        img:      img/desert_moon.jpg
+        subtitle: Book 1 in the hedgehog series
+      - title:    Windswept
+        url:      http://annalowebooks.com
+        img:      img/desert_moon.jpg
+        subtitle: Book 1 in the hedgehog series
+      - title:    Adrift
+        url:      http://annalowebooks.com
+        img:      img/desert_moon.jpg
+        subtitle: Book 1 in the hedgehog series
+      # if addons are specified they will follow under the list of titles,
+      # beneath an 'and'
+      addons:
+      - title:    Off the Charts
+        url:      http://annalowebooks.com
+        subtitle: (a short story prequel to Uncharted)
+    - name:       Twin Moon Ranch Paranormal
+      titlelist:
+      - title:    Uncharted
+        url:      http://annalowebooks.com
+      - title:    Entangled
+        url:      http://annalowebooks.com
+      - title:    Windswept
+        url:      http://annalowebooks.com
+      - title:    Adrift
+        url:      http://annalowebooks.com
+      # if addons are specified they will follow under the list of titles,
+      # beneath an 'and'
+      addons:
+      - title:    Off the Charts
+        url:      http://annalowebooks.com
+        subtitle: (a short story prequel to Uncharted)
+
 
 backmatter:
     - id:       otherbooksbyauthor

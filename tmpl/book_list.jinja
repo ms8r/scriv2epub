@@ -1,0 +1,25 @@
+{% extends "xhtml_skeleton.jinja" %}
+    {# `pg_meta`: dict define in the front/main/backmatter sections of the yaml metadata file
+       `pd_data`: detailed content section for the respective page #}
+    {% block body %}
+    <div class="center">
+        {% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
+        {% for series in pg_data.serieslist %}
+            {% if series.name %}<h3 class="chapter-heading">{{ series.name|e }}</h3>{% endif %}
+            {% for t in series.titlelist %}
+                {% if t.img %}<p class="center-par-t-extra-space">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}"></img>{% if t.url %}</a>{% endif %}</p>{% endif %}
+                <p class="center-par">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}</p>
+                {% if t.subtitle %}<p class="center-par-b-space">{{ t.subtitle|e }}</p>{% endif %}
+                <p class="center-par">&nbsp;</p>
+            {% endfor %}
+            {% if series.addons %}<p class="center-par-tb-extra-space">and</p>
+            {% for a in series.addons %}
+                {% if a.img %}<p class="center-par-t-extra-space">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}<img width="200" src="{{ a.img|e }}"></img>{% if a.url %}</a>{% endif %}</p>{% endif %}
+                <p class="center-par">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}{{ a.title|e }}{% if a.url %}</a>{% endif %}</p>
+                {% if a.subtitle %}<p class="center-par-b-space">{{ a.subtitle|e }}</p>{% endif %}
+                <p class="center-par">&nbsp;</p>
+            {% endfor %}
+            {% endif %}
+        {% endfor %}
+</div>
+{% endblock %}

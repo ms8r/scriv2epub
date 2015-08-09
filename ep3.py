@@ -23,7 +23,7 @@ from num2eng import num2eng
 
 
 _PATH_PREFIX = os.path.dirname(os.path.realpath(__file__))
-_TEMPLATE_PATH = os.path.join(_PATH_PREFIX, 'templates')
+_TEMPLATE_PATH = os.path.join(_PATH_PREFIX, 'tmpl')
 _TEMPLATE_EXT = '.jinja'
 _EPUB_SKELETON_PATH = os.path.join(_PATH_PREFIX, 'epub')
 
@@ -465,11 +465,14 @@ def handle_genep(args):
             continue
         elif pg['type'] != 'template':
             continue
-        tmpl = tmplEnv.get_template(pg['id'] + _TEMPLATE_EXT)
+        tmpl_name = pg.get('template')
+        if not tmpl_name: tmpl_name = pg['id']
+        tmpl = tmplEnv.get_template(tmpl_name + _TEMPLATE_EXT)
         outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
         logging.info('generating %s...', outfile)
         with open(outfile, 'w') as foo:
-            foo.write(tmpl.render(meta))
+            foo.write(tmpl.render(meta, pg_meta=pg,
+                pg_data=meta.get(pg['id']), header_title=pg.get('heading')))
 
     tmpl = tmplEnv.get_template('chapter' + _TEMPLATE_EXT)
 
