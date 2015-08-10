@@ -19,3 +19,8 @@
 8.  Run ``ep3.py genep`` to generate template based pages, table of contents and metadata files.
 
 9.  Run ``mkep`` shell script to generate EPUB (and mobi is desired).
+
+TODO:
+=====
+
+[ ] Turn paragraph formatting in md2htsnip into cl parameter

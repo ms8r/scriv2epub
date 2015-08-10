@@ -1,25 +1,58 @@
 {% extends "xhtml_skeleton.jinja" %}
-    {# `pg_meta`: dict define in the front/main/backmatter sections of the yaml metadata file
-       `pd_data`: detailed content section for the respective page #}
-    {% block body %}
-    <div class="center">
-        {% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
-        {% for series in pg_data.serieslist %}
-            {% if series.name %}<h3 class="chapter-heading">{{ series.name|e }}</h3>{% endif %}
-            {% for t in series.titlelist %}
-                {% if t.img %}<p class="center-par-t-extra-space">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}"></img>{% if t.url %}</a>{% endif %}</p>{% endif %}
-                <p class="center-par">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}</p>
-                {% if t.subtitle %}<p class="center-par-b-space">{{ t.subtitle|e }}</p>{% endif %}
-                <p class="center-par">&nbsp;</p>
-            {% endfor %}
-            {% if series.addons %}<p class="center-par-tb-extra-space">and</p>
-            {% for a in series.addons %}
-                {% if a.img %}<p class="center-par-t-extra-space">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}<img width="200" src="{{ a.img|e }}"></img>{% if a.url %}</a>{% endif %}</p>{% endif %}
-                <p class="center-par">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}{{ a.title|e }}{% if a.url %}</a>{% endif %}</p>
-                {% if a.subtitle %}<p class="center-par-b-space">{{ a.subtitle|e }}</p>{% endif %}
-                <p class="center-par">&nbsp;</p>
-            {% endfor %}
-            {% endif %}
+{# ----------------------------------------------------------------------------
+Defines the structure for book listings in front and/or backmatter, works with
+or without images and with or without links to the titles for a single series
+or multiple series.
+
+Passed in variables:
+    title_heading: str
+        Used in xhtml_skeleton
+    pg_meta: dict
+        Will look for `pg_meta.heading` and use as page heading. Required for
+        toc. If template is used for a single series only, use the series name
+        as heading and leave the series name in `pg_data` blank.  May also
+        contain `url` and `urltext` which, if specified, will be shown as
+        "Visit <urltext>" with `urltext` linked to `url` at the bottom of the
+        page.
+    pg_data: sequence
+        List with the different series to be listed. Each item is a dict with
+        the following items:
+            name: str
+                Series name / title
+            titlelist: sequence
+                List with the individual titles to be listed. Each item is a
+                dict with items `title`, `url`, `tclause`, `subtitle`, and
+                `img` (all except for title are optional). `url` will be linked
+                to `title`, followed by `tclause` if specified. `img` will
+                precede `title` and also be linked to `url`. `subtitle` will
+                follow on a separate line below `title`.
+            addons: sequence
+                Same as `titlelist`. Items will follow the ones in `titlelist`,
+                separates by the text in `addonsep`.
+            addonsep: str
+                Text to precede add-ons
+---------------------------------------------------------------------------- #}
+{% block body %}
+<div class="center">
+    {% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
+    {% for series in pg_data %}
+        {% if series.series %}<h3 class="chapter-heading">{{ series.series|e }}</h3>{% endif %}
+        {% for t in series.titlelist %}
+            {% if t.img %}<p class="center-par-t-extra-space">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}"></img>{% if t.url %}</a>{% endif %}</p>{% endif %}
+            <p class="center-par-tb-space">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}{% if t.tclause %} {{ t.tclause }}{% endif %}{% if t.subtitle %}<br />{{ t.subtitle|e }}{% endif %}</p>
+            <p class="center-par">&nbsp;</p>
         {% endfor %}
+        {% if series.addons %}<p class="center-par-tb-extra-space">{{ series.addonsep }}</p>
+        {% for a in series.addons %}
+            {% if a.img %}<p class="center-par-t-extra-space">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}<img width="200" src="{{ a.img|e }}"></img>{% if a.url %}</a>{% endif %}</p>{% endif %}
+            <p class="center-par-tb-space">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}{{ a.title|e }}{% if a.url %}</a>{% endif %}{% if a.tclause %} {{ a.tclause }}{% endif %}{% if a.subtitle %}<br />{{ a.subtitle|e }}{% endif %}</p>
+            <p class="center-par">&nbsp;</p>
+        {% endfor %}
+        {% endif %}
+    {% endfor %}
+    {% if pg_meta.urltext %}
+    <p class="center-par">&nbsp;</p>
+    <p class="center-par-tb-space">Visit {% if pg_meta.url %}<a href="{{ pg_meta.url }}">{% endif %}{{ pg_meta.urltext }}{% if pg_meta.url %}</a>{% endif %}</p>
+    {% endif %}
 </div>
 {% endblock %}

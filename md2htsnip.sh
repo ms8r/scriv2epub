@@ -5,21 +5,21 @@
 #
 
 
-if [ $# != "1" ]
+if [ $# != "2" ]
 then
     echo
     echo "::::::::::::::::::::::::::::::::::::::::::::::::::::"
 	echo "md2htsnip: convert markdown to HTML snippets"
-	echo "usage: md2htsnip <md file>"
+	echo "usage: md2htsnip <md file> <par style>"
     echo "::::::::::::::::::::::::::::::::::::::::::::::::::::"
     echo
     exit 1
 fi
 
-css_basic=par-indent
+css_basic=$2
 css_center=center-par-tb-space
 center_pattern="\&lt;\&lt;\&lt;[ ]*\&gt;\&gt;\&gt;"   # paragraphs matching this
-                                                      # pattern will be styled 
+                                                      # pattern will be styled
                                                       # with css_center
 
 mdf=$1

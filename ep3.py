@@ -26,6 +26,7 @@ _PATH_PREFIX = os.path.dirname(os.path.realpath(__file__))
 _TEMPLATE_PATH = os.path.join(_PATH_PREFIX, 'tmpl')
 _TEMPLATE_EXT = '.jinja'
 _EPUB_SKELETON_PATH = os.path.join(_PATH_PREFIX, 'epub')
+_BASIC_CH_PAR_STYLE = 'par-indent'
 
 logging.basicConfig(level=logging.INFO)
 
@@ -316,6 +317,7 @@ def handle_scriv2md(args):
     # quick and dirty recursion to turn yaml into lists
     def mk_mm_list(mm):
         for m in mm:
+            if not m.get('src'): continue
             src.append(m['src'])
             target.append(m['id'])
             if 'children' in m:
@@ -445,9 +447,11 @@ def handle_genep(args):
         mdfile = os.path.join(args.epubdir, args.srcdir, pg['id'] + '.md')
         outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] +
                                '.xhtml')
-        logging.info('generating %s from %s...', outfile, mdfile)
+        par_style = pg.get('parstyle', _BASIC_CH_PAR_STYLE)
+        logging.info('generating %s from %s with par style "%s"...', outfile,
+                mdfile, par_style)
         cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
-        std, err = run_script(cmd, mdfile)
+        std, err = run_script(cmd, mdfile, par_style)
         if err: logging.error(err.decode('utf-8'))
         with open(outfile, 'w') as foo:
             foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
@@ -466,13 +470,23 @@ def handle_genep(args):
         elif pg['type'] != 'template':
             continue
         tmpl_name = pg.get('template')
-        if not tmpl_name: tmpl_name = pg['id']
+        if not tmpl_name:
+            tmpl_name = pg['id']
+        pg_data = meta.get(pg['id'])
+        if not pg_data:
+            # look for supplementary YAML file with page data:
+            try:
+                with open(os.path.join(args.epubdir, args.yincl, pg['id'] +
+                    '.yaml'), 'r') as foi:
+                    pg_data = yaml.load(foi)
+            except FileNotFoundError as e:
+                logging.warning(e)
         tmpl = tmplEnv.get_template(tmpl_name + _TEMPLATE_EXT)
         outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
         logging.info('generating %s...', outfile)
         with open(outfile, 'w') as foo:
             foo.write(tmpl.render(meta, pg_meta=pg,
-                pg_data=meta.get(pg['id']), header_title=pg.get('heading')))
+                pg_data=pg_data, header_title=pg.get('heading')))
 
     tmpl = tmplEnv.get_template('chapter' + _TEMPLATE_EXT)
 
@@ -554,7 +568,14 @@ def setup_parser_scrivx2yaml(p):
 
 def setup_parser_genep(p):
     p.add_argument('--yaml', required=True,
-            help="path to YAML metadata file")
+            help="path to YAML metadata file, relative to epubdir")
+    p.add_argument('--yincl', default='.',
+            help="""path to YAML include directory; if genep encounters a book
+            section/page with a jinja template that is different from the page
+            id and the YAML file specified with `--yaml` does not contain a top
+            level identifier equal to <page id>, genep will look for a file
+            <page id>.yaml in <yincl> and path the data from this file to the
+            jinja template as the `pg_data` parameter; defaults to '.'""")
     p.add_argument('--epubdir', default='.',
             help="""path to EPUB root directory; defaults to '.'""")
     p.add_argument('--imgdir', default='OPS/img',

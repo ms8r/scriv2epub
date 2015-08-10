@@ -4,35 +4,42 @@
 # Metadata
 #------------------------------------------------------------------------------
 
-title:          Uncharted
-subtitle:       Hedgehogs reloaded
-# subplain:
+title:          Desert Wolf 3
+# subtitle:
+subplain:       A Twin Moon Ranch short story
 author:         Anna Lowe
 authorweb:      www.annalowebooks.com
 authoremail:    author@annalowebooks.com
 # authorlist:
-series:         A Serendipity Adventure romance
+series:         Twin Moon Ranch
 publisher:      Twin Moon Press
 pubdate:        2015-07-30
 editor:
-    name:       Erika Mustermann
-    web:        http://www.erika.com
+    name:       Lisa A. Hollett
+    # web:        http://www.erika.com
 coverart:
     name:       Fiona Jayde Media
     web:        www.FionaJaydeMedia.com
 
 description: >
-    Don’t despair! Our Wicked Alphas are about to get even wilder
-    in a second sizzling collection heading your way soon. {ww2_link_snippet}
-    releases on October 30, 2015 and features ALL-NEW, previously
-    unpublished scenes from your favorite paranormal romance authors,
-    including New York Times and USA Today bestsellers. We’re writing red-hot
-    scenes with werewolves, shapeshifting bears, ghosts, and more just for
-    this great new collection!
+    Kyle Williams is just a lone wolf trying to settle in to a new skin. But when
+    the brown-eyed girl from his past turns up, bloodied by a rival male, the
+    instinct to protect overrides everything else—including duty to his pack.
+
+    Stefanie Alt is a woman on the run, and fate is hot on her heels. The only one
+    who can help her is the neighborhood bad boy she once knew. But even after one
+    hot night under the desert moon, Stefanie isn’t sure she can trust him—or
+    herself.
+
+    There’s more than meets the eye on Twin Moon Ranch, home to a pack of
+    shapeshifting wolves willing to battle for life and love.
 
 keywords:
     - Romance
     - Paranormal
+    - Twin Moon Ranch
+    - Werewolf
+    - Shapeshifter
 
 #------------------------------------------------------------------------------
 # Book contents
@@ -71,62 +78,25 @@ frontmatter:
     - id:       copyright
       type:     template
       heading:  Copyright
-    - id:       freebook
+    - id:       freebook_dd
       type:     static
       heading:  Free Book
     - id:       booksinseries
+      # pg_data will be read from booksinseries.yaml
       type:     template
       template: book_list
-      heading:  More from Anna Lowe
-
-booksinseries:
-    serieslist:
-    - name:       Serendipity Adventure Romances
-      titlelist:
-      - title:    Uncharted
-        url:      http://annalowebooks.com
-        img:      img/desert_moon.jpg
-        subtitle: Book 1 in the hedgehog series
-      - title:    Entangled
-        url:      http://annalowebooks.com
-        img:      img/desert_moon.jpg
-        subtitle: Book 1 in the hedgehog series
-      - title:    Windswept
-        url:      http://annalowebooks.com
-        img:      img/desert_moon.jpg
-        subtitle: Book 1 in the hedgehog series
-      - title:    Adrift
-        url:      http://annalowebooks.com
-        img:      img/desert_moon.jpg
-        subtitle: Book 1 in the hedgehog series
-      # if addons are specified they will follow under the list of titles,
-      # beneath an 'and'
-      addons:
-      - title:    Off the Charts
-        url:      http://annalowebooks.com
-        subtitle: (a short story prequel to Uncharted)
-    - name:       Twin Moon Ranch Paranormal
-      titlelist:
-      - title:    Uncharted
-        url:      http://annalowebooks.com
-      - title:    Entangled
-        url:      http://annalowebooks.com
-      - title:    Windswept
-        url:      http://annalowebooks.com
-      - title:    Adrift
-        url:      http://annalowebooks.com
-      # if addons are specified they will follow under the list of titles,
-      # beneath an 'and'
-      addons:
-      - title:    Off the Charts
-        url:      http://annalowebooks.com
-        subtitle: (a short story prequel to Uncharted)
-
+      heading:  Other books in this series
+      url:      http://annalowebooks.com
+      urltext:  www.annalowebooks.com
 
 backmatter:
     - id:       otherbooksbyauthor
-      type:     static
+      # pg_data will be read from otherbooksbyauthor.yaml
+      type:     template
+      template: book_list
       heading:  Other Books by the Author
+      url:      http://annalowebooks.com
+      urltext:  www.annalowebooks.com
     - id:       recommendedreads
       type:     static
       heading:  Recommended Reads
@@ -137,15 +107,20 @@ backmatter:
       type:     static
       heading:  Sneak Peak II
     - id:       morefromauthor
-      type:     static
+      # pg_data will be read from morefromauthor.yaml
+      type:     template
+      template: book_list
       heading:  More from Anna Lowe
+      url:      http://annalowebooks.com
+      urltext:  www.annalowebooks.com
+
 
 mainmatter:
-    - heading: Chapter One
-      id: pro2
+    - heading: Thank you
+      id: tnote
       level: 1
-      src: Files/Docs/122.rtf
       type: chapter
+      parstyle: no-indent
     - heading: Chapter Two
       id: her2
       level: 1

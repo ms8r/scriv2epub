@@ -1,0 +1,14 @@
+{% extends "xhtml_skeleton.jinja" %}
+
+{% block body %}
+
+{% if heading %}<h2>{{ heading|e }}</h2>{% endif %}
+{% if subheading %}<h3>{{ subheading|e }}</h3>{% endif %}
+
+{% for p in pars %}
+<p class="no-indent">{{ p|e }}</p>
+{% endfor %}
+
+{% endblock %}
+
+

@@ -1,0 +1,33 @@
+# at end of backmatter, all series with images
+# see book_list.jinja template for possible attributes
+
+- series:
+  titlelist:
+  - title:    Desert Moon
+    subtitle: (Book 1)
+    url:      http://www.amazon.com/gp/product/B00TEEHDPS/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00TEEHDPS&linkCode=as2&tag=wwwannalowebo-20&linkId=UXEVIR7DPBKQMJTQ
+    img:      img/desert_moon.jpg
+  - title:    Desert Hunt
+    subtitle: (the Prequel)
+    url:      http://www.smarturl.it/cgb2m3
+    img:      img/desert_hunt.jpg
+  - title:    Desert Wulf 1
+    subtitle: (a short story)
+    url:      http://www.amazon.com/gp/product/B00TEEHIN0/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00TEEHIN0&linkCode=as2&tag=wwwannalowebo-20&linkId=PQAVZDWFVBET6JVL
+    img:      img/desert_wolf.jpg
+  - title:    Desert Wulf 2
+    subtitle: (a short story)
+    url:      http://www.smarturl.it/4bo3sr
+    img:      img/desert_wolf_2.jpg
+  - title:    Desert Blood
+    subtitle: (Book 2)
+    url:      http://www.amazon.com/gp/product/B00TIUEVL2/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00TIUEVL2&linkCode=as2&tag=wwwannalowebo-20&linkId=YSAIQVX5QFH3FU4L
+    img:      img/desert_blood.jpg
+  - title:    Desert Fate
+    subtitle:  (Book 3)
+    url:
+    img:      img/desert_fate.jpg
+  - title:    Desert Heart
+    subtitle: (Book 4)
+    url:      http://www.smarturl.it/abn3iv
+    img:      img/desert_heart.jpg

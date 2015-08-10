@@ -1,0 +1,28 @@
+# end of fronmatter, simple list of books in this series only:
+# see book_list.jinja template for possible attributes
+
+- name:
+  titlelist:
+  - title:    Desert Moon
+    tclause:  (Book 1)
+    url:      http://www.amazon.com/gp/product/B00TEEHDPS/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00TEEHDPS&linkCode=as2&tag=wwwannalowebo-20&linkId=UXEVIR7DPBKQMJTQ
+  - title:    Desert Hunt
+    tclause:  (the Prequel)
+    url:      http://www.smarturl.it/cgb2m3
+  - title:    Desert Wulf 1
+    tclause:  (a short story)
+    url:      http://www.amazon.com/gp/product/B00TEEHIN0/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00TEEHIN0&linkCode=as2&tag=wwwannalowebo-20&linkId=PQAVZDWFVBET6JVL
+  - title:    Desert Wulf 2
+    tclause:  (a short story)
+    url:      http://www.smarturl.it/4bo3sr
+  - title:    Desert Blood
+    tclause:  (Book 2)
+    url:      http://www.amazon.com/gp/product/B00TIUEVL2/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00TIUEVL2&linkCode=as2&tag=wwwannalowebo-20&linkId=YSAIQVX5QFH3FU4L
+  - title:    Desert Fate
+    tclause:  (Book 3)
+    url:
+  addonsep:   'coming soon:'
+  addons:
+  - title:    Desert Heart
+    tclause:  (Book 4)
+    url:      http://www.smarturl.it/abn3iv
