@@ -18,7 +18,7 @@
 
 Additional supporting bits and pieces:
 
-* __rtf2md.sh__: bash script for RTF to Markdown conversion (called by s2e.py via ``subprocess.Popen()``).
+* __rtf2md.sh__: bash script for RTF to Markdown conversion.
 
 * __md2htsnip__: bash script for converting Markdown files to HTML snippets (body content only, called by s2e.py via ``subprocess.Popen()``). In addition to the conversion via _pandoc_ it also adds a basic CSS class for all mainmatter paragraphs and centers paragraphs that match "\<\<\<[ ]\*\>\>\>".
 
