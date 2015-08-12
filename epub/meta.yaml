@@ -1,4 +1,5 @@
-#============================================================================== # Configuration file for scriv2epub / ep3.py - see README.md for genral intro
+#==============================================================================
+# Configuration file for scriv2epub - see README.md for genral intro
 #==============================================================================
 
 #------------------------------------------------------------------------------
@@ -6,7 +7,7 @@
 #------------------------------------------------------------------------------
 
 title:          This is the Title
-# subtitle:     Remove comments if you want this to appear
+# subtitle:     uncommen if you want this to appear
 subplain:       Comment this out if you don't wnat it to appear
 author:         Fred Feuerstein
 authorweb:      www.fredfeuerstein.com      # will not be linked
@@ -27,7 +28,8 @@ coverart:       # comment out / delete if not to appear
 
 description: >
     Put blurb / description here. Can be multiple lines (all
-    lines must be indented equally)
+    lines must be indented equally, will be unwrapped before inserting into
+    templates).
 
 keywords:
     - Neanderthal
@@ -60,7 +62,7 @@ start_id:   title
 #                       passed into the template as the pg_data variable; the
 #                       YAML section can also be offshored into a separate YAML
 #                       file named {id}.yaml in a directory specified by the
-#                       --yamldir parameter to ep3's `genep` command
+#                       --yamldir parameter to s2e's `genep` command
 #       chapter     -   will use 'chapter.jinja' in templates
 #                       directory ad generate xhtml content from {id}.md in
 #                       source directory
@@ -93,7 +95,7 @@ frontmatter:
 booksinseries:  # if provided in separate file, list starting with '- name'
                 # must be at top level; see comments in book_list.jinja
                 # for avialable variables
-- name:
+- series:     Some Series Title
   titlelist:
   - title:    Blue Moon
     tclause:  (Book 1)
@@ -105,6 +107,14 @@ booksinseries:  # if provided in separate file, list starting with '- name'
   addons:
   - title:    Distant Sun
     tclause:  (Book 2)
+    url:      http://...
+- series:     Some other Series Title
+  titlelist:
+  - title:    Deep Sea
+    tclause:  (Book 1)
+    url:      http://...
+  - title:    Shallow Water
+    tclause:  (the Prequel)
     url:      http://...
 
 backmatter:
@@ -119,7 +129,8 @@ backmatter:
       type:     static
       heading:  Recommended Reads
 
-mainmatter:
+mainmatter:     # this can be generated automatically from a Scrivener project
+                # via ``python s2e.py srivx2yaml``
     - heading: Chapter One
       id: stuff
       level: 1

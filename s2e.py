@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-"""ep3.py: EPUB Pre-Processor - utilities for converting Scrivener
+"""s2e.py: EPUB Pre-Processor - utilities for converting Scrivener
 projects into good looking EPUBs (written for Python 3)
 
-Run `python ep3.py -h` for more info
+Run `python s2e.py -h` for more info
 """
 
 import sys

@@ -1,0 +1,24 @@
+# simple list of all series
+# see book_list.jinja template for possible attributes
+
+- series:     Some Series Title
+  titlelist:
+  - title:    Blue Moon
+    tclause:  (Book 1)
+    url:      http://...
+  - title:    Yellow Moon
+    tclause:  (the Prequel)
+    url:      http://...
+  addonsep:   'coming soon:'
+  addons:
+  - title:    Distant Sun
+    tclause:  (Book 2)
+    url:      http://...
+- series:     Some other Series Title
+  titlelist:
+  - title:    Deep Sea
+    tclause:  (Book 1)
+    url:      http://...
+  - title:    Shallow Water
+    tclause:  (the Prequel)
+    url:      http://...
