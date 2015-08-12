@@ -1,73 +1,72 @@
-# configuration file for ep3.py
+#============================================================================== # Configuration file for scriv2epub / ep3.py - see README.md for genral intro
+#==============================================================================
 
 #------------------------------------------------------------------------------
 # Metadata
 #------------------------------------------------------------------------------
 
-title:          Desert Wolf 3
-# subtitle:
-subplain:       A Twin Moon Ranch short story
-author:         Anna Lowe
-authorweb:      www.annalowebooks.com
-authoremail:    author@annalowebooks.com
+title:          This is the Title
+# subtitle:     Remove comments if you want this to appear
+subplain:       Comment this out if you don't wnat it to appear
+author:         Fred Feuerstein
+authorweb:      www.fredfeuerstein.com      # will not be linked
+authoremail:    fred@feuerstein.com
 # authorlist:
-series:         Twin Moon Ranch
-publisher:      Twin Moon Press
-pubdate:        2015-07-30
-editor:
-    name:       Lisa A. Hollett
-    # web:        http://www.erika.com
-coverart:
-    name:       Fiona Jayde Media
-    web:        www.FionaJaydeMedia.com
+#  - author one     # uncomment if you want multiple author to appear as
+                    # creators in content.opf
+#  - author two
+series:         The Flintstones
+publisher:      Blue Moon Press
+pubdate:        YYYY-MM-DD      # needs to be in this format
+editor:         # comment out / delete if not to appear
+    name:       Ed Itor
+    web:        www.EdItor.com              # will not be linked
+coverart:       # comment out / delete if not to appear
+    name:       Art Ist
+    web:        www.ArtIts.com              # will not be linked
 
 description: >
-    Kyle Williams is just a lone wolf trying to settle in to a new skin. But when
-    the brown-eyed girl from his past turns up, bloodied by a rival male, the
-    instinct to protect overrides everything else—including duty to his pack.
-
-    Stefanie Alt is a woman on the run, and fate is hot on her heels. The only one
-    who can help her is the neighborhood bad boy she once knew. But even after one
-    hot night under the desert moon, Stefanie isn’t sure she can trust him—or
-    herself.
-
-    There’s more than meets the eye on Twin Moon Ranch, home to a pack of
-    shapeshifting wolves willing to battle for life and love.
+    Put blurb / description here. Can be multiple lines (all
+    lines must be indented equally)
 
 keywords:
+    - Neanderthal
     - Romance
-    - Paranormal
-    - Twin Moon Ranch
-    - Werewolf
-    - Shapeshifter
 
 #------------------------------------------------------------------------------
 # Book contents
 #------------------------------------------------------------------------------
-# book will be assembled as
+# Book will be assembled as
 # - frontmatter (incl. cover page)
 # - toc (not listed in this file)
 # - mainmatter
 # - backmatter
 
-# for opf guide section: id of page to open to:
+# For opf guide section: id of page to open to:
 start_id:   title
 
-# label for each item will become page-id with href={label}.xhtml
-# for type == template a template {id}.jinja must exist in templates folder
+# Label for each item will become page-id with href={label}.xhtml
+# For type == template a template {id}.jinja must exist in templates folder
 # `type` attribute:
 #       static      -   a file {id}.xhtml will be copied from source to target
 #                       directory (source and target can be specified as cmd
 #                       line parameters)
 #       template    -   either a template {id}.jinja must exist in templates
 #                       folder or a 'template' attribute must provide the name
-#                       of the template to be used (without .ninja suffix); the
-#                       root of the data structure generated from this YAML
-#                       will be passed into the template
-#       chapter     -   will use 'chapter.jinja' in templates directory ad
-#                       generate xhtml content from {id}.md in source directory
+#                       of the template to be used (without .ninja suffix); an
+#                       additional top-level YAML section can be provided to
+#                       specify the page contents (see example below); the root
+#                       of the data structure generated from this YAML will be
+#                       passed into the template as the pg_data variable; the
+#                       YAML section can also be offshored into a separate YAML
+#                       file named {id}.yaml in a directory specified by the
+#                       --yamldir parameter to ep3's `genep` command
+#       chapter     -   will use 'chapter.jinja' in templates
+#                       directory ad generate xhtml content from {id}.md in
+#                       source directory
 #                       (specified as command line parameter); the dict with
 #                       the page parameters will be passed into the template
+#
 frontmatter:
     - id:       cover
       type:     static
@@ -82,12 +81,31 @@ frontmatter:
       type:     static
       heading:  Free Book
     - id:       booksinseries
-      # pg_data will be read from booksinseries.yaml
+      # pg_data will be taken from 'booksinseries' section in this file is
+      # avilable or read from booksinseries.yaml
       type:     template
       template: book_list
       heading:  Other books in this series
-      url:      http://annalowebooks.com
-      urltext:  www.annalowebooks.com
+      url:      http://fredfeuerstein.com       # will appear at bottom of list
+                                                # id specified
+      urltext:  www.FredFeuerstein.com
+
+booksinseries:  # if provided in separate file, list starting with '- name'
+                # must be at top level; see comments in book_list.jinja
+                # for avialable variables
+- name:
+  titlelist:
+  - title:    Blue Moon
+    tclause:  (Book 1)
+    url:      http://...
+  - title:    Yellow Moon
+    tclause:  (the Prequel)
+    url:      http://...
+  addonsep:   'coming soon:'
+  addons:
+  - title:    Distant Sun
+    tclause:  (Book 2)
+    url:      http://...
 
 backmatter:
     - id:       otherbooksbyauthor
@@ -95,174 +113,34 @@ backmatter:
       type:     template
       template: book_list
       heading:  Other Books by the Author
-      url:      http://annalowebooks.com
-      urltext:  www.annalowebooks.com
+      url:      http://fredfeuerstein.com
+      urltext:  www.FredFeuerstein.com
     - id:       recommendedreads
       type:     static
       heading:  Recommended Reads
-    - id:       sneakpeek1
-      type:     static
-      heading:  Sneak Peak I
-    - id:       sneakpeek2
-      type:     static
-      heading:  Sneak Peak II
-    - id:       morefromauthor
-      # pg_data will be read from morefromauthor.yaml
-      type:     template
-      template: book_list
-      heading:  More from Anna Lowe
-      url:      http://annalowebooks.com
-      urltext:  www.annalowebooks.com
-
 
 mainmatter:
+    - heading: Chapter One
+      id: stuff
+      level: 1
+      src: Files/Docs/12.rtf
+      type: chapter
+      parstyle: no-indent
+    - heading: Chapter Two
+      id: more_stuff
+      level: 1
+      src: Files/Docs/123.rtf
+      type: chapter
+      children:
+        - heading: Chapter Two and One Half
+          id: subchapter
+          level: 2
+          src: Files/Docs/1234.rtf
+          type: chapter
     - heading: Thank you
       id: tnote
       level: 1
       type: chapter
-      parstyle: no-indent
-    - heading: Chapter Two
-      id: her2
-      level: 1
-      src: Files/Docs/123.rtf
-      type: chapter
-    - heading: Chapter Three
-      id: his_pov
-      level: 1
-      src: Files/Docs/33.rtf
-      type: chapter
-    - heading: Chapter Four
-      id: his_pov_more
-      level: 1
-      src: Files/Docs/93.rtf
-      type: chapter
-    - heading: Chapter Five
-      id: on_bike
-      level: 1
-      src: Files/Docs/90.rtf
-      type: chapter
-    - heading: Chapter Six
-      id: on_boat
-      level: 1
-      src: Files/Docs/65.rtf
-      type: chapter
-    - heading: Chapter Seven
-      id: sees_card
-      level: 1
-      src: Files/Docs/80.rtf
-      type: chapter
-    - heading: Chapter Eight
-      id: anchor
-      level: 1
-      src: Files/Docs/30.rtf
-      type: chapter
-    - heading: Chapter Nine
-      id: his_pov_1
-      level: 1
-      src: Files/Docs/75.rtf
-      type: chapter
-    - heading: Chapter Ten
-      id: on_island
-      level: 1
-      src: Files/Docs/51.rtf
-      type: chapter
-    - heading: Chapter Eleven
-      id: explain
-      level: 1
-      src: Files/Docs/76.rtf
-      type: chapter
-    - heading: Chapter Twelve
-      id: sex
-      level: 1
-      src: Files/Docs/31.rtf
-      type: chapter
-    - heading: Chapter Thirteen
-      id: more_sex
-      level: 1
-      src: Files/Docs/77.rtf
-      type: chapter
-    - heading: Chapter Fourteen
-      id: more_sex_1
-      level: 1
-      src: Files/Docs/54.rtf
-      type: chapter
-    - heading: Chapter Fifteen
-      id: bad_guys
-      level: 1
-      src: Files/Docs/43.rtf
-      type: chapter
-    - heading: Chapter Sixteen
-      id: more_bad_guys
-      level: 1
-      src: Files/Docs/89.rtf
-      type: chapter
-    - heading: Chapter Seventeen
-      id: get_free
-      level: 1
-      src: Files/Docs/34.rtf
-      type: chapter
-    - heading: Chapter Eighteen
-      id: her_pov
-      level: 1
-      src: Files/Docs/78.rtf
-      type: chapter
-    - heading: Chapter Nineteen
-      id: open_box
-      level: 1
-      src: Files/Docs/40.rtf
-      type: chapter
-    - heading: Chapter Twenty
-      id: options
-      level: 1
-      src: Files/Docs/88.rtf
-      type: chapter
-    - heading: Chapter Twenty-One
-      id: to_nuns
-      level: 1
-      src: Files/Docs/48.rtf
-      type: chapter
-    - heading: Chapter Twenty-Two
-      id: cloister
-      level: 1
-      src: Files/Docs/58.rtf
-      type: chapter
-    - heading: Chapter Twenty-Three
-      id: inside
-      level: 1
-      src: Files/Docs/79.rtf
-      type: chapter
-    - heading: Chapter Twenty-Four
-      id: finish
-      level: 1
-      src: Files/Docs/63.rtf
-      type: chapter
-    - heading: Chapter Twenty-Five
-      id: epilogue
-      level: 1
-      src: Files/Docs/37.rtf
-      type: chapter
-    - heading: Chapter Twenty-Six
-      id: thank_you
-      level: 1
-      src: Files/Docs/126.rtf
-      type: chapter
-    - heading: Chapter Twenty-Seven
-      id: blurb
-      level: 1
-      src: Files/Docs/141.rtf
-      type: chapter
-    - heading: Chapter Twenty-Eight
-      id: ch_1
-      level: 1
-      src: Files/Docs/140.rtf
-      type: chapter
-    - heading: Chapter Twenty-Nine
-      id: cara_stuck_on_a_smile_and_wandered_down_the...
-      level: 1
-      src: Files/Docs/143.rtf
-      type: chapter
-    - heading: Chapter Thirty
-      id: other_books
-      level: 1
-      src: Files/Docs/139.rtf
-      type: chapter
+      src: Files/Docs/456.rtf
+      parstyle: no-indent       # will be used as default paragraph style for
+                                # this chapter

@@ -1,65 +1,121 @@
 # scriv2epub - utilities for creating EPUBs from Scrivener projects
 
+While indie author writing tools such as [Scrivener](http://www.literatureandlatte.com/scrivener.php) offer good support for the writing process, they are mediocre at best in supporting professional eBook (EPUB) production (generate messy HTML without any structural markup such as heading tags, poor CSS support / styling, missing automation for recurring front and backmatter content, especially for authors who write serials). _scriv2epub_ allows authors to keep using Scrivener for writing and organizing mainmatter content, while streamlining the EPUB generation process.
 
 
-## Workflow
+## Key components of _scriv2epub_
 
-1.  Work in EPUB top directory with Scrivener project folder as a subfolder. An exclude list can be created to prevent the subfolder to be included in the EPUB (exclude list can be passed to ``mkep`` as an argument).
+* __ep3.py__: the Python 3 script that runs the whole thing from the command line. It provides the following commands (run ``python ep3.py <command> -h`` for info about options):
 
-2.  Create YAML file with metadata for the project (see example XXXX).
+    - ``init`` to initialize a new EPUB project
+    - ``scrivx2yaml`` to extract the relevant mainmatter structure information from the Scrivener project file (usually ``project.scrivx`` in the Scrivener project root directory).
+    - ``scriv2md`` to convert the Scrivener RTF source files to Markdown,preserving italics but scrubbing all other format info (using [unrtf](https://www.gnu.org/software/unrtf/unrtf.html) and [pandoc](http://pandoc.org/))
+    - ``genep`` to generate to full EPUB content and metadata
 
-3.  Run ``ep3.py scriv2tsv`` to cerate a tsv file with each record representing a BinderItem in the Scrivener project XML file. This will also add headings and subheadings if these have been specified in the YAML metadat file. This will also generate target filenames for the individual chapters, based on their Title tags in the Scrivener project XML file.
+* [__Jinja2__](http://jinja.pocoo.org) __templates__: the basis for HTML content and XML metadata files. These reference ``stylesheet.css`` for styling/formatting (see tree structure below).
 
-4.  Run shell script ``scriv2md.sh`` which will convert the Scrivener RTF source files to markdown. Store markdown file in ``src`` directory. Later manual edits can be made in thes markdown files and then re-running the subsequent steps in te workflow.
+* __meta.yaml__: this files contains the metadata for the EPUB as well as the specification for front and backmatter content, and overall book structure. See below for details on the structure of this file.
 
-5.  Run shell script ``md2htsnip.sh`` which generate clean HTML snippets (one for each chapter file in the book) from the markdown chapter files.
+Additional supporting bits and pieces:
 
-6.  Copy static front and backmatter HTML files (incl. any images) and stylesheet.
+* __rtf2md.sh__: bash script for RTF to Markdown conversion (called by ep3.py via ``subprocess.Popen()``).
 
-7.  Update the tsv file generated in step (2), adding the static front and backmatter files as well as any template-based files (e.g. title), and define sequence in which docs are to appear in EPUB.
+* __md2htsnip__: bash script for converting Markdown files to HTML snippets (body content only, called by ep3.py via ``subprocess.Popen()``). In addition to the conversion via _pandoc_ it also adds a basic CSS class for all mainmatter paragraphs and centers paragraphs that match "\<\<\<[ ]\*\>\>\>".
 
-8.  Run ``ep3.py genep`` to generate template based pages, table of contents and metadata files.
+* __num2eng.py__: module adapted from [Miki Tebeka's blog](http://www.blog.pythonlibrary.org/2012/06/02/how-to-convert-decimal-numbers-to-words-with-python/) to spell out numerals in English (used for automatic chapter heading numbering).
 
-9.  Run ``mkep`` shell script to generate EPUB (and mobi is desired).
 
-TODO:
-=====
+## Workflow with Scrivener and _scriv2epub_:
+
+1.  Create your mainmatter content in Scrivener.
+
+2.  Run ``python ep3.py init`` to initialize a new EPUB directory tree, pre-populated with a CSS stylesheet and the boilerplate EPUB files such as ``mimetype`` and ``container.xml`` (run with ``-h`` argument to see more options). ``init`` will also initialize a blank git repository under the newly created ``epub`` directory and provide a standard ``.gitignore`` file. In addition, it will provide a default ``exclude.list`` file taht cab be used during the EPUB zipping to prevent supporting files and directories to be included into the EPUB zip file.
+
+3.  Update the ``meta.yaml`` template that is provided as part of the ``init`` setup in the EPUB root directory. Enter EPUB metadata, and the required front and backmatter data. See comments in ``meta.yaml`` for available page templates and how content elements for these can be specified.
+
+4.  Run ``python ep3.py scrivx2yaml`` to extract required mainmatter data (incl. paths to RTF source files) from the Scrivener project file and append output to ``meta.yaml``. Run with ``-h`` argument to see more options.
+
+5.  Run ``python ep3.py scriv2md`` to convert Scrivener RTF files to Markdown. Depending on your preferences you can make future content edits directly in these Markdown files or continue to work in Scrivener and re-run ``scriv2md`` after edits.
+
+6.  Run ``python ep3.py genep`` to generate the full EPUB content (run with ``-h`` argument to see options). This will generate the EPUB metadata files (content.opf, toc.ncx), the HTML table of contents, all front and backmatter pages specified in the ``meta.yaml`` file, and of course the mainmatter content.
+
+7.  Finally, you will need to zip these files into an EPUB, run your preferred EPUB checker, and convert to MOBI if required.
+
+
+## Directory structure created by ``init``
+
+    epub/
+       |
+       |-- mimetype             boilerplate EPUB
+       |
+       |-- meta.yaml            metadata info, and front and backmater specs
+       |
+       |-- exclude.list         list of directories and files to excluded from
+       |                        EPUB zipping (argument to zip's -x option)
+       |
+       |-- META-INF/
+       |          |
+       |          --- container.xml     EPUB boilerplate
+       |
+       |-- OPS/                 all generated content (XHTML) and EPUB metadata
+       |     |                  will be placed in this directory
+       |     |
+       |     |-- css/
+       |     |     |
+       |     |     --- stylesheet.css
+       |     |
+       |     --- img/           place cover.jpg and all other required image
+       |                        files in this directory (will be picked up
+       |                        automatically for OPF manifest)
+       |
+       --- src/                 place Markdown files generated from Scrivener
+             |                  RFT files in this directory; also any static
+             |                  XHTML files which are to be copied into EPUB
+             |
+             --- cover.xhtml
+
+This tree is created by simply copying the ``epub`` subtree from the directory this README file resides in. If you have additional files to be included in the default setup just add them to the epub subtree.
+
+
+## Structure of ``meta.yaml`` file
+
+See the comments in the boilerplate ``meta.yaml`` file for details. The basic structure is:
+
+1. EPUB metadata such as title, author, description, keywords. These will be used to populate Title and Copyright page templates as well as the EPUB metadata XML files.
+
+2. The book contents, broken down on frontmatter, mainmatter, and backmatter. The mainmatter section can be generated automatically from the Scrivener ``project.scrivx`` file via ep3's ``scrivx2yaml`` command. For each section the YAML file contains a list of pages to be created for this section. Each list item specifies
+
+    - an *id* that will be used for the XHTML filename and as identifier in EPUB metadate files.
+    - a *heading* that will be used to populate the jinja template. Optionally also a subheading can be specified.
+    - a *type*. This determines how the corresponding XHTML page will be generated. Options are 'static' (existing \<id\>.XHTML will be copied from ``src`` directory), 'template' (jinja template to be populated with combination of metadata and page data specified in the YAML file), and 'chapter' (mainmatter content that will be generated from Markdown source files). See comments in YAML boilerplate for details on 'template' type and additional optional page parameters.
+
+For front and/or backmatter pages of type 'template' an additional top-level section in the YAML file can be provided (keyed with the page id) to define the detailed content for the page. For example, for book listings, the individual titles and URLs to be listed can be specified in this way. This detailed content definition for a page can also be broken out in a separate YAML file named ``<page id>.yaml``.
+
+In general, any items in the YAML file(s) that are used to replace variables in the jinja templates must be keyed by the respective variable names in the template(s).
+
+
+## Available templates
+
+* __opf.jinja__: basis for content.opf EPUB metadata file
+
+* __ncx.jinja__: basis for toc.ncx EPUB navigation map
+
+* __xhtml_skeleton.jinja__: base template that is extended by the templates listed subsequently which overwrite the ``body`` block
+
+* __title.jinja__: title page template
+
+* __copyright.jinja__: copyright page
+
+* __chapter.jinja__: mainmatter chapter; default style is ``par-indent``, can be changed for a specific page to another style available in ``OPS/css/stylesheet.css`` by providing a ``parstyle`` parameter for the respective page in ``meta.yaml``
+
+* __book_list.jinja__: basis for book listings by series, with or without images; see comment in template for details
+
+* __noindent_pars.jinja__: simple template with heading, subheading and unindented, parskipped paragraphs; text content can be specified in ``meta.yaml``
+
+
+
+## TODO:
 
 (x) Turn paragraph formatting in md2htsnip into cl parameter
 
-
-## Background
-
-Indie authors primarily publish eBooks
-* writing for eBook more like writing for the web
-    - HTML based format, multiple small files
-    - Styling separate
-* workflow resembles programming
-    - compiled by computer program, must meet exact specifications
-    - many techniques programmers have honed over time that would be useful to authors (workflow, tools, version control, collaborative development)
-
-Issues with word processors:
-* Cumbersome to work with multiple smaller files as pieces of a whole. Master Docs provide some of that functionality, but too bulky to be useful
-* WYSIWYG is the wrong principle for when writing for web/EPUB. You don't control final appearance anyway but you have to make sure structure and styling is perfect. WPs are optimized for WYSIWIG presentation, very poor at extracting clean structure and styling. Inherently linked to WYSIWIG philosophy by giving user free reign over formatting features
-
-Tools like Scrivener address some of these issues:
-* Good at managing / arranging multiple file, incl. research notes, pin board
-* Additional writer tools like word count targets
-* Decent at producing multiple output formats for simple works (incl. EPUB)
-
-But not sufficient for professional authors:
-* RTF as underlying doc format very poor - difficult to reliably extract clean HTML
-* EPUB HTML generation lacks structure (everything is <p></p>)
-* CSS and HTML reflect unclean structure of underlying RTF; even Scrivener pre-defined styles are not applied / recognizable in output. Styles are simply numbered consequtively, but same style will have different names/numbers for different documents
-* No support for dealing with content repeated across titles (front and back matter)
-* No support for e.g. managing outgoing links, not even overview (crucial for marketing)
-
-Lessons learned
-* Use Markdown or similar (lingua franca of writing for the Web): 
-    - robust conversion tools
-    - light-weight (text editor)
-    - results in clean HTML code
-    - plain text - can use all tools incl. powerful version control and collaboration tools
-* Use YAML for metadata
-* If you need Scrivener or similar for writing: use it for mainmatter only, build automated workflow around it
 
