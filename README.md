@@ -12,9 +12,9 @@
     - ``scriv2md`` to convert the Scrivener RTF source files to Markdown,preserving italics but scrubbing all other format info (using [unrtf](https://www.gnu.org/software/unrtf/unrtf.html) and [pandoc](http://pandoc.org/))
     - ``genep`` to generate to full EPUB content and metadata
 
-* [__Jinja2__](http://jinja.pocoo.org) __templates__: the basis for HTML content and XML metadata files. These reference ``stylesheet.css`` for styling/formatting (see tree structure below).
+* [__Jinja2__](http://jinja.pocoo.org) __templates__ (in directory ``tmpl``): the basis for HTML content and XML metadata files. These reference ``stylesheet.css`` for styling/formatting (see tree structure below).
 
-* __meta.yaml__: this files contains the metadata for the EPUB as well as the specification for front and backmatter content, and overall book structure. See below for details on the structure of this file.
+* __meta.yaml__ (in directory ``epub``): this file contains the metadata for the EPUB as well as the specification for front and backmatter content, and overall book structure. See below for details on the structure of this file.
 
 Additional supporting bits and pieces:
 
