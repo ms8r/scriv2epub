@@ -62,7 +62,7 @@ start_id:   title
 #                       passed into the template as the pg_data variable; the
 #                       YAML section can also be offshored into a separate YAML
 #                       file named {id}.yaml in a directory specified by the
-#                       --yamldir parameter to s2e's `genep` command
+#                       --yincl parameter to s2e's `genep` command
 #       chapter     -   will use 'chapter.jinja' in templates
 #                       directory ad generate xhtml content from {id}.md in
 #                       source directory

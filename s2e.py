@@ -574,7 +574,7 @@ def setup_parser_genep(p):
             section/page with a jinja template that is different from the page
             id and the YAML file specified with `--yaml` does not contain a top
             level identifier equal to <page id>, genep will look for a file
-            <page id>.yaml in <yincl> and path the data from this file to the
+            <page id>.yaml in <yincl> and pass the data from this file to the
             jinja template as the `pg_data` parameter; defaults to '.'""")
     p.add_argument('--epubdir', default='.',
             help="""path to EPUB root directory; defaults to '.'""")
