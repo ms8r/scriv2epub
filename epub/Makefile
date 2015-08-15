@@ -72,17 +72,17 @@ info:
 
 .PHONY: epub
 epub: info
-	echo "#"
-	echo "# zipping mimetype to create $(BOOK).epub..."
-	echo "#"
+	@echo "#"
+	@echo "# zipping mimetype to create $(BOOK).epub..."
+	@echo "#"
 	zip -0Xq  $(BOOK).epub mimetype
-	echo "#"
-	echo "# adding remaining files to $(BOOK).epub..."
-	echo "#"
+	@echo "#"
+	@echo "# adding remaining files to $(BOOK).epub..."
+	@echo "#"
 	zip -Xr9Dq $(BOOK).epub * -x@$(EXCLUDE_LIST)
-	echo "#"
-	echo "# calling epubcheck to validate $(BOOK).epub..."
-	echo "#"
+	@echo "#"
+	@echo "# calling epubcheck to validate $(BOOK).epub..."
+	@echo "#"
 	java -jar /home/markus/EPUB/epubcheck-3.0/epubcheck-3.0.jar \
 		"$(BOOK).epub" | less
 
