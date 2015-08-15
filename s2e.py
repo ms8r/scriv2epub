@@ -424,7 +424,7 @@ def setup_parser_scrivx2yaml(p):
             " Scrivener project file")
     p.add_argument('--headings', action='store_true',
             help="will add headings to for each chapter as 'Chapter Num'")
-    p.add_argument('--hoffset', default=0,
+    p.add_argument('--hoffset', type=int, default=0,
             help="""offset for start of chapter headings (first <hoffset>
             chapters will be skipped""")
 
