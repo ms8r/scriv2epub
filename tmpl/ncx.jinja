@@ -32,13 +32,6 @@
     </navPoint>
   {% endfor %}
   {% endif %}
-  {% if po_counter.append(1) %}{% endif %}
-    <navPoint id="toc" playOrder="{{ po_counter|length }}">
-      <navLabel>
-        <text>Contents</text>
-      </navLabel>
-      <content src="toc.xhtml"></content>
-    </navPoint>
   {% if mainmatter %}
   {% for pg in mainmatter recursive %}
     {% if po_counter.append(1) %}{% endif %}

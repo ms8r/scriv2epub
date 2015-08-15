@@ -42,27 +42,26 @@
   <manifest>
 
     <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml" />
-    <item href="toc.xhtml" id="htmltoc" media-type="application/xhtml+xml" />
     {% if frontmatter %}
     {% for pg in frontmatter %}
-    <item href="{{ pg.id|e }}.xhtml" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
+    <item href="{{ pg.id|e }}.xhtml" id="html_{{ pg.id|e }}" media-type="application/xhtml+xml" />
     {% endfor %}
     {% endif %}
     {% if mainmatter %}
     {% for pg in mainmatter recursive %}
-    <item href="{{ pg.id|e }}.xhtml" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
+    <item href="{{ pg.id|e }}.xhtml" id="html_{{ pg.id|e }}" media-type="application/xhtml+xml" />
     {% if pg.children %}{{ loop(pg.children) }}{% endif %}
     {% endfor %}
     {% endif %}
     {% if backmatter %}
     {% for pg in backmatter %}
-    <item href="{{ pg.id|e }}.xhtml" id="{{ pg.id|e }}" media-type="application/xhtml+xml" />
+    <item href="{{ pg.id|e }}.xhtml" id="html_{{ pg.id|e }}" media-type="application/xhtml+xml" />
     {% endfor %}
     {% endif %}
     <item href="{{ css_file|default('css/stylesheet.css')|e }}" id="css-epub" media-type="text/css" />
     {% if images %}
     {% for img in images %}
-    <item href="{{ img.href|e }}" id="{{ img.id|e }}" media-type="image/{{ img.format }}" />
+    <item href="{{ img.href|e }}" id="{{ img.format }}_{{ img.id|e }}" media-type="image/{{ img.format }}" />
     {% endfor %}
     {% endif %}
 
@@ -74,19 +73,18 @@
 
     {% if frontmatter %}
     {% for pg in frontmatter %}
-    <itemref idref="{{ pg.id|e }}" linear="yes"/>
+    <itemref idref="html_{{ pg.id|e }}" linear="yes"/>
     {% endfor %}
     {% endif %}
-    <itemref idref="htmltoc" />
     {% if mainmatter %}
     {% for pg in mainmatter recursive %}
-    <itemref idref="{{ pg.id|e }}" linear="yes"/>
+    <itemref idref="html_{{ pg.id|e }}" linear="yes"/>
     {% if pg.children %}{{ loop(pg.children) }}{% endif %}
     {% endfor %}
     {% endif %}
     {% if backmatter %}
     {% for pg in backmatter %}
-    <itemref idref="{{ pg.id|e }}" linear="yes"/>
+    <itemref idref="html_{{ pg.id|e }}" linear="yes"/>
     {% endfor %}
     {% endif %}
 
