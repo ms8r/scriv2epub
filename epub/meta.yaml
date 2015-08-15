@@ -40,8 +40,7 @@ keywords:
 #------------------------------------------------------------------------------
 # Book will be assembled as
 # - frontmatter (incl. cover page)
-# - toc (not listed in this file)
-# - mainmatter
+# - mainmatter (defined in separate YAML file)
 # - backmatter
 
 # For opf guide section: id of page to open to:
@@ -63,11 +62,12 @@ start_id:   title
 #                       YAML section can also be offshored into a separate YAML
 #                       file named {id}.yaml in a directory specified by the
 #                       --yincl parameter to s2e's `genep` command
-#       chapter     -   will use 'chapter.jinja' in templates
-#                       directory ad generate xhtml content from {id}.md in
-#                       source directory
-#                       (specified as command line parameter); the dict with
-#                       the page parameters will be passed into the template
+#       chapter     -   will  generate xhtml content from {id}.md in
+#                       source directory and use 'chapter.jinja' in templates
+#                       directory unless another template is specified; the
+#                       dict with the page parameters and the xhtml content
+#                       from the source Markdown file will be passed into the
+#                       template
 #
 frontmatter:
     - id:       cover
@@ -91,6 +91,9 @@ frontmatter:
       url:      http://fredfeuerstein.com       # will appear at bottom of list
                                                 # id specified
       urltext:  www.FredFeuerstein.com
+    - id:       toc
+      type:     template
+      heading:  Contents
 
 booksinseries:  # if provided in separate file, list starting with '- name'
                 # must be at top level; see comments in book_list.jinja

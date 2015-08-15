@@ -1,6 +1,6 @@
 {% extends "xhtml_skeleton.jinja" %}
 {% block body %}
-<h1 class="toc-heading">Contents</h1>
+<h1 class="toc-heading">{{ pg_meta.heading|default('Contents')|e }}</h1>
 
 {% if frontmatter %}
 {% for pg in frontmatter %}

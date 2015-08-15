@@ -16,10 +16,11 @@ MARKDOWN_COOKIE  = markdown.timestamp
 OPF              = ./OPS/content.opf
 
 # overwrite by assigning on cmd line or edit below if desired
-BOOK             = book
+BOOK             = desert_hunt
 META_YAML        = ./meta.yaml
 MM_YAML          = ./mainmatter.yaml
-YINCL            = .
+HOFFSET          = 1
+YINCL            = ~/Documents/NaMaBooks/annalowebooks.com/yaml
 SCRIV_ROOT       = ./$(BOOK).scriv
 SCRIV_XML        = project.scrivx
 SCRIV_RTF        = Files/Docs
@@ -57,6 +58,7 @@ info:
 	@echo 'BOOK            : '$(BOOK)
 	@echo 'META_YAML       : '$(META_YAML)
 	@echo 'MM_YAML         : '$(MM_YAML)
+	@echo 'HOFFSET         : '$(HOFFSET)
 	@echo 'YINCL           : '$(YINCL)
 	@echo 'SCRIV_ROOT      : '$(SCRIV_PROJ_ROOT)
 	@echo 'SCRIV_RTF       : '$(SCRIV_RTF)
@@ -86,4 +88,4 @@ mmyaml: $(MM_YAML)
 $(MM_YAML):
 	$(S2E) scrivx2yaml --projdir $(SCRIV_ROOT) --rtfdir $(SCRIV_RTF) \
 		--output $(MM_YAML) --typefilter 'Text' --headings --type 'chapter' \
-		--toptitle 'Manuscript'
+		--toptitle 'Manuscript' --hoffset $(HOFFSET)

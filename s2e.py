@@ -338,6 +338,8 @@ def handle_genep(args):
         cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
         std, err = run_script(cmd, mdfile, par_style)
         if err: logging.error(err.decode('utf-8'))
+        tmpl_name = pg.get('template', 'chapter')
+        tmpl = tmplEnv.get_template(tmpl_name + _TEMPLATE_EXT)
         with open(outfile, 'w') as foo:
             foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
                 header_title=meta['title'] + ' | ' + pg['heading']))
@@ -371,9 +373,8 @@ def handle_genep(args):
         logging.info('generating %s...', outfile)
         with open(outfile, 'w') as foo:
             foo.write(tmpl.render(meta, pg_meta=pg,
-                pg_data=pg_data, header_title=pg.get('heading')))
-
-    tmpl = tmplEnv.get_template('chapter' + _TEMPLATE_EXT)
+                pg_data=pg_data, mainmatter=mainmatter,
+                header_title=pg.get('heading')))
 
     def mm_gen(pages):
         for pg in pages:

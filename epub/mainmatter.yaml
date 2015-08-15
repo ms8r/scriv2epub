@@ -1,5 +1,10 @@
-# this can be generated automatically from a Scrivener project
+# This file can be generated automatically from a Scrivener project
 # via ``python s2e.py srivx2yaml``
+#
+# Only type == chapter allowed in mainmatter; template chapter.jinja
+# will be used by default, alternative template can be specified via
+# 'template' key
+#
 - heading: Chapter One
   id: stuff
   level: 1
