@@ -21,9 +21,9 @@ Passed in variables:
                 `title`.
 ---------------------------------------------------------------------------- #}
 {% block body %}
-{% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
+{% if pg_meta.heading %}<h2>{{ pg_meta.heading|e }}</h2>{% endif %}
 {% for section in pg_data %}
-    {% if section.section %}<h3 class="chapter-heading">{{ section.section|e }}</h3>{% endif %}
+    {% if section.section %}<h3>{{ section.section|e }}</h3>{% endif %}
     {% for t in section.titlelist %}
         <p class="no-indent">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}{% if t.series %} ({{ t.series|e }}){% endif %}{% if t.author %} by {{ t.author|e }}{% endif %}</p>
     {% endfor %}
