@@ -1,0 +1,33 @@
+{% extends "xhtml_skeleton.jinja" %}
+{# ----------------------------------------------------------------------------
+Defines the structure for "Recommended Reads" references to other author's
+books. Can have multiple sections, each with its own heading
+
+Passed in variables:
+    title_heading: str
+        Used in xhtml_skeleton
+    pg_meta: dict
+        Will look for `pg_meta.heading` and use as page heading. Required for
+        toc.
+    pg_data: sequence
+        List with the different sections to be listed. Each item is a dict with
+        the following items:
+            name: str
+                section name / title
+            titlelist: sequence
+                List with the individual titles to be listed. Each item is a
+                dict with items `title`, `url`, `series`, and `author` (all
+                except for title are optional). `url` will be linked to
+                `title`.
+---------------------------------------------------------------------------- #}
+{% block body %}
+{% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
+{% for section in pg_data %}
+    {% if section.section %}<h3 class="chapter-heading">{{ section.section|e }}</h3>{% endif %}
+    {% for t in series.titlelist %}
+        <p class="no-indent">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}{% if t.series %} ({{ t.tclause }}){% endif %}{% if t.author %} by {{ t.authore|e }}{% endif %}</p>
+    {% endfor %}
+    <p class="center-par">&nbsp;</p>
+{% endfor %}
+{% endblock %}
+
