@@ -38,21 +38,21 @@ Passed in variables:
     {% for series in pg_data %}
         {% if series.series %}<h3 class="chapter-heading">{{ series.series|e }}</h3>{% endif %}
         {% for t in series.titlelist %}
-            {% if t.img %}<p class="center-par-t-extra-space">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}" alt="Cover image for {{ t.title|e }}"></img>{% if t.url %}</a>{% endif %}</p>{% endif %}
-            <p class="center-par-tb-space">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}{% if t.tclause %} {{ t.tclause }}{% endif %}{% if t.subtitle %}<br />{{ t.subtitle|e }}{% endif %}</p>
+            {% if t.img %}<p class="center-par">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}" alt="Cover image for {{ t.title|e }}"></img>{% if t.url %}</a>{% endif %}</p>{% endif %}
+            <p class="center-par">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}{% if t.tclause %} {{ t.tclause }}{% endif %}{% if t.subtitle %}<br />{{ t.subtitle|e }}{% endif %}</p>
             <p class="center-par">&nbsp;</p>
         {% endfor %}
         {% if series.addons %}<p class="center-par-tb-extra-space">{{ series.addonsep }}</p>
         {% for a in series.addons %}
-            {% if a.img %}<p class="center-par-t-extra-space">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}<img width="200" src="{{ a.img|e }}" alt="Cover image for {{ t.title|e }}"></img>{% if a.url %}</a>{% endif %}</p>{% endif %}
-            <p class="center-par-tb-space">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}{{ a.title|e }}{% if a.url %}</a>{% endif %}{% if a.tclause %} {{ a.tclause }}{% endif %}{% if a.subtitle %}<br />{{ a.subtitle|e }}{% endif %}</p>
+            {% if a.img %}<p class="center-par">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}<img width="200" src="{{ a.img|e }}" alt="Cover image for {{ t.title|e }}"></img>{% if a.url %}</a>{% endif %}</p>{% endif %}
+            <p class="center-par">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}{{ a.title|e }}{% if a.url %}</a>{% endif %}{% if a.tclause %} {{ a.tclause }}{% endif %}{% if a.subtitle %}<br />{{ a.subtitle|e }}{% endif %}</p>
             <p class="center-par">&nbsp;</p>
         {% endfor %}
         {% endif %}
     {% endfor %}
     {% if pg_meta.urltext %}
     <p class="center-par">&nbsp;</p>
-    <p class="center-par-tb-space">Visit {% if pg_meta.url %}<a href="{{ pg_meta.url }}">{% endif %}{{ pg_meta.urltext }}{% if pg_meta.url %}</a>{% endif %}</p>
+    <p class="center-par-tb-space">visit {% if pg_meta.url %}<a href="{{ pg_meta.url }}">{% endif %}{{ pg_meta.urltext }}{% if pg_meta.url %}</a>{% endif %}</p>
     {% endif %}
 </div>
 {% endblock %}
