@@ -3,6 +3,7 @@
 src
 src/*
 Makefile
+*.timestamp
 .gitignore
 .git
 .git/*

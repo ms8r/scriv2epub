@@ -184,98 +184,6 @@ def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
     return df.to_dict(orient='records')
 
 
-def chapters_to_df(chapters, src_dir='Files/Docs', src_type='chapter',
-        headings=None, sub_headings=None, norm_level=True):
-    """
-    Converts chapter list to Dataframe and returns same.
-
-    Arguments:
-    ----------
-
-    chapters: list of dicts
-        List with metadate extracted from Scrivener project file. Each dict
-        must be keyed by 'ID', 'Type', 'Title', 'IncludeInCompile' and 'Level'
-    src_dir: str
-        Path to the Scrivener (*.rtf) source files
-    src_type: str
-        'Type' entry to be used for these records in resulting tsv file.  Note
-        that this 'Type' is different from the 'Type' in the Scrivener project
-        XML file. The latter will be renamed to 'ScrivType' in the resulting
-        Dataframe.
-    headings: sequence
-        List of chapter headings to be used.
-    sub_headings: sequence
-        List of chapter sub-headings to be used.
-    norm_level: boolean
-        If `True` level values will be shifted such that `1` becomes the
-        highest level.
-
-    Retruns a Pandas Dataframe with the following columns:
-
-        Sequence: int
-            NaN, to be added once front and back matter have been added
-        ScrivSeq: int
-            Seqeunce in Scrivener
-        ScrivID: int
-            Scrivener ID attribute value
-        ScrivType: str
-            Scrivener 'Type' atribute ('Text' or 'Folder')
-        ScrivTitle: str
-            Title tag text in Scrivener
-        ScrivSrc: str
-            Path to Scrivener rtf source file
-        ScrivLevel: int
-            Level in nested Scrivener XML structure
-        ScrivInCompile: str
-            Value of Scrivener IncludeInCompile tag
-        ID: str
-            Identifier generated from Scrivener Title
-        Type: str
-            Value of `src_type` argument
-        Heading: str
-            Heading text if `hdg_tmpl` was specified
-        SubHeading: str
-            Empty initially
-    """
-    def fix_length(a, length, filler=''):
-        if len(a) > length:
-            b = a[:length]
-        elif len(a) < length:
-            b = a + ((length - len(a)) * [filler])
-        else:
-            b = a
-        return b
-
-    col_map = {'ID': 'ScrivID', 'Type': 'ScrivType', 'Title': 'ScrivTitle',
-            'Level': 'ScrivLevel', 'IncludeInCompile': 'ScrivInCompile'}
-
-    df = pd.DataFrame(chapters)
-    df = df.rename(columns=col_map)
-
-    df['Type'] = src_type
-    df['ScrivSeq'] = df.index + 1
-    df['ScrivSrc'] = [os.path.join(src_dir, '{}.rtf'.format(i)) for i in
-                      df['ScrivID']]
-    df['Heading'] = fix_length(headings, len(df)) if headings else ''
-    df['SubHeading'] = fix_length(
-            sub_headings, len(df)) if sub_headings else ''
-    ids = []
-    for t in df['ScrivTitle']:
-        id_str = t.lower().replace(' ', '_')
-        suffix = 0
-        while id_str in ids:
-            if suffix >= 1:
-                id_str.replace('_{}'.format(suffix), '')
-            suffix += 1
-            id_str += '_{}'.format(suffix)
-        ids.append(id_str)
-    df['ID'] = ids
-    if norm_level:
-        df['ScrivLevel'] = df['ScrivLevel'] - df['ScrivLevel'].min() + 1
-
-    return df.set_index('ScrivSeq', drop=True)
-
-
 def run_script(*args):
     """
     Runs external executable `script` with list of arguments in `args`.
@@ -309,8 +217,8 @@ def handle_scriv2md(args):
 
     Returns number of items written.
     """
-    with open(args.yaml, 'r') as foi:
-        meta = yaml.load(foi)
+    with open(args.mmyaml, 'r') as foi:
+        mainmatter = yaml.load(foi)
 
     src = []
     target = []
@@ -323,7 +231,7 @@ def handle_scriv2md(args):
             if 'children' in m:
                 mk_mm_list(m['children'])
 
-    mk_mm_list(meta['mainmatter'])
+    mk_mm_list(mainmatter)
 
     for i, (s, t) in enumerate(zip(src, target)):
         infile = os.path.join(args.projdir, s)
@@ -335,32 +243,6 @@ def handle_scriv2md(args):
         if std: logging.info(std.decode('utf-8'))
 
     return i
-
-
-def handle_scrivx2tsv(args):
-    """
-    Converts the 'Manuscript' section a Scrivener project XML file into tab
-    separated records, augmenting same with additional info such as rtf source
-    file location, level and sequencs numbers.
-    """
-    xml_path = os.path.join(args.projdir, args.scrivxml)
-    ms_bi = get_top_bi(scriv_xml=xml_path, top_title=args.toptitle)
-    ch = get_chapters(top=ms_bi, type_filter=args.typefilter)
-    # if meta file exists read and check for headings and subheadings
-    if args.meta:
-        meta = yaml.load(args.meta)
-        args.meta.close()
-        headings = meta.get('headings')
-        sub_headings = meta.get('sub-headings')
-    else:
-        headings = sub_headings = None
-    df = chapters_to_df(ch, src_dir=args.rtfdir, src_type=args.type,
-            headings=headings, sub_headings=sub_headings)
-
-    foo = args.output if args.output else sys.stdout
-    df.to_csv(foo, sep='\t')
-    if args.output:
-            args.output.close()
 
 
 def handle_scrivx2yaml(args):
@@ -384,7 +266,7 @@ def handle_scrivx2yaml(args):
                                          'type'])
 
     foo = args.output if args.output else sys.stdout
-    yaml.dump({'mainmatter': yd}, stream=foo, default_flow_style=False)
+    yaml.dump(yd, stream=foo, default_flow_style=False)
     if args.output:
             args.output.close()
 
@@ -405,8 +287,10 @@ def handle_genep(args):
             'gif': 'gif',
             'svg': 'svg'}
 
-    with open(os.path.join(args.epubdir, args.yaml), 'r') as foi:
+    with open(os.path.join(args.epubdir, args.metayaml), 'r') as foi:
         meta = yaml.load(foi)
+    with open(os.path.join(args.epubdir, args.mmyaml), 'r') as foi:
+        mainmatter = yaml.load(foi)
 
     tmplLoader = j2.FileSystemLoader(searchpath=_TEMPLATE_PATH)
     tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True)
@@ -434,7 +318,7 @@ def handle_genep(args):
         logging.info('generating %s...', out_file)
         tmpl = tmplEnv.get_template(tmpl_file)
         with open(os.path.join(args.epubdir, out_file), 'w') as foo:
-            foo.write(tmpl.render(meta, **kwargs))
+            foo.write(tmpl.render(meta, mainmatter=mainmatter, **kwargs))
 
     # now content:
     def cp_static(pg):
@@ -498,7 +382,7 @@ def handle_genep(args):
             if 'children' in pg:
                 mm_gen(pg['children'])
 
-    mm_gen(meta['mainmatter'])
+    mm_gen(mainmatter)
 
     return
 
@@ -508,37 +392,12 @@ def setup_parser_init(p):
 
 
 def setup_parser_scriv2md(p):
-    p.add_argument('--yaml', required=True,
-            help="YAML file with book metada and page inventory")
+    p.add_argument('--mmyaml', required=True,
+            help="YAML file with book mainmatter page inventory")
     p.add_argument('--mddir', required=True,
             help="directory to which to write markdown output")
     p.add_argument('--projdir', required=True,
             help="path to Scrivener project directory")
-
-
-def setup_parser_scrivx2tsv(p):
-    p.add_argument('--projdir', required=True,
-            help="path to Scrivener project directory")
-    p.add_argument('--scrivxml', default='project.scrivx',
-            help="Scrivener project XML file, relative to Scrivener project"
-            " directory; defaults to 'project.scrivx'")
-    p.add_argument('--rtfdir', default='Files/Docs',
-            help="path to Scrivener rtf directory, relative to Scrivener"
-            " project directory; defaults to 'Files/Docs'")
-    p.add_argument('--output', type=argparse.FileType('w'), default=None,
-            help="file to save tab separated output to, defaults to STDOUT if"
-            " not specified")
-    p.add_argument('--meta', type=argparse.FileType('r'), default=None,
-            help="YAML metadata file")
-    p.add_argument('--type', default='chapter',
-            help="string to used as 'Type' attribute for chapters; "
-            "defaults to 'chapter'")
-    p.add_argument('--toptitle', default='Manuscript',
-            help="Title element text of the top BinderItem to be used from"
-            " Scrivener project file, defaults to 'Manuscript'")
-    p.add_argument('--typefilter', default=None,
-            help="Title element text of the top BinderItem to be used from"
-            " Scrivener project file")
 
 
 def setup_parser_scrivx2yaml(p):
@@ -567,8 +426,10 @@ def setup_parser_scrivx2yaml(p):
 
 
 def setup_parser_genep(p):
-    p.add_argument('--yaml', required=True,
+    p.add_argument('--metayaml', required=True,
             help="path to YAML metadata file, relative to epubdir")
+    p.add_argument('--mmyaml', required=True,
+            help="path to YAML mainmatter file, relative to epubdir")
     p.add_argument('--yincl', default='.',
             help="""path to YAML include directory; if genep encounters a book
             section/page with a jinja template that is different from the page
