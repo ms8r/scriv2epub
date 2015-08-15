@@ -1,8 +1,8 @@
 # set ROOT_DIR to path to directory that contains s2e.py
-ROOT_DIR         = ~/Documents/NaMaBooks/scriv2epub
+ROOT_DIR         = ~/Python/scriv2epub
 S2E              = $(ROOT_DIR)/s2e.py
-MAKE_EPUB        = ~/bin/mkep
 TMPL_DIR         = $(ROOT_DIR)/tmpl
+EPUB_CHECKER	 = java -jar ~/EPUB/epubcheck-3.0/epubcheck-3.0.jar
 SRC_DIR          = src
 STATIC_SOURCES   = ./src/*.xhtml
 MD_SOURCES       = ./src/*.md
@@ -16,11 +16,14 @@ MARKDOWN_COOKIE  = markdown.timestamp
 OPF              = ./OPS/content.opf
 
 # overwrite by assigning on cmd line or edit below if desired
-BOOK             = desert_hunt
+BOOK             = book
 META_YAML        = ./meta.yaml
 MM_YAML          = ./mainmatter.yaml
+# HOFFSET is the heading offset for mainmatter (auto generated chapter
+# numbering will start $(HOFFSET) chapters after the first chapter in
+# mainmatter
 HOFFSET          = 1
-YINCL            = ~/Documents/NaMaBooks/annalowebooks.com/yaml
+YINCL            = ./yaml
 SCRIV_ROOT       = ./$(BOOK).scriv
 SCRIV_XML        = project.scrivx
 SCRIV_RTF        = Files/Docs
@@ -46,8 +49,8 @@ info:
 	@echo '-----------------------------------------'
 	@echo 'ROOT_DIR        : '$(ROOT_DIR)
 	@echo 'S2E             : '$(S2E)
-	@echo 'MAKE_EPUB       : '$(MAKE_EPUB)
 	@echo 'TMPL_DIR        : '$(TMPL_DIR)
+	@echo 'EPUB_CHECKER	   : '$(EPUB_CHECKER)
 	@echo 'STYLE_SHEET     : '$(STYLE_SHEET)
 	@echo 'IMG_DIR         : '$(IMG_DIR)
 	@echo 'OPF             : '$(OPF)
@@ -69,7 +72,20 @@ info:
 
 .PHONY: epub
 epub: info
-	$(MAKE_EPUB) $(BOOK) $(EXCLUDE_LIST)
+	echo "#"
+	echo "# zipping mimetype to create $(BOOK).epub..."
+	echo "#"
+	zip -0Xq  $(BOOK).epub mimetype
+	echo "#"
+	echo "# adding remaining files to $(BOOK).epub..."
+	echo "#"
+	zip -Xr9Dq $(BOOK).epub * -x@$(EXCLUDE_LIST)
+	echo "#"
+	echo "# calling epubcheck to validate $(BOOK).epub..."
+	echo "#"
+	java -jar /home/markus/EPUB/epubcheck-3.0/epubcheck-3.0.jar \
+		"$(BOOK).epub" | less
+
 
 .PHONY: content
 content: info
