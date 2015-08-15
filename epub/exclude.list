@@ -2,6 +2,7 @@
 *.mobi
 src
 src/*
+Makefile
 .gitignore
 .git
 .git/*

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# md2htsnip: converts mardown files to html snippets and inserts css class
+# md2htsnip: converts Markdown files to html snippets and inserts css class
 # into p tags
 #
 

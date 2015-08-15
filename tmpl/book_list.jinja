@@ -38,13 +38,13 @@ Passed in variables:
     {% for series in pg_data %}
         {% if series.series %}<h3 class="chapter-heading">{{ series.series|e }}</h3>{% endif %}
         {% for t in series.titlelist %}
-            {% if t.img %}<p class="center-par-t-extra-space">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}"></img>{% if t.url %}</a>{% endif %}</p>{% endif %}
+            {% if t.img %}<p class="center-par-t-extra-space">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}" alt="Cover image for {{ t.title|e }}"></img>{% if t.url %}</a>{% endif %}</p>{% endif %}
             <p class="center-par-tb-space">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}{% if t.tclause %} {{ t.tclause }}{% endif %}{% if t.subtitle %}<br />{{ t.subtitle|e }}{% endif %}</p>
             <p class="center-par">&nbsp;</p>
         {% endfor %}
         {% if series.addons %}<p class="center-par-tb-extra-space">{{ series.addonsep }}</p>
         {% for a in series.addons %}
-            {% if a.img %}<p class="center-par-t-extra-space">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}<img width="200" src="{{ a.img|e }}"></img>{% if a.url %}</a>{% endif %}</p>{% endif %}
+            {% if a.img %}<p class="center-par-t-extra-space">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}<img width="200" src="{{ a.img|e }}" alt="Cover image for {{ t.title|e }}"></img>{% if a.url %}</a>{% endif %}</p>{% endif %}
             <p class="center-par-tb-space">{% if a.url %}<a href="{{ a.url|e }}">{% endif %}{{ a.title|e }}{% if a.url %}</a>{% endif %}{% if a.tclause %} {{ a.tclause }}{% endif %}{% if a.subtitle %}<br />{{ a.subtitle|e }}{% endif %}</p>
             <p class="center-par">&nbsp;</p>
         {% endfor %}
