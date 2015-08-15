@@ -7,7 +7,6 @@
 <p class="toc-item-1"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e }}</a></p>
 {% endfor %}
 {% endif %}
-<p class="toc-item-1"><a href="toc.xhtml">Contents</a></p>
 {% if mainmatter %}
 {% for pg in mainmatter recursive %}
 <p class="toc-item-{{ pg.level|default('1') }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((pg.level - 1) * 4, true) }}</a> {{ pg.suffix|e }}</p>
