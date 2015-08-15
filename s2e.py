@@ -256,8 +256,9 @@ def handle_scrivx2yaml(args):
     ch = get_chapters(top=ms_bi, type_filter=args.typefilter)
 
     if getattr(args, 'headings', False):
-        headings = ['Chapter ' + num2eng(i + 1).title().replace(' ', '-')
-                    for i in range(len(ch))]
+        headings = args.hoffset * ['']
+        headings += ['Chapter ' + num2eng(i + 1).title().replace(' ', '-')
+                     for i in range(len(ch) - args.hoffset)]
     else:
         headings = None
 
@@ -423,6 +424,9 @@ def setup_parser_scrivx2yaml(p):
             " Scrivener project file")
     p.add_argument('--headings', action='store_true',
             help="will add headings to for each chapter as 'Chapter Num'")
+    p.add_argument('--hoffset', default=0,
+            help="""offset for start of chapter headings (first <hoffset>
+            chapters will be skipped""")
 
 
 def setup_parser_genep(p):
