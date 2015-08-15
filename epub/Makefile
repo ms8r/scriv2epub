@@ -76,7 +76,7 @@ epub: info
 		echo "#"; \
 		echo "# removing existing $(BOOK).epub..."; \
 		echo "#"; \
-		rm $(BOOK).epub \
+		rm $(BOOK).epub; \
 	fi
 	@echo "#"
 	@echo "# zipping mimetype to create $(BOOK).epub..."
