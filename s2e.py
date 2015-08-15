@@ -279,7 +279,6 @@ def handle_genep(args):
     epub_meta = {
             'opf': ('opf.jinja', os.path.join(args.htmldir, 'content.opf')),
             'ncx': ('ncx.jinja', os.path.join(args.htmldir, 'toc.ncx')),
-            'toc': ('toc.jinja', os.path.join(args.htmldir, 'toc.xhtml')),
     }
 
     img_ext2fmt = {'jpg': 'jpeg',
