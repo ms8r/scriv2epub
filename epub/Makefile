@@ -72,6 +72,12 @@ info:
 
 .PHONY: epub
 epub: info
+	@if test -f $(BOOK).epub; then \
+		echo "#"; \
+		echo "# removing existing $(BOOK).epub..."; \
+		echo "#"; \
+		rm $(BOOK).epub \
+	fi
 	@echo "#"
 	@echo "# zipping mimetype to create $(BOOK).epub..."
 	@echo "#"
