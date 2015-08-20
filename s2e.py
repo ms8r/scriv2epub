@@ -308,7 +308,7 @@ def handle_genep(args):
         img = {}
         img['href'] = os.path.join(opf2img_path, item)
         img['id'] = '-'.join(item.split('.')[:-1]) + '-img'
-        img['format'] = img_ext2fmt[item.split('.')[-1]]
+        img['format'] = img_ext2fmt[item.split('.')[-1].lower()]
         images.append(img)
 
     # generate metadata files:
@@ -343,18 +343,7 @@ def handle_genep(args):
             foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
                 header_title=meta['title'] + ' | ' + pg['heading']))
 
-    fm = meta.get('frontmatter', [])
-    bm = meta.get('backmatter', [])
-    pages = (fm if fm else []) + (bm if bm else [])
-    for pg in pages:
-        if pg['type'] == 'chapter':
-            gen_chapter(pg)
-            continue
-        elif pg['type'] == 'static':
-            cp_static(pg)
-            continue
-        elif pg['type'] != 'template':
-            continue
+    def gen_from_tmpl(pg):
         tmpl_name = pg.get('template')
         if not tmpl_name:
             tmpl_name = pg['id']
@@ -375,15 +364,23 @@ def handle_genep(args):
                 pg_data=pg_data, mainmatter=mainmatter,
                 header_title=pg.get('heading')))
 
-    def mm_gen(pages):
+    def gen_content(pages):
         for pg in pages:
-            if pg['type'] != 'chapter':
+            if pg['type'] == 'chapter':
+                gen_chapter(pg)
                 continue
-            gen_chapter(pg)
+            elif pg['type'] == 'static':
+                cp_static(pg)
+                continue
+            elif pg['type'] == 'template':
+                gen_from_tmpl(pg)
             if 'children' in pg:
-                mm_gen(pg['children'])
+                gen_content(pg['children'])
 
-    mm_gen(mainmatter)
+    fm = meta.get('frontmatter', [])
+    bm = meta.get('backmatter', [])
+    pages = (fm if fm else []) + (bm if bm else []) + mainmatter
+    gen_content(pages)
 
     return
 
