@@ -2,21 +2,9 @@
 {% block body %}
 <h1 class="toc-heading">{{ pg_meta.heading|default('Contents')|e }}</h1>
 
-{% if frontmatter %}
-{% for pg in frontmatter %}
-<p class="toc-item-1"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e }}</a></p>
-{% endfor %}
-{% endif %}
-{% if mainmatter %}
-{% for pg in mainmatter recursive %}
-<p class="toc-item-{{ pg.level|default('1') }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((pg.level - 1) * 4, true) }}</a> {{ pg.suffix|e }}</p>
+{% for pg in pages recursive %}
+<p class="toc-item-{{ pg.level|default('1') }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((pg.level|default(1) - 1) * 4, true) }}</a> {{ pg.suffix|e }}</p>
 {% if pg.children %}{{ loop(pg.children) }}{% endif %}
 {% endfor %}
-{% endif %}
-{% if backmatter %}
-{% for pg in backmatter %}
-<p class="toc-item-1"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e }}</a></p>
-{% endfor %}
-{% endif %}
 
 {% endblock %}

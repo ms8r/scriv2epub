@@ -225,8 +225,8 @@ def handle_scriv2md(args):
     # quick and dirty recursion to turn yaml into lists
     def mk_mm_list(mm):
         for m in mm:
-            if not m.get('src'): continue
-            src.append(m['src'])
+            if not m.get('rtf_src'): continue
+            src.append(m['rtf_src'])
             target.append(m['id'])
             if 'children' in m:
                 mk_mm_list(m['children'])
@@ -322,13 +322,15 @@ def handle_genep(args):
 
     # now content:
     def cp_static(pg):
-        source = os.path.join(args.epubdir, args.srcdir, pg['id'] + '.xhtml')
+        src_base = pg.get('src', pg['id'])
+        source = os.path.join(args.epubdir, args.srcdir, src_base + '.xhtml')
         target = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
         logging.info('copying %s to %s...', source, target)
         shutil.copy(source, target)
 
     def gen_chapter(pg):
-        mdfile = os.path.join(args.epubdir, args.srcdir, pg['id'] + '.md')
+        md_base = pg.get('src', pg['id'])
+        mdfile = os.path.join(args.epubdir, args.srcdir, md_base + '.md')
         outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] +
                                '.xhtml')
         par_style = pg.get('parstyle', _BASIC_CH_PAR_STYLE)
@@ -343,7 +345,7 @@ def handle_genep(args):
             foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
                 header_title=meta['title'] + ' | ' + pg['heading']))
 
-    def gen_from_tmpl(pg):
+    def gen_from_tmpl(pg, pages):
         tmpl_name = pg.get('template')
         if not tmpl_name:
             tmpl_name = pg['id']
@@ -361,7 +363,7 @@ def handle_genep(args):
         logging.info('generating %s...', outfile)
         with open(outfile, 'w') as foo:
             foo.write(tmpl.render(meta, pg_meta=pg,
-                pg_data=pg_data, mainmatter=mainmatter,
+                pg_data=pg_data, pages=pages,
                 header_title=pg.get('heading')))
 
     def gen_content(pages):
@@ -373,13 +375,13 @@ def handle_genep(args):
                 cp_static(pg)
                 continue
             elif pg['type'] == 'template':
-                gen_from_tmpl(pg)
+                gen_from_tmpl(pg, pages)
             if 'children' in pg:
                 gen_content(pg['children'])
 
     fm = meta.get('frontmatter', [])
     bm = meta.get('backmatter', [])
-    pages = (fm if fm else []) + (bm if bm else []) + mainmatter
+    pages = (fm if fm else []) + mainmatter + (bm if bm else [])
     gen_content(pages)
 
     return
