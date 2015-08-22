@@ -10,13 +10,14 @@ import sys
 import os
 import shutil
 import subprocess
+import re
+from copy import deepcopy
 import xml.etree.ElementTree as ET
 import argparse
 from datetime import datetime as dt
 from hashlib import md5
 from tempfile import NamedTemporaryFile
 import logging
-import pandas as pd
 import yaml
 import jinja2 as j2
 from num2eng import num2eng
@@ -54,40 +55,59 @@ def get_top_bi(scriv_xml='project.scrivx', top_title='Manuscript'):
             top_title))
 
 
-def get_chapters(top, type_filter=None):
+def get_chapters(top, type_filter=None, in_compile_only=True):
     """
-    Returns a list if dicts with keys 'ID', 'Title', 'Type',
-    'IncludeInCompile', 'Level' based on the 'BinderItem' elements under `top`.
-    If `type_filter` is not `None` only elements with 'Type' tag text equal to
+    Returns a tuple `(chapters, count)`. `chapters` is a list of dicts with
+    keys 'scrivID', 'scrivTitle', 'scrivType', 'IncludeInCompile' based on the
+    'BinderItem' elements under `top`. If the respective element has children
+    these will be captured in a list, mapped against 'children'.  If
+    `type_filter` is not `None` only elements with 'Type' tag text equal to
     `type_filter` will be considered (children will be considered in any case).
+    Similarly, if `in_compile_only` is `True` only items for which the
+    'IncludeInCompile' value is 'Yes' will be considered. `count` is the total
+    number of items in `chapters` across potential nestings.
     """
-    bi = []
-
-    def get_children(top, level):
+    def get_children(top, chapters):
+        count = 0
         for e in top.iterfind('BinderItem'):
             rec = {}
-            rec['ID'] = e.get('ID')
-            rec['Type'] = e.get('Type')
-            rec['Title'] = e.findtext('Title')
-            rec['IncludeInCompile'] = e.find('MetaData').findtext(
+            rec['scrivID'] = e.get('ID')
+            rec['scrivType'] = e.get('Type')
+            rec['scrivTitle'] = e.findtext('Title')
+            in_compile = e.find('MetaData').findtext(
                     'IncludeInCompile')
-            rec['Level'] = level
-            if type_filter is None or rec['Type'] == type_filter:
-                bi.append(rec)
+            if ((type_filter is None or rec['scrivType'] == type_filter)
+                    and (in_compile.lower() == 'yes' or not in_compile_only)):
+                incl_item = True
+                rec['children'] = []
+                ccollect = rec['children']
+            else:
+                # we're not interested in the current item but want to pull
+                # up its children one level
+                incl_item = False
+                ccollect = chapters
             children = e.find('Children')
             if children is not None:
-                get_children(children, level + 1)
-        return
+                    count += get_children(children, ccollect)
+            if incl_item:
+                if len(rec['children']) == 0:
+                    rec.pop('children', None)
+                chapters.append(rec)
+                count += 1
+        return count
 
     children = top.find('Children')
+
+    chapters = []
+    count = 0
     if children is not None:
-        get_children(top=children, level=1)
+        count = get_children(top=children, chapters=chapters)
 
-    return bi
+    return (chapters, count)
 
 
-def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
-        headings=None, sub_headings=None, norm_level=True, key_mask=None):
+def chapters_to_dict(chapters, src_type='chapter', headings=None,
+                     sub_headings=None, in_place=False):
     """
     Converts chapter list to dict that can be serialized as YAML for
     mainmatter.
@@ -97,91 +117,65 @@ def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
 
     chapters: list of dicts
         List with metadate extracted from Scrivener project file. Each dict
-        must be keyed by 'ID', 'Type', 'Title', 'IncludeInCompile' and 'Level'
-    src_dir: str
-        Path to the Scrivener (*.rtf) source files
+        must be keyed by 'scrivID', 'scrivType', 'scrivTitle', and potentially
+        'children'
     src_type: str
-        'Type' entry to be used for these records in resulting tsv file.  Note
-        that this 'Type' is different from the 'Type' in the Scrivener project
-        XML file. The latter will be renamed to 'ScrivType' in the resulting
-        dict.
+        'type' entry to be used for these records in resulting dict.
     headings: sequence
-        List of chapter headings to be used.
+        List of chapter headings to be used. These will be used in sequence
+        across potentially nested structures in `chapters`.
     sub_headings: sequence
-        List of chapter sub-headings to be used.
-    norm_level: boolean
-        If `True` level values will be shifted such that `1` becomes the
-        highest level.
-    key_mask: list
-        If provided, only keys listed in `key_mask` will be returned for each
-        list item (see below).
+        List of chapter sub-headings to be used. These will be used in sequence
+        across potentially nested structures in `chapters`.
 
-    Returns a list of dicts (one per chapter), keyed by (selection can be
-    controlled via `key_mask` argument):
+    Returns `chapters`, augmented by the keys below, but with key 'scrivID'
+    removed. If `in_place` is `False` an augmented copy of `chapters` will be
+    returned.
 
-        scrivID: int
-            Scrivener ID attribute value
-        scrivType: str
-            Scrivener 'Type' atribute ('Text' or 'Folder')
-        scrivTitle: str
-            Title tag text in Scrivener
-        ScrivInCompile: str
-            Value of Scrivener IncludeInCompile tag
         id: str
             Unique label, generated from Scrivener Title tag text
-        src: str
+        rtf_src: str
             Path to Scrivener rtf source file
-        level: int
-            Level in nested Scrivener XML structure
         type: str
             Value of `src_type` argument
         heading: str
             Heading text if list with headings was provided
         subheading: str
             Subheading text if list with subheadings was provided
+        scrivType: str
+            Scrivener 'Type' atribute ('Text' or 'Folder')
+        scrivTitle: str
+            Title tag text in Scrivener
     """
-    def fix_length(a, length, filler=''):
-        if len(a) > length:
-            b = a[:length]
-        elif len(a) < length:
-            b = a + ((length - len(a)) * [filler])
-        else:
-            b = a
-        return b
+    if not in_place: chapters = deepcopy(chapters)
+    if headings: headings = headings[:]
+    if sub_headings: sub_headings = sub_headings[:]
+    ids = set()
 
-    col_map = {'ID': 'scrivID', 'Type': 'scrivType', 'Title': 'scrivTitle',
-            'Level': 'level', 'IncludeInCompile': 'scrivInCompile'}
+    def augment_ch(chapters):
+        for ch in chapters:
+            id_str = ch['scrivTitle'].lower()
+            id_str = re.sub(r'[ \-&]', '_', id_str)
+            id_str = re.sub(r'[,.;:\"\'*#@%!$?]', '', id_str)
+            suffix = 0
+            while id_str in ids:
+                if suffix >= 1:
+                    id_str.replace('_{}'.format(suffix), '')
+                suffix += 1
+                id_str += '_{}'.format(suffix)
+            ids.add(id_str)
+            ch['id'] = id_str
+            ch['type'] = src_type
+            ch['rtf_src'] = '{}.rtf'.format(ch['scrivID'])
+            ch.pop('scrivID', None)
+            ch['heading'] =  headings.pop(0) if headings else ''
+            ch['subheading'] =  sub_headings.pop(0) if sub_headings else ''
+            if 'children' in ch:
+                augment_ch(ch['children'])
 
-    df = pd.DataFrame(chapters)
-    df = df.rename(columns=col_map)
+    augment_ch(chapters)
 
-    df['type'] = src_type
-    df['src'] = [os.path.join(src_dir, '{}.rtf'.format(i)) for i in
-                      df['scrivID']]
-    df['heading'] = fix_length(headings, len(df)) if headings else ''
-    df['subheading'] = fix_length(
-            sub_headings, len(df)) if sub_headings else ''
-    if norm_level:
-        df['level'] = df['level'] - df['level'].min() + 1
-
-    ids = []
-    for t in df['scrivTitle']:
-        id_str = t.lower().replace(' ', '_')
-        suffix = 0
-        while id_str in ids:
-            if suffix >= 1:
-                id_str.replace('_{}'.format(suffix), '')
-            suffix += 1
-            id_str += '_{}'.format(suffix)
-        ids.append(id_str)
-
-    if key_mask is not None:
-        drops = set(df.columns) - set(key_mask)
-        df = df.drop(drops, axis=1)
-
-    df['id'] = ids
-
-    return df.to_dict(orient='records')
+    return chapters
 
 
 def run_script(*args):
@@ -249,25 +243,24 @@ def handle_scrivx2yaml(args):
     """
     Converts the 'Manuscript' section a Scrivener project XML file into a YAML
     file, augmenting with additional info such as rtf source
-    file location, level, unique label.
+    file location and unique label.
     """
     xml_path = os.path.join(args.projdir, args.scrivxml)
     ms_bi = get_top_bi(scriv_xml=xml_path, top_title=args.toptitle)
-    ch = get_chapters(top=ms_bi, type_filter=args.typefilter)
+    ch, count = get_chapters(top=ms_bi, type_filter=args.typefilter)
 
     if getattr(args, 'headings', False):
         headings = args.hoffset * ['']
         headings += ['Chapter ' + num2eng(i + 1).title().replace(' ', '-')
-                     for i in range(len(ch) - args.hoffset)]
+                     for i in range(count - args.hoffset)]
     else:
         headings = None
 
-    yd = chapters_to_dict(ch, src_dir=args.rtfdir, src_type=args.type,
-            headings=headings, key_mask=['id', 'src', 'heading', 'level',
-                                         'type'])
+    chapters_to_dict(ch, src_dir=args.rtfdir, src_type=args.type,
+                     headings=headings, in_place=True)
 
     foo = args.output if args.output else sys.stdout
-    yaml.dump(yd, stream=foo, default_flow_style=False)
+    yaml.dump(ch, stream=foo, default_flow_style=False)
     if args.output:
             args.output.close()
 
