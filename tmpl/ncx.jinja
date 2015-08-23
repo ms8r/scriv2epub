@@ -5,7 +5,7 @@
   <!-- *** Metadata Section *** -->
   <head>
     <meta content="{{ uuid }}" name="dtb:uid" />
-    <meta content="{{ toc_depth|default('1') }}" name="dtb:depth" />
+    <meta content="{{ toc_depth|default('2') }}" name="dtb:depth" />
     <meta content="0" name="dtb:totalPageCount" /> <!-- Do Not change -->
     <meta content="0" name="dtb:maxPageNumber" /> <!-- Do Not change -->
   </head>
@@ -21,19 +21,7 @@
   <!-- *** Navigation Map Section *** -->
   {% set po_counter = [] %}
   <navMap>
-  {% if frontmatter %}
-  {% for pg in frontmatter %}
-    {% if po_counter.append(1) %}{% endif %}
-    <navPoint id="{{ pg.id|e }}" playOrder="{{ po_counter|length }}">
-      <navLabel>
-        <text>{{ pg.heading|e }}</text>
-      </navLabel>
-      <content src="{{ pg.id|e }}.xhtml"></content>
-    </navPoint>
-  {% endfor %}
-  {% endif %}
-  {% if mainmatter %}
-  {% for pg in mainmatter recursive %}
+  {% for pg in pages recursive %}
     {% if po_counter.append(1) %}{% endif %}
     <navPoint id="{{ pg.id|e }}" playOrder="{{ po_counter|length }}">
       <navLabel>
@@ -43,18 +31,5 @@
       {% if pg.children %}{{ loop(pg.children)|indent(4, true) }}{% endif %}
     </navPoint>
   {% endfor %}
-  {% endif %}
-  {% if backmatter %}
-  {% for pg in backmatter %}
-    {% if po_counter.append(1) %}{% endif %}
-    <navPoint id="{{ pg.id|e }}" playOrder="{{ po_counter|length }}">
-      <navLabel>
-        <text>{{ pg.heading|e }}</text>
-      </navLabel>
-      <content src="{{ pg.id|e }}.xhtml"></content>
-    </navPoint>
-  {% endfor %}
-  {% endif %}
-
   </navMap>
 </ncx>

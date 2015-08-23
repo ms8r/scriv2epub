@@ -42,22 +42,10 @@
   <manifest>
 
     <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml" />
-    {% if frontmatter %}
-    {% for pg in frontmatter %}
-    <item href="{{ pg.id|e }}.xhtml" id="html_{{ pg.id|e }}" media-type="application/xhtml+xml" />
-    {% endfor %}
-    {% endif %}
-    {% if mainmatter %}
-    {% for pg in mainmatter recursive %}
+    {% for pg in pages recursive %}
     <item href="{{ pg.id|e }}.xhtml" id="html_{{ pg.id|e }}" media-type="application/xhtml+xml" />
     {% if pg.children %}{{ loop(pg.children) }}{% endif %}
     {% endfor %}
-    {% endif %}
-    {% if backmatter %}
-    {% for pg in backmatter %}
-    <item href="{{ pg.id|e }}.xhtml" id="html_{{ pg.id|e }}" media-type="application/xhtml+xml" />
-    {% endfor %}
-    {% endif %}
     <item href="{{ css_file|default('css/stylesheet.css')|e }}" id="css-epub" media-type="text/css" />
     {% if images %}
     {% for img in images %}

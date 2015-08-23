@@ -353,6 +353,10 @@ def handle_genep(args):
         img['format'] = img_ext2fmt[item.split('.')[-1].lower()]
         images.append(img)
 
+    fm = meta.get('frontmatter', [])
+    bm = meta.get('backmatter', [])
+    pages = (fm if fm else []) + mainmatter + (bm if bm else [])
+
     # generate metadata files:
     uuid = gen_uuid(meta.__str__() + dt.utcnow().__str__())
     kwargs = {'images': images, 'uuid': uuid}
@@ -360,7 +364,7 @@ def handle_genep(args):
         logging.info('generating %s...', out_file)
         tmpl = tmplEnv.get_template(tmpl_file)
         with open(os.path.join(args.epubdir, out_file), 'w') as foo:
-            foo.write(tmpl.render(meta, mainmatter=mainmatter, **kwargs))
+            foo.write(tmpl.render(meta, pages=pages, **kwargs))
 
     # now content:
     def cp_static(pg):
@@ -421,9 +425,6 @@ def handle_genep(args):
             if 'children' in pg:
                 gen_content(pg['children'])
 
-    fm = meta.get('frontmatter', [])
-    bm = meta.get('backmatter', [])
-    pages = (fm if fm else []) + mainmatter + (bm if bm else [])
     gen_content(pages)
 
     return

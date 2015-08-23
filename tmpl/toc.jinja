@@ -2,9 +2,12 @@
 {% block body %}
 <h1 class="toc-heading">{{ pg_meta.heading|default('Contents')|e }}</h1>
 
+{% set level = [] %}
 {% for pg in pages recursive %}
-<p class="toc-item-{{ pg.level|default('1') }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((pg.level|default(1) - 1) * 4, true) }}</a> {{ pg.suffix|e }}</p>
-{% if pg.children %}{{ loop(pg.children) }}{% endif %}
+    {% if level.append(1) %}{% endif %}
+    <p class="toc-item-{{ level|length }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((level|length - 1) * 4, true) }}</a> {{ pg.suffix|e }}</p>
+    {% if pg.children %}{{ loop(pg.children) }}{% endif %}
+    {% if level.pop(0) %}{% endif %}
 {% endfor %}
 
 {% endblock %}
