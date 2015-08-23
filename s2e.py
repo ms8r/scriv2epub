@@ -265,6 +265,47 @@ def handle_scrivx2yaml(args):
             args.output.close()
 
 
+def handle_body2md(args):
+    """
+    Converts a set of body XHTML files (already "<em></em> cleansed") into
+    Markdown files and creates YAML mainmatter output. Optionally headings of
+    the format 'Chapter <Num>' can be added.
+
+    Returns the list with mainmatter dicts.
+
+    NOTE: this is quick and dirty and specific to ALB
+    """
+    num_files = args.stopnum - args.startnum + 1
+    if getattr(args, 'headings', False):
+        headings = args.hoffset * ['']
+        headings += ['Chapter ' + num2eng(i + 1).title().replace(' ', '-')
+                     for i in range(num_files - args.hoffset)]
+    else:
+        headings = num_files * ['']
+
+    cmd = os.path.join(_PATH_PREFIX, 'body2md.sh')
+    std, err = run_script(cmd, args.bodydir, str(args.startnum),
+                          str(args.stopnum), args.mdprefix)
+    if err: logging.error(err.decode('utf-8'))
+    if std: logging.info(std.decode('utf-8'))
+
+    # generate mainmatter YAML:
+    mm = []
+    for i, hdg in enumerate(headings):
+        rec = {}
+        rec['id'] = args.mdprefix + 'body{}'.format(i + 1)
+        rec['type'] = 'chapter'
+        rec['heading'] = hdg
+        mm.append(rec)
+
+    foo = args.yamlout if args.yamlout else sys.stdout
+    yaml.dump(mm, stream=foo, default_flow_style=False)
+    if args.yamlout:
+            args.yamlout.close()
+
+    return mm
+
+
 def handle_genep(args):
     """
     Generates the files required for an EPUB ebook
@@ -380,8 +421,9 @@ def handle_genep(args):
     return
 
 def setup_parser_init(p):
-    p.add_argument('--target', required=True,
-            help="directory in which to set up EPUB structure")
+    p.add_argument('--target', default='.',
+            help="""directory in which to set up EPUB structure; defaults to
+            current directory""")
 
 
 def setup_parser_scriv2md(p):
@@ -391,6 +433,26 @@ def setup_parser_scriv2md(p):
             help="directory to which to write markdown output")
     p.add_argument('--projdir', required=True,
             help="path to Scrivener project directory")
+
+
+def setup_parser_body2md(p):
+    p.add_argument('--bodydir', default='.',
+            help="""path to body XHTML files; defaults to current directory""")
+    p.add_argument('--yamlout', type=argparse.FileType('w'), default=None,
+            help="file to save YAML output to, defaults to STDOUT if"
+            " not specified")
+    p.add_argument('--startnum', type=int, required=True,
+            help="first html body file number to process")
+    p.add_argument('--stopnum', type=int, required=True,
+            help="last html body file number to process")
+    p.add_argument('--mdprefix', default='',
+            help="""prefix to use for generated Markdown files; defaults to
+            ''""")
+    p.add_argument('--headings', action='store_true',
+            help="will add headings to for each chapter as 'Chapter Num'")
+    p.add_argument('--hoffset', type=int, default=0,
+            help="""offset for start of chapter headings (first <hoffset>
+            chapters will be skipped); defaults to 0""")
 
 
 def setup_parser_scrivx2yaml(p):
@@ -454,7 +516,8 @@ def setup_parser_genep(p):
 _task_handler = {'init': (handle_init, setup_parser_init),
                  'scriv2md': (handle_scriv2md, setup_parser_scriv2md),
                  'scrivx2yaml': (handle_scrivx2yaml, setup_parser_scrivx2yaml),
-                 'genep': (handle_genep, setup_parser_genep),}
+                 'genep': (handle_genep, setup_parser_genep),
+                 'body2md': (handle_body2md, setup_parser_body2md),}
 
 
 if __name__ == '__main__':
