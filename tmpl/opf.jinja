@@ -59,22 +59,10 @@
 
   <spine toc="ncx">
 
-    {% if frontmatter %}
-    {% for pg in frontmatter %}
-    <itemref idref="html_{{ pg.id|e }}" linear="yes"/>
-    {% endfor %}
-    {% endif %}
-    {% if mainmatter %}
-    {% for pg in mainmatter recursive %}
+    {% for pg in pages recursive %}
     <itemref idref="html_{{ pg.id|e }}" linear="yes"/>
     {% if pg.children %}{{ loop(pg.children) }}{% endif %}
     {% endfor %}
-    {% endif %}
-    {% if backmatter %}
-    {% for pg in backmatter %}
-    <itemref idref="html_{{ pg.id|e }}" linear="yes"/>
-    {% endfor %}
-    {% endif %}
 
   </spine>
 

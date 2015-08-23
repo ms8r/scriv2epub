@@ -107,7 +107,7 @@ def get_chapters(top, type_filter=None, in_compile_only=True):
 
 
 def chapters_to_dict(chapters, src_type='chapter', headings=None,
-                     sub_headings=None, in_place=False, level_offset=0):
+                     sub_headings=None, in_place=False):
     """
     Converts chapter list to dict that can be serialized as YAML for
     mainmatter.
@@ -127,8 +127,6 @@ def chapters_to_dict(chapters, src_type='chapter', headings=None,
     sub_headings: sequence
         List of chapter sub-headings to be used. These will be used in sequence
         across potentially nested structures in `chapters`.
-    level_offset: int
-        Starting level for top-level entries
 
     Returns `chapters`, augmented by the keys below, but with key 'scrivID'
     removed. If `in_place` is `False` an augmented copy of `chapters` will be
@@ -144,9 +142,6 @@ def chapters_to_dict(chapters, src_type='chapter', headings=None,
             Heading text if list with headings was provided
         subheading: str
             Subheading text if list with subheadings was provided
-        level: int
-            Level in nested structure, starting at `1 + level_offset`  for
-            top-level
         scrivType: str
             Scrivener 'Type' atribute ('Text' or 'Folder')
         scrivTitle: str
@@ -157,7 +152,7 @@ def chapters_to_dict(chapters, src_type='chapter', headings=None,
     if sub_headings: sub_headings = sub_headings[:]
     ids = set()
 
-    def augment_ch(chapters, level):
+    def augment_ch(chapters):
         for ch in chapters:
             id_str = ch['scrivTitle'].lower()
             id_str = re.sub(r'[ \-&]', '_', id_str)
@@ -171,15 +166,14 @@ def chapters_to_dict(chapters, src_type='chapter', headings=None,
             ids.add(id_str)
             ch['id'] = id_str
             ch['type'] = src_type
-            ch['level'] = level
             ch['rtf_src'] = '{}.rtf'.format(ch['scrivID'])
             ch.pop('scrivID', None)
             ch['heading'] =  headings.pop(0) if headings else ''
             ch['subheading'] =  sub_headings.pop(0) if sub_headings else ''
             if 'children' in ch:
-                augment_ch(ch['children'], level=level + 1)
+                augment_ch(ch['children'])
 
-    augment_ch(chapters, level=1 + level_offset)
+    augment_ch(chapters)
 
     return chapters
 
@@ -303,7 +297,6 @@ def handle_body2md(args):
         rec['id'] = args.mdprefix + 'body{}'.format(i + 1)
         rec['type'] = 'chapter'
         rec['heading'] = hdg
-        rec['level'] = 1 + args.loffset
         mm.append(rec)
 
     foo = args.yamlout if args.yamlout else sys.stdout
@@ -416,10 +409,8 @@ def handle_genep(args):
         for pg in pages:
             if pg['type'] == 'chapter':
                 gen_chapter(pg)
-                continue
             elif pg['type'] == 'static':
                 cp_static(pg)
-                continue
             elif pg['type'] == 'template':
                 gen_from_tmpl(pg, pages)
             if 'children' in pg:
@@ -462,9 +453,6 @@ def setup_parser_body2md(p):
     p.add_argument('--hoffset', type=int, default=0,
             help="""offset for start of chapter headings (first <hoffset>
             chapters will be skipped); defaults to 0""")
-    p.add_argument('--loffset', type=int, default=0,
-            help="""offset for level counting in nested structure; defaults to
-            0""")
 
 
 def setup_parser_scrivx2yaml(p):
@@ -493,9 +481,6 @@ def setup_parser_scrivx2yaml(p):
     p.add_argument('--hoffset', type=int, default=0,
             help="""offset for start of chapter headings (first <hoffset>
             chapters will be skipped""")
-    p.add_argument('--loffset', type=int, default=0,
-            help="""offset for level counting in nested structure; defaults to
-            0""")
 
 
 def setup_parser_genep(p):
