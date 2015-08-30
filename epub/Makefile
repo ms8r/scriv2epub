@@ -23,11 +23,12 @@ MM_YAML          = ./mainmatter.yaml
 # numbering will start $(HOFFSET) chapters after the first chapter in
 # mainmatter
 HOFFSET          = 1
-YINCL            = ./yaml
+YINCL            = ~/Documents/NaMaBooks/annalowebooks.com/yaml
 SCRIV_ROOT       = ./$(BOOK).scriv
 SCRIV_XML        = project.scrivx
 SCRIV_RTF        = Files/Docs
 EXCLUDE_LIST     = ./exclude.list
+KINDLE_GEN		 = ~/EPUB/KindleGen/kindlegen
 
 
 .PHONY: help
@@ -35,7 +36,8 @@ help:
 	@echo
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  info     to display variable values"
-	@echo "  epub     to generate EPUB and MOBI files"
+	@echo "  mobi     to generate MOBI from EPUB"
+	@echo "  epub     to generate EPUB"
 	@echo "  content  to generate EPUB content and metadata from YAML config"
 	@echo "           files and md/xhtml sources"
 	@echo "  markdown to generate Markdown mainmatter files from RTF sources"
@@ -69,6 +71,19 @@ info:
 	@echo 'EXCLUDE_LIST    : '$(EXCLUDE_LIST)
 	@echo
 
+
+.PHONY: mobi
+mobi: info
+	@if test -f $(BOOK).mobi; then \
+		echo "#"; \
+		echo "# removing existing $(BOOK).mobi..."; \
+		echo "#"; \
+		rm $(BOOK).mobi; \
+	fi
+	@echo "#"
+	@echo "# calling kindlegen to convert $(BOOK).epub to MOBI..."
+	@echo "#"
+	$(KINDLE_GEN) $(BOOK).epub -c1 -verbose | less
 
 .PHONY: epub
 epub: info
