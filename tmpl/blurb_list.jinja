@@ -1,4 +1,31 @@
 {% extends "xhtml_skeleton.jinja" %}
+{#----------------------------------------------------------------------------
+Defines the structure for listing an overview of books (e.g. in a box set) with a title (optionally linked and with siffix), subtitle, and a list of paragraphs.for each book.
+
+Passed in variables:
+    title_heading: str
+        Used in xhtml_skeleton
+    pg_meta: dict
+        Will look for `pg_meta.heading` and use as page heading. Required for
+        toc.
+    pg_data: sequence
+        List with the different books to be listed. Each item is a dict with
+        the following items:
+            title: str
+                Book name / title
+            href: str
+                Optional. URL to be linked to the title (file name in epub if to
+                reference internally
+            suffix: str
+                Optional. Text to be placed after title, outside of link,
+                separated by space.
+            subheading: str
+                Optional. Will appear as ceneterd, italicized text beneath
+                title.
+            pars: sequence
+                List with the individual paragraphs to be printed fro this book
+                (will be html escaped).
+----------------------------------------------------------------------------#}
 
 {% block body %}
 
