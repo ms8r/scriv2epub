@@ -1,0 +1,19 @@
+{% extends "xhtml_skeleton.jinja" %}
+{% block body %}
+<div class="center">
+    <p class="title">{{ pg_meta.title|e }}</p>
+    {% if pg_meta.subtitle is defined %}
+        <p class="subtitle">{{ pg_meta.subtitle|e }}</p>
+    {% endif %}
+    {% if pg_meta.subplain is defined %}
+        <p class="center-par">{{ pg_meta.subplain|e }}</p>
+    {% endif %}
+    <p class="author">by {{ pg_meta.author|e }}</p>
+    {% if pg_meta.img is defined %}
+        <p class="center"><img src="{{ pg_meta.img|e }}" alt="{{ pg_meta.title|e }}" /></p>
+    {% endif %}
+    {% if pg_meta.series is defined %}
+        <p class="series">{{ pg_meta.series|e }}</p>
+    {% endif %}
+</div>
+{% endblock %}
