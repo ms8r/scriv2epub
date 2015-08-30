@@ -390,10 +390,22 @@ def handle_genep(args):
             tmpl_name = pg['id']
         pg_data = meta.get(pg['id'])
         if not pg_data:
-            # look for supplementary YAML file with page data:
+            # look for supplementary YAML file with page data,
+            # first in current dir, then in epubdir, then in yincl:
             try:
-                with open(os.path.join(args.epubdir, args.yincl, pg['id'] +
-                    '.yaml'), 'r') as foi:
+                with open(pg['id'] + '.yaml', 'r') as foi:
+                    pg_data = yaml.load(foi)
+            except FileNotFoundError as e:
+                logging.warning(e)
+            try:
+                with open(os.path.join(args.epubdir, pg['id']
+                          + '.yaml'), 'r') as foi:
+                    pg_data = yaml.load(foi)
+            except FileNotFoundError as e:
+                logging.warning(e)
+            try:
+                with open(os.path.join(args.yincl, pg['id'] +
+                          '.yaml'), 'r') as foi:
                     pg_data = yaml.load(foi)
             except FileNotFoundError as e:
                 logging.warning(e)
