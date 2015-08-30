@@ -1,0 +1,12 @@
+{% extends "xhtml_skeleton.jinja" %}
+
+{% block body %}
+
+{% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
+{% for blurb in pg_data %}
+<h3 class="center">{% if blurb.href %}<a href="{{ blurb.href|e }}">{% endif %}{{ blurb.title|e }}{% if blurb.href %}</a>{% endif %}{% if blurb.suffix %} {{blurb.suffix|e }}{% endif %}</h3>
+{% if blurb.subtitle %}<p class="center-par-tb-space"><em>{{ blurb.subtitle|e }}</em></p>{% endif %}
+{% for par in blurb.pars %}<p class="no-indent">{{ par|e }}</p>{% endfor %}
+{% endfor %}
+
+{% endblock %}
