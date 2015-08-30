@@ -18,7 +18,7 @@
     {% endif %}
     <dc:publisher>{{ publisher|e }}</dc:publisher> <!--Name of Publisher or yourself if self-published-->
     <dc:date>{{ pubdate }}</dc:date> <!--Published Date in the format YYYY-MM-DD-->
-    <meta name="cover" content="cover-img" /> <!--Required for KindleGen, Barnes and Noble, and iBookstore-->
+    <meta name="cover" content="jpeg_cover-img" /> <!--Required for KindleGen, Barnes and Noble, and iBookstore-->
     <dc:description>{{ description|e }}</dc:description>
     {% if keywords is defined %}
         {% for kw in keywords %}
