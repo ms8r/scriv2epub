@@ -106,8 +106,8 @@ def get_chapters(top, type_filter=None, in_compile_only=True):
     return (chapters, count)
 
 
-def chapters_to_dict(chapters, src_type='chapter', headings=None,
-                     sub_headings=None, in_place=False):
+def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
+                     headings=None, sub_headings=None, in_place=False):
     """
     Converts chapter list to dict that can be serialized as YAML for
     mainmatter.
@@ -119,6 +119,8 @@ def chapters_to_dict(chapters, src_type='chapter', headings=None,
         List with metadate extracted from Scrivener project file. Each dict
         must be keyed by 'scrivID', 'scrivType', 'scrivTitle', and potentially
         'children'
+    src_dir: str
+        Relative path to RFT files from Scrivener project dir.
     src_type: str
         'type' entry to be used for these records in resulting dict.
     headings: sequence
@@ -166,7 +168,8 @@ def chapters_to_dict(chapters, src_type='chapter', headings=None,
             ids.add(id_str)
             ch['id'] = id_str
             ch['type'] = src_type
-            ch['rtf_src'] = '{}.rtf'.format(ch['scrivID'])
+            ch['rtf_src'] = os.path.join(src_dir,
+                                         '{}.rtf'.format(ch['scrivID']))
             ch.pop('scrivID', None)
             ch['heading'] =  headings.pop(0) if headings else ''
             ch['subheading'] =  sub_headings.pop(0) if sub_headings else ''
@@ -257,8 +260,7 @@ def handle_scrivx2yaml(args):
         headings = None
 
     chapters_to_dict(ch, src_dir=args.rtfdir, src_type=args.type,
-                     headings=headings, in_place=True,
-                     level_offset=args.loffset)
+                     headings=headings, in_place=True)
 
     foo = args.output if args.output else sys.stdout
     yaml.dump(ch, stream=foo, default_flow_style=False)
