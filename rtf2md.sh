@@ -7,4 +7,6 @@
 unrtf --html $1 | \
     pandoc --normalize -f html -t markdown | \
     sed 's/\\$/\n/g' | \
+    # insert space after smushed italics '*'
+    sed 's/\([^ —]\)\*\([^ \.,;:\"\!\?]\)/\1\* \2/g' | \
     pandoc --no-wrap -f markdown -t markdown > $2
