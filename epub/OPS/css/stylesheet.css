@@ -139,3 +139,11 @@ td  {padding: 0em 0.3125em 0em 0.3125em}
 .italic-par {
     font-style: italic;
 }
+.figure {
+    text-align: center;
+}
+.caption {
+    font-style: italic;
+    font-size: 85%;
+
+}
