@@ -21,9 +21,10 @@ do
     outnum=$(( $line - $2 + 1 ))
     pandoc --no-wrap -f html -t markdown ${1}/body${line}.xhtml | \
             # delete chapter heading
-            sed '/^[A-Z ]\+$/d' | \
+            sed '/^CHAPTER [^ ]\+$/d' | \
+            sed '/^Chapter [^ ]\+$/d' | \
             # insert space after smushed italics '*'
-            sed 's/\([^ —]\)\*\([^ \.,;:\"\!\?]\)/\1\* \2/g' | \
+            sed 's/\([\.,;:\!\?…*]\)\*\([a-zA-Z0-9“]\)/\1 \*\2/g' | \
             # delete empty lines at beginning
             sed '1,/[a-zA-Z]\+/ { /[a-zA-Z]\+/!d }' \
             > ${4}body${outnum}.md
