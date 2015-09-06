@@ -6,10 +6,14 @@
     <h2 class="chapter-heading">{{ heading|e }}</h2>
 {% endif %}
 {% if subheading is defined %}
-    <h3 class="chapter-sub-heading">{{ subheading|e }}</h3>
+    <h3 class="chapter-heading">{{ subheading|e }}</h3>
 {% endif %}
 
+{% if pg_meta.beg_raw %}{{ pg_meta.beg_raw }}{% endif %}
+
 {{ chapter_content }}
+
+{% if pg_meta.end_raw %}{{ pg_meta.end_raw }}{% endif %}
 
 {% endblock %}
 

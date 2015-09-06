@@ -384,7 +384,8 @@ def handle_genep(args):
         tmpl = tmplEnv.get_template(tmpl_name + _TEMPLATE_EXT)
         with open(outfile, 'w') as foo:
             foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
-                header_title=meta['title'] + ' | ' + pg['heading']))
+                header_title=meta['title'] + ' | ' + pg['heading'],
+                pg_meta=pg))
 
     def gen_from_tmpl(pg, pages):
         tmpl_name = pg.get('template')

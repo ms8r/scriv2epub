@@ -19,6 +19,9 @@ Passed in variables:
         the following items:
             name: str
                 Series name / title
+            img: str
+                url of an image to be shown centered above the listing of the
+                individual titles in the series.
             titlelist: sequence
                 List with the individual titles to be listed. Each item is a
                 dict with items `title`, `url`, `tclause`, `subtitle`, and
@@ -37,6 +40,7 @@ Passed in variables:
     {% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
     {% for series in pg_data %}
         {% if series.series %}<h3 class="chapter-heading">{{ series.series|e }}</h3>{% endif %}
+        {% if series.img %}<p class="center-par"><img width="400" src="{{ series.img|e }}" alt="{{ series.series|e }}" /></p>{% endif %}
         {% for t in series.titlelist %}
             {% if t.img %}<p class="center-par">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}" alt="Cover image for {{ t.title|e }}" />{% if t.url %}</a>{% endif %}</p>{% endif %}
             <p class="center-par">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}{% if t.tclause %} {{ t.tclause }}{% endif %}{% if t.subtitle %}<br />{{ t.subtitle|e }}{% endif %}</p>
