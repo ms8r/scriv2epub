@@ -5,13 +5,17 @@
 {% if pg_meta.heading %}<h2>{{ pg_meta.heading|e }}</h2>{% endif %}
 {% if pg_meta.subheading %}<h3>{{ pg_meta.subheading|e }}</h3>{% endif %}
 
-{% if pg_meta.beg_img %}<p class="center"><img src="{{ pg_meta.beg_img.url }}" alt="{{ pg_meta.beg_img.alt }}" /></p>{% endif %}
+{% if pg_meta.beg_img %}<p class="center"><img src="{{ pg_meta.beg_img.url|e }}" alt="{{ pg_meta.beg_img.alt|e }}" /></p>{% endif %}
+
+{% if pg_meta.beg_raw %}<p class="no-indent">{{ pg_meta.beg_raw }}</p>{% endif %}
 
 {% for p in pg_meta.pars %}
 <p class="no-indent">{{ p|e }}</p>
 {% endfor %}
 
-{% if pg_meta.end_img %}<p class="center"><img src="{{ pg_meta.end_img.url }}" alt="{{ pg_meta.end_img.alt }}" /></p>{% endif %}
+{% if pg_meta.end_raw %}<p class="no-indent">{{ pg_meta.end_raw }}</p>{% endif %}
+
+{% if pg_meta.end_img %}<p class="center"><img src="{{ pg_meta.end_img.url|e }}" alt="{{ pg_meta.end_img.alt|e }}" /></p>{% endif %}
 
 {% endblock %}
 
