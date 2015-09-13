@@ -105,7 +105,7 @@ epub: info
 	@echo "# calling epubcheck to validate $(BOOK).epub..."
 	@echo "#"
 	java -jar /home/markus/EPUB/epubcheck-3.0/epubcheck-3.0.jar \
-		"$(BOOK).epub" | less
+		"$(BOOK).epub"
 
 
 .PHONY: content
