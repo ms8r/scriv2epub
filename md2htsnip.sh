@@ -25,7 +25,7 @@ center_pattern2="\\#[ ]*\\#[ ]*\\#"
 
 
 mdf=$1
-pandoc -f markdown -t html $mdf | \
+pandoc --smart -f markdown -t html $mdf | \
     # replace line breaks by paragraph breaks
     sed "s/<br[ ]*\/>/<\/p>\n<p>/g" | \
     # tag <<<>>> as center-par
