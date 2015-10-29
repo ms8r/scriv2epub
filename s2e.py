@@ -228,6 +228,23 @@ def mm_gen(mm, src_dir, hoffs):
             yield from mm_gen(m['children'], src_dir, level)
 
 
+def latex_fleuronize(s, symbol=r'\\infty', rpt=3, math=True):
+    """
+    Replaces instances of *** and ### in string `s` (also if backslah escaped
+    and/or spearated by spaces) with raw LaTeX code for a fleuron, using `rpt`
+    repetitions of character `symbol` (can be a LaTeX command in which case the
+    leading \ must be escaped as \\. If `math` is `True` `symbol` will be
+    placed in math environment.
+    """
+    pattern = r'\\?[#*]\s*\\?[#*]\s*\\?[#*]'
+    repl = symbol * rpt
+    if math:
+        repl = '$' + repl + '$'
+    repl = r'\\plainbreak{{1}}\\fancybreak{{{}}}\\plainbreak{{1}}'.format(repl)
+
+    return re.sub(pattern, repl, s)
+
+
 def handle_mmcat(args):
     """
     Concatenates all mainmatter markdown sources with headings at correct level
@@ -238,6 +255,8 @@ def handle_mmcat(args):
 
     foo = args.outfile if args.outfile else sys.stdout
     for m in mm_gen(mainmatter, args.mddir, args.hoffset):
+        if args.lbreak:
+            m = latex_fleuronize(m)
         foo.write('{}\n\n'.format(m))
 
     foo.close()
@@ -342,6 +361,66 @@ def handle_body2md(args):
             args.yamlout.close()
 
     return mm
+
+
+def handle_genlatex(args):
+    """
+    Generates LaTeX for print book meta YAML, mainmatter md and template.
+    """
+    with open(args.metayaml, 'r') as foi:
+        meta = yaml.load(foi)
+
+    tmplLoader = j2.FileSystemLoader(searchpath=_TEMPLATE_PATH)
+    tmplEnv = j2.Environment(
+            loader=tmplLoader,
+            trim_blocks=True,
+            block_start_string='<%',
+            block_end_string='%>',
+            variable_start_string='<&',
+            variable_end_string='&>',
+            comment_start_string='<#',
+            comment_end_string='#>')
+
+    # generate main document file:
+    logging.info('generating main file %s from template %s...',
+            args.book + '.tex', args.tmpl + _TEMPLATE_EXT)
+    tmpl = tmplEnv.get_template(args.tmpl + _TEMPLATE_EXT)
+    with open(args.book + '.tex', 'w') as foo:
+        foo.write(tmpl.render(meta))
+
+    # generate any dynamic front or backmatter files:
+    fm = meta.get('frontmatter', [])
+    bm = meta.get('backmatter', [])
+    pages = (fm if fm else []) + (bm if bm else [])
+    pages = [p for p in pages if p['type'] == 'template']
+    for pg in pages:
+        logging.info('generating page for "%s" from template %s...',
+                pg['heading'], pg['template'] + _TEMPLATE_EXT)
+        tmpl_name = pg.get('template')
+        if not tmpl_name:
+            tmpl_name = pg['id']
+        pg_data = meta.get(pg['id'])
+        # TODO: encapsulate finding the right page_data yaml so it can be used
+        # for epub as well as for print
+        if not pg_data:
+            # look for supplementary YAML file with page data,
+            # first in current dir, then in yincl:
+            try:
+                with open(pg['id'] + '.yaml', 'r') as foi:
+                    pg_data = yaml.load(foi)
+            except FileNotFoundError as e:
+                logging.warning(e)
+            try:
+                with open(os.path.join(args.yincl, pg['id'] +
+                          '.yaml'), 'r') as foi:
+                    pg_data = yaml.load(foi)
+            except FileNotFoundError as e:
+                logging.warning(e)
+        tmpl = tmplEnv.get_template(tmpl_name + _TEMPLATE_EXT)
+        outfile = os.path.join(pg['id'] + '.tex')
+        logging.info('generating %s...', outfile)
+        with open(outfile, 'w') as foo:
+            foo.write(tmpl.render(meta, pg_meta=pg, pg_data=pg_data))
 
 
 def handle_genep(args):
@@ -455,20 +534,18 @@ def handle_genep(args):
                 pg_data=pg_data, pages=pages,
                 header_title=pg.get('heading')))
 
-    def gen_content(pages):
-        for pg in pages:
-            if pg['type'] == 'chapter':
-                gen_chapter(pg)
-            elif pg['type'] == 'static':
-                cp_static(pg)
-            elif pg['type'] == 'template':
-                gen_from_tmpl(pg, pages)
-            if 'children' in pg:
-                gen_content(pg['children'])
-
-    gen_content(pages)
+    for pg in pages:
+        if pg['type'] == 'chapter':
+            gen_chapter(pg)
+        elif pg['type'] == 'static':
+            cp_static(pg)
+        elif pg['type'] == 'template':
+            gen_from_tmpl(pg, pages)
+        if 'children' in pg:
+            gen_content(pg['children'])
 
     return
+
 
 def setup_parser_init(p):
     p.add_argument('--target', default='.',
@@ -495,6 +572,9 @@ def setup_parser_mmcat(p):
             help="""offset for chapter heading  level; defaults to 0""")
     p.add_argument('--mddir', required=True,
             help="directory from which to read markdown chapter files")
+    p.add_argument('--lbreak', action='store_true',
+            help="""will replace '***' and '###' (also if escaped and/or space
+            spearated) with LaTeX code for a paragraph separator (fleuron)""")
 
 
 def setup_parser_body2md(p):
@@ -545,6 +625,22 @@ def setup_parser_scrivx2yaml(p):
             chapters will be skipped""")
 
 
+def setup_parser_genlatex(p):
+    p.add_argument('--metayaml', required=True,
+            help="path to YAML metadata file")
+    p.add_argument('--yincl', default='.',
+            help="""path to YAML include directory; if genlatex encounters a
+            book section/page with a jinja template that is different from the
+            page id and the YAML file specified with `--yaml` does not contain
+            a top level identifier equal to <page id>, genlatex will look for a
+            file <page id>.yaml in <yincl> and pass the data from this file to
+            the jinja template as the `pg_data` parameter; defaults to '.'""")
+    p.add_argument('--tmpl', default='tex_book_5x8',
+            help="template to use for the book")
+    p.add_argument('--book', required=True,
+            help="file name to be used for LaTeX output (without extension")
+
+
 def setup_parser_genep(p):
     p.add_argument('--metayaml', required=True,
             help="path to YAML metadata file, relative to epubdir")
@@ -566,7 +662,7 @@ def setup_parser_genep(p):
             help="""path to write (x)html output files to, relative to EPUB
             root directory; defaults to 'OPS'""")
     p.add_argument('--srcdir', default='src',
-            help="""path to markdown and statis xhtml ource files for
+            help="""path to markdown and static xhtml ource files for
             mainmatter chapter content (relative to EPUB root directory);
             dafaults to 'src'""")
 
@@ -579,6 +675,7 @@ _task_handler = {'init': (handle_init, setup_parser_init),
                  'scriv2md': (handle_scriv2md, setup_parser_scriv2md),
                  'scrivx2yaml': (handle_scrivx2yaml, setup_parser_scrivx2yaml),
                  'genep': (handle_genep, setup_parser_genep),
+                 'genlatex': (handle_genlatex, setup_parser_genlatex),
                  'body2md': (handle_body2md, setup_parser_body2md),
                  'mmcat': (handle_mmcat, setup_parser_mmcat),
 }

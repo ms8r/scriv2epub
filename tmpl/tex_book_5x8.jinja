@@ -1,0 +1,131 @@
+<# ---------------------------------------------------------------------------
+jinja2 template for LaTeX CreateSpace print book 5.06" x 7.81"
+
+jinja delimiters used in this template are:
+
+   block_start_string:     <%
+   block_end_string:       %>
+   vairable_start_string:  <&
+   variable_end_string:    &>
+   comment_start_string:   <#
+   comment_end_string:     same as start string, swapped
+
+----------------------------------------------------------------------------#>
+\documentclass[10pt]{memoir}
+
+% paper size and page layout, see memoir user manual for details
+\setstocksize{7.81in}{5.06in}
+\settrimmedsize{\stockheight}{\stockwidth}{*}
+\settypeblocksize{6in}{3.56in}{*}
+\setlrmargins{0.9in}{*}{*}
+\setulmargins{0.75in}{*}{*}
+\setheadfoot{\baselineskip}{0.41in}
+\setheaderspaces{0.35in}{*}{*}
+%\setlength{\topskip}{1.6\topskip}
+\checkandfixthelayout
+%\sloppybottom
+\midsloppy
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+% indentfirst will also indent first paragraph after headings
+%\usepackage{indentfirst}
+
+\setsecnumdepth{none}
+\setcounter{tocdepth}{0}
+
+% set up header and footer (see memoir manual for details)
+\makepagestyle{twinmoon}
+  \makeevenhead{twinmoon}{}{\scriptsize <& author|upper &>}{}
+  \makeoddhead{twinmoon}{}{\scriptsize <& title|upper &>}{}
+  \makeevenfoot{twinmoon}{}{\thepage}{}
+  \makeoddfoot{twinmoon}{}{\thepage}{}
+
+\usepackage{layout}
+%\layout
+
+% simple chapter headings
+\chapterstyle{dowding}
+
+\begin{document}
+
+\begin{titlingpage}
+\begin{center}
+
+% \vplace for vertical centering; number argument specifies ration between
+% upper and lower margin
+\begin{vplace}[1]
+\textbf{\Huge <& title &>}\\[0.25in]
+<% if subtitle is defined %>
+    \textit{\LARGE <& subtitle &>}\\[0.5in]
+<% endif %>
+{\huge by <& author &>}
+\\[0.5in]
+<% if titlegraphic is defined %>
+    \includegraphics[width=2in]{<& titlegraphic &>}\\[0.5in]
+<% endif %>
+<% if publisher is defined %>
+    {\Large <& publisher &>}
+<% endif %>
+\end{vplace}
+
+% uncomment if copyright is to be on its own page
+% \cleartorecto
+\newpage
+
+\begin{vplace}[1]
+{\Large
+Copyright © <& pubyear &> <& author &>
+\\[0.25in]
+All rights reserved.
+\\[0.5in]
+<% if editor.name is defined %>
+Editing by <& editor.name &>
+<% endif %>
+<% if editor.web is defined %>
+\\<& editor.web &>
+<% endif %>
+\\[0.25in]
+<% if coverart.name is defined %>
+Covert art by <& coverart.name &>
+<% endif %>
+<% if coverart.web is defined %>
+\\<& coverart.web &>
+<% endif %>
+\\[0.5in]
+<% if isbn10 is defined %>
+ISBN-10: <& isbn10 &>
+<% endif %>
+<% if isbn13 is defined %>
+\\ISBN-13: <& isbn13 &>
+<% endif %>
+}
+\end{vplace}
+
+\end{center}
+\end{titlingpage}
+
+\thispagestyle{empty}
+
+\frontmatter
+\pagestyle{plain}
+\tableofcontents
+<% for item in frontmatter %>
+\include{<& item.id &>}
+<% endfor %>
+
+\mainmatter
+\pagestyle{twinmoon}
+\include{<& mainmatter &>}
+
+\backmatter
+\pagestyle{plain}
+
+<% for item in backmatter %>
+\include{<& item.id &>}
+\cleartorecto
+<% endfor %>
+
+\end{document}

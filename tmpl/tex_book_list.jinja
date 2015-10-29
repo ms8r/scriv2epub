@@ -1,0 +1,52 @@
+<# ----------------------------------------------------------------------------
+Defines the structure for book listings in front and/or backmatter, works with
+or without images for a single series or multiple series.
+
+Passed in variables:
+    pg_meta: dict
+        Will look for `pg_meta.heading` and use as page heading. Required for
+        toc. If template is used for a single series only, use the series name
+        as heading and leave the series name in `pg_data` blank.  May also
+        contain `url` and `urltext` which, if specified, will be shown as
+        "Visit <urltext>" with `urltext` linked to `url` at the bottom of the
+        page.
+    pg_data: sequence
+        List with the different series to be listed. Each item is a dict with
+        the following items:
+            name: str
+                Series name / title
+            img: str
+                url of an image to be shown centered above the listing of the
+                individual titles in the series.
+            titlelist: sequence
+                List with the individual titles to be listed. Each item is a
+                dict with items `title`, `tclause`, and `subtitle` (all
+                except for title are optional). `img` will precede `title`.
+                `subtitle` will follow on a separate line below `title`.
+            addons: sequence
+                Same as `titlelist`. Items will follow the ones in `titlelist`,
+                separates by the text in `addonsep`.
+            addonsep: str
+                Text to precede add-ons
+---------------------------------------------------------------------------- #>
+<% if pg_meta.heading %>\chapter{<& pg_meta.heading &>}<% endif %>
+\begin{center}
+<% for series in pg_data %>
+    <% if series.series %>{\LARGE <& series.series &>}\plainbreak{0.5}<% endif %>
+    <% if series.img %>\includegraphics[width=0.75\linewidth]{<& series.img &>}\plainbreak{0.5}<% endif %>
+    <% for t in series.titlelist %>
+        <& t.title &><% if t.tclause %> <& t.tclause &><% endif %><% if t.subtitle %>\\<& t.subtitle &><% endif %>
+        \plainbreak{0.75}
+    <% endfor %>
+    <% if series.addons %>\plainbreak{0.5}<& series.addonsep &>
+    <% for a in series.addons %>
+        <& a.title &><% if a.tclause %> <& a.tclause &><% endif %><% if a.subtitle %>\\<& a.subtitle &><% endif %>
+        \plainbreak{0.75}
+    <% endfor %>
+    <% endif %>
+<% endfor %>
+<% if pg_meta.urltext %>
+\plainbreak{1}
+visit <& pg_meta.urltext &>
+<% endif %>
+\end{center}
