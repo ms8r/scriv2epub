@@ -208,6 +208,41 @@ def handle_init(args):
     if std: logging.info(std.decode('utf-8'))
 
 
+
+def mm_gen(mm, src_dir, hoffs):
+    """
+    Generator that yields the chapters in mm (mainmatter list of dicts) with
+    headings at correct level (top level will be equal to `hoffs` + 1).
+    Source markdown files are assumed to reside in `src_dir`.
+    """
+    level = hoffs + 1
+    for m in mm:
+        s = '{}{}\n\n'.format('#' * (level), m['heading'])
+        # *** for now chapters only ***
+        if not m['type'] == 'chapter':
+            continue
+        with open(os.path.join(src_dir, m['id'] + '.md'), 'r') as foi:
+            s += foi.read()
+        yield s
+        if 'children' in m:
+            yield from mm_gen(m['children'], src_dir, level)
+
+
+def handle_mmcat(args):
+    """
+    Concatenates all mainmatter markdown sources with headings at correct level
+    inserted.
+    """
+    with open(args.mmyaml, 'r') as foi:
+        mainmatter = yaml.load(foi)
+
+    foo = args.outfile if args.outfile else sys.stdout
+    for m in mm_gen(mainmatter, args.mddir, args.hoffset):
+        foo.write('{}\n\n'.format(m))
+
+    foo.close()
+
+
 def handle_scriv2md(args):
     """
     Generates markdown files from Scrivener RTF sources.
@@ -450,6 +485,18 @@ def setup_parser_scriv2md(p):
             help="path to Scrivener project directory")
 
 
+def setup_parser_mmcat(p):
+    p.add_argument('--mmyaml', required=True,
+            help="YAML file with book mainmatter page inventory")
+    p.add_argument('--outfile', type=argparse.FileType('a'), default=None,
+            help="file to save output to, defaults to STDOUT if"
+            " not specified")
+    p.add_argument('--hoffset', type=int, default=0,
+            help="""offset for chapter heading  level; defaults to 0""")
+    p.add_argument('--mddir', required=True,
+            help="directory from which to read markdown chapter files")
+
+
 def setup_parser_body2md(p):
     p.add_argument('--bodydir', default='.',
             help="""path to body XHTML files; defaults to current directory""")
@@ -532,7 +579,9 @@ _task_handler = {'init': (handle_init, setup_parser_init),
                  'scriv2md': (handle_scriv2md, setup_parser_scriv2md),
                  'scrivx2yaml': (handle_scrivx2yaml, setup_parser_scrivx2yaml),
                  'genep': (handle_genep, setup_parser_genep),
-                 'body2md': (handle_body2md, setup_parser_body2md),}
+                 'body2md': (handle_body2md, setup_parser_body2md),
+                 'mmcat': (handle_mmcat, setup_parser_mmcat),
+}
 
 
 if __name__ == '__main__':
