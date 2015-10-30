@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """s2e.py: EPUB Pre-Processor - utilities for converting Scrivener
-projects into good looking EPUBs (written for Python 3)
+projects into good looking EPUBs and print books(written for Python 3)
 
 Run `python s2e.py -h` for more info
 """
@@ -239,7 +239,7 @@ def latex_fleuronize(s, symbol=r'\\infty', rpt=3, math=True):
     patterns = [
             r'\\?[*]\s*\\?[*]\s*\\?[*]',
             r'\\?[#]\s*\\?[#]\s*\\?[#]',
-            r'\\?[<]\s*\\?[<]\s*\\?[<]\s*\?[>]\s*\\?[>]\s*\\?[>]',
+            r'\\?[<]\s*\\?[<]\s*\\?[<]\s*\\?[>]\s*\\?[>]\s*\\?[>]',
     ]
     repl = symbol * rpt
     if math:
