@@ -14,9 +14,9 @@ jinja delimiters used in this template are:
 \documentclass[10pt]{memoir}
 
 % paper size and page layout, see memoir user manual for details
-\setstocksize{7.81in}{5.06in}
+\setstocksize{8in}{5.25in}
 \settrimmedsize{\stockheight}{\stockwidth}{*}
-\settypeblocksize{6in}{3.56in}{*}
+\settypeblocksize{6.19in}{3.75in}{*}
 \setlrmargins{0.9in}{*}{*}
 \setulmargins{0.75in}{*}{*}
 \setheadfoot{\baselineskip}{0.41in}
@@ -56,7 +56,7 @@ jinja delimiters used in this template are:
 
 % \vplace for vertical centering; number argument specifies ration between
 % upper and lower margin
-\begin{vplace}[1]
+\begin{vplace}[2]
 \textbf{\Huge <& title &>}\\[0.25in]
 <% if subtitle is defined %>
     \textit{\LARGE <& subtitle &>}\\[0.5in]
@@ -64,10 +64,10 @@ jinja delimiters used in this template are:
 {\huge by <& author &>}
 \\[0.5in]
 <% if titlegraphic is defined %>
-    \includegraphics[width=2in]{<& titlegraphic &>}\\[0.5in]
+    \includegraphics[width=0.75\linewidth]{<& titlegraphic &>}
 <% endif %>
 <% if publisher is defined %>
-    {\Large <& publisher &>}
+    \\[0.5in]{\Large <& publisher &>}
 <% endif %>
 \end{vplace}
 

@@ -230,19 +230,26 @@ def mm_gen(mm, src_dir, hoffs):
 
 def latex_fleuronize(s, symbol=r'\\infty', rpt=3, math=True):
     """
-    Replaces instances of *** and ### in string `s` (also if backslah escaped
-    and/or spearated by spaces) with raw LaTeX code for a fleuron, using `rpt`
-    repetitions of character `symbol` (can be a LaTeX command in which case the
-    leading \ must be escaped as \\. If `math` is `True` `symbol` will be
-    placed in math environment.
+    Replaces instances of ***, ###, and <<<>>> in string `s` (also if backslah
+    escaped and/or spearated by spaces) with raw LaTeX code for a fleuron,
+    using `rpt` repetitions of character `symbol` (can be a LaTeX command in
+    which case the leading \ must be escaped as \\. If `math` is `True`
+    `symbol` will be placed in math environment.
     """
-    pattern = r'\\?[#*]\s*\\?[#*]\s*\\?[#*]'
+    patterns = [
+            r'\\?[*]\s*\\?[*]\s*\\?[*]',
+            r'\\?[#]\s*\\?[#]\s*\\?[#]',
+            r'\\?[<]\s*\\?[<]\s*\\?[<]\s*\?[>]\s*\\?[>]\s*\\?[>]',
+    ]
     repl = symbol * rpt
     if math:
         repl = '$' + repl + '$'
     repl = r'\\plainbreak{{1}}\\fancybreak{{{}}}\\plainbreak{{1}}'.format(repl)
 
-    return re.sub(pattern, repl, s)
+    for pat in patterns:
+        s = re.sub(pat, repl, s)
+
+    return s
 
 
 def handle_mmcat(args):
