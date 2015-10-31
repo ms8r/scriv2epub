@@ -28,8 +28,11 @@ _TEMPLATE_PATH = os.path.join(_PATH_PREFIX, 'tmpl')
 _TEMPLATE_EXT = '.jinja'
 _EPUB_SKELETON_PATH = os.path.join(_PATH_PREFIX, 'epub')
 _BASIC_CH_PAR_STYLE = 'par-indent'
+_FIRST_CH_PAR_STYLE = 'texttop'
+_DROP_CAP_STYLE = 'dropcap'
+_CLEAR_STYLE = 'clearit'
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class ParsingError(Exception):
@@ -208,7 +211,6 @@ def handle_init(args):
     if std: logging.info(std.decode('utf-8'))
 
 
-
 def mm_gen(mm, src_dir, hoffs):
     """
     Generator that yields the chapters in mm (mainmatter list of dicts) with
@@ -280,6 +282,7 @@ def handle_scriv2md(args):
 
     src = []
     target = []
+
     # quick and dirty recursion to turn yaml into lists
     def mk_mm_list(mm):
         for m in mm:
@@ -501,10 +504,23 @@ def handle_genep(args):
         cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
         std, err = run_script(cmd, mdfile, par_style)
         if err: logging.error(err.decode('utf-8'))
+        std = std.decode('utf-8')
+        if args.dropcaps:
+            std = re.sub(
+                    r'<p class="{}">\s*'
+                    '(?P<pre_tag>(<[^>]*>)*)'
+                    '(?P<first>[^a-zA-Z0-9]*[a-zA-Z0-9])'.format(
+                        _BASIC_CH_PAR_STYLE),
+                    '<p class="{0}">\g<pre_tag><span class="{1}">'
+                    '\g<first></span>'.format(_FIRST_CH_PAR_STYLE,
+                        _DROP_CAP_STYLE), std, 1)
+            std = re.sub(r'<p class="{}">'.format(_BASIC_CH_PAR_STYLE),
+                    '<p class="{0} {1}">'.format(_BASIC_CH_PAR_STYLE,
+                        _CLEAR_STYLE), std, 1)
         tmpl_name = pg.get('template', 'chapter')
         tmpl = tmplEnv.get_template(tmpl_name + _TEMPLATE_EXT)
         with open(outfile, 'w') as foo:
-            foo.write(tmpl.render(pg, chapter_content=std.decode('utf-8'),
+            foo.write(tmpl.render(pg, chapter_content=std,
                 header_title=meta['title'] + ' | ' + pg['heading'],
                 pg_meta=pg))
 
@@ -675,6 +691,9 @@ def setup_parser_genep(p):
             help="""path to markdown and static xhtml ource files for
             mainmatter chapter content (relative to EPUB root directory);
             dafaults to 'src'""")
+    p.add_argument('--dropcaps', action='store_true',
+            help="""causes first character in chapters to be formatted
+            as dropcap""")
 
 
 # The _task_handler dictionary maps each 'command' to a (task_handler,
