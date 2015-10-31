@@ -541,15 +541,18 @@ def handle_genep(args):
                 pg_data=pg_data, pages=pages,
                 header_title=pg.get('heading')))
 
-    for pg in pages:
-        if pg['type'] == 'chapter':
-            gen_chapter(pg)
-        elif pg['type'] == 'static':
-            cp_static(pg)
-        elif pg['type'] == 'template':
-            gen_from_tmpl(pg, pages)
-        if 'children' in pg:
-            gen_content(pg['children'])
+    def gen_content(pages):
+        for pg in pages:
+            if pg['type'] == 'chapter':
+                gen_chapter(pg)
+            elif pg['type'] == 'static':
+                cp_static(pg)
+            elif pg['type'] == 'template':
+                gen_from_tmpl(pg, pages)
+            if 'children' in pg:
+                gen_content(pg['children'])
+
+    gen_content(pages)
 
     return
 
@@ -576,7 +579,7 @@ def setup_parser_mmcat(p):
             help="file to save output to, defaults to STDOUT if"
             " not specified")
     p.add_argument('--hoffset', type=int, default=0,
-            help="""offset for chapter heading  level; defaults to 0""")
+            help="""offset for chapter heading level; defaults to 0""")
     p.add_argument('--mddir', required=True,
             help="directory from which to read markdown chapter files")
     p.add_argument('--lbreak', action='store_true',

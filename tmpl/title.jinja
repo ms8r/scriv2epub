@@ -5,12 +5,12 @@
     {% if subtitle is defined %}
         <p class="subtitle">{{ subtitle|e }}</p>
     {% endif %}
-    {% if subplain is defined %}
-        <p class="center-par">{{ subplain|e }}</p>
-    {% endif %}
     <p class="author">by {{ author|e }}</p>
     {% if img is defined %}
         <p class="center"><img src="{{ img|e }}" alt="{{ title|e }} /></p>
+    {% endif %}
+    {% if subplain is defined %}
+        <p class="center-par">{{ subplain|e }}</p>
     {% endif %}
     {% if series is defined %}
         <p class="series">{{ series|e }}</p>
