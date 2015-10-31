@@ -32,7 +32,7 @@ _FIRST_CH_PAR_STYLE = 'texttop'
 _DROP_CAP_STYLE = 'dropcap'
 _CLEAR_STYLE = 'clearit'
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class ParsingError(Exception):
