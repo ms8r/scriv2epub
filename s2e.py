@@ -16,7 +16,6 @@ import xml.etree.ElementTree as ET
 import argparse
 from datetime import datetime as dt
 from hashlib import md5
-from tempfile import NamedTemporaryFile
 import logging
 import yaml
 import jinja2 as j2
@@ -232,10 +231,10 @@ def mm_gen(mm, src_dir, hoffs):
 
 def latex_fleuronize(s, symbol=r'\\infty', rpt=3, math=True):
     """
-    Replaces instances of ***, ###, and <<<>>> in string `s` (also if backslah
+    Replaces instances of ***, ###, and <<<>>> in string `s` (also if backslash
     escaped and/or spearated by spaces) with raw LaTeX code for a fleuron,
     using `rpt` repetitions of character `symbol` (can be a LaTeX command in
-    which case the leading \ must be escaped as \\. If `math` is `True`
+    which case the leading \ must be escaped as \\). If `math` is `True`
     `symbol` will be placed in math environment.
     """
     patterns = [
