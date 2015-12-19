@@ -79,7 +79,8 @@ def get_chapters(top, type_filter=None, in_compile_only=True):
             in_compile = e.find('MetaData').findtext(
                     'IncludeInCompile')
             if ((type_filter is None or rec['scrivType'] == type_filter)
-                    and (in_compile.lower() == 'yes' or not in_compile_only)):
+                    and (in_compile is None or in_compile.lower() == 'yes'
+                         or not in_compile_only)):
                 incl_item = True
                 rec['children'] = []
                 ccollect = rec['children']
