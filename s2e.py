@@ -17,6 +17,7 @@ import argparse
 from datetime import datetime as dt
 from hashlib import md5
 import logging
+from collections import OrderedDict
 import yaml
 import jinja2 as j2
 from num2eng import num2eng
@@ -304,6 +305,51 @@ def handle_scriv2md(args):
         if std: logging.info(std.decode('utf-8'))
 
     return i
+
+def navMap2dict(nav_map, chtype='chapter', headings=False, hoffset=0):
+    """
+    Converts the NCX navMap (an ETree Element) to a list of dicts, preserving
+    hierarchy/nesting. Returns number of navPoints  added (incl. nesting).
+    The value of `chtype` will be added a 'type' entry to each navPoint in the
+    output. If `headings == True`, the 'heading 'entry for each navPoint will
+    the chapter number in English ("Chapter One"). `hoffset` can be used to
+    specify an offset in the chapter numbering. if `hoffset > 0`, numbering
+    will start with the value of `hoffset`. If `hoffset < 0`, numbering will
+    start with One at the (hoffset + 1)st chapter.
+    """
+    # extract name space URI (if any)
+    try:
+        ns_uri = re.match(r'\{([^}]+)\}', nav_map.tag).groups()[0]
+    except AttributeError:
+        ns_uri = ''
+
+    ns = {'xmlns': ns_uri}
+
+    def get_navPoint_children(parent, records, count):
+        for np in parent.iterfind('xmlns:navPoint', ns):
+            count += 1
+            rec = {}
+            if headings and count > 0:
+                rec['heading'] = ('Chapter ' +
+                        num2eng(count).title().replace(' ', '-'))
+            else:
+                rec['heading'] = np.find(
+                        'xmlns:navLabel', ns).find('xmlns:text', ns).text
+            rec['id'] = np.get('id')
+            rec['type'] = chtype
+            rec['src'] = np.find('xmlns:content', ns).get('src')
+            # check for children:
+            if np.find('xmlns:navPoint', ns):
+                children = []
+                count = get_navPoint_children(np, children, count)
+                rec['children'] = children
+            records.append(rec)
+        return count
+
+    records = []
+    count = get_navPoint_children(nav_map, records, hoffset)
+
+    return records
 
 
 def handle_scrivx2yaml(args):
