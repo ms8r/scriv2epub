@@ -13,6 +13,7 @@ import subprocess
 import re
 from copy import deepcopy
 import xml.etree.ElementTree as ET
+from urllib.parse import urlsplit, urlunsplit, urlencode, parse_qs
 import argparse
 from datetime import datetime as dt
 from hashlib import md5
@@ -20,6 +21,7 @@ import logging
 from collections import OrderedDict
 import yaml
 import jinja2 as j2
+from markdown import Markdown
 from num2eng import num2eng
 
 
@@ -352,6 +354,24 @@ def navMap2dict(nav_map, chtype='chapter', headings=False, hoffset=0):
     return records
 
 
+def mk_query_urls(ht_text, url_re, qmap):
+    """
+    Appends a URL query string contructed from `qmap` to all URLs that match
+    `url_re` in `ht_text`. If the original URL already contained one of the
+    query elements in `qmap` this will be overwritten with the `qmap` version.
+    Returns the text with substitutions made.
+    """
+    links = re.findall(url_re, ht_text)
+    for ll in set(links):
+        old = urlsplit(ll)
+        if old.query:
+            qmap = dict(list(parse_qs(old.query).items()) + list(qmap.items()))
+        new = list(old[:3]) + [urlencode(qmap)] + [old[-1]]
+        ht_text = ht_text.replace('"{}"'.format(ll),
+                '"{}"'.format(urlunsplit(new).replace('&', '&amp;')))
+    return ht_text
+
+
 def handle_scrivx2yaml(args):
     """
     Converts the 'Manuscript' section a Scrivener project XML file into a YAML
@@ -538,7 +558,14 @@ def handle_genep(args):
         target = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
         logging.info('copying %s to %s...', source, target)
         shutil.copy(source, target)
+        if 'query_url' in pg:
+            with open(target, 'r') as foi:
+                ht_text = mk_query_urls(foi.read(), pg['query_url']['url_re'],
+                                        pg['query_url']['utm'])
+            with open(target, 'w') as foo:
+                foo.write(ht_text)
 
+    mdo = Markdown()
     def gen_chapter(pg):
         md_base = pg.get('src', pg['id'])
         mdfile = os.path.join(args.epubdir, args.srcdir, md_base + '.md')
@@ -547,28 +574,31 @@ def handle_genep(args):
         par_style = pg.get('parstyle', _BASIC_CH_PAR_STYLE)
         logging.info('generating %s from %s with par style "%s"...', outfile,
                 mdfile, par_style)
-        cmd = os.path.join(_PATH_PREFIX, 'md2htsnip.sh')
-        std, err = run_script(cmd, mdfile, par_style)
-        if err: logging.error(err.decode('utf-8'))
-        std = std.decode('utf-8')
+        with open(mdfile, 'r') as foi:
+            ht_text = mdo.convert(foi.read())
+        ht_text = re.sub(r'<p>', r'<p class="{}">'.format(par_style), ht_text)
         if args.dropcaps:
-            std = re.sub(
+            ht_text = re.sub(
                     r'<p class="{}">\s*'
                     '(?P<pre_tag>(<[^>]*>)*)'
                     '(?P<first>[^a-zA-Z0-9]*[a-zA-Z0-9])'.format(
                         _BASIC_CH_PAR_STYLE),
                     '<p class="{0}">\g<pre_tag><span class="{1}">'
                     '\g<first></span>'.format(_FIRST_CH_PAR_STYLE,
-                        _DROP_CAP_STYLE), std, 1)
-            std = re.sub(r'<p class="{}">'.format(_BASIC_CH_PAR_STYLE),
+                        _DROP_CAP_STYLE), ht_text, 1)
+            ht_text = re.sub(r'<p class="{}">'.format(_BASIC_CH_PAR_STYLE),
                     '<p class="{0} {1}">'.format(_BASIC_CH_PAR_STYLE,
-                        _CLEAR_STYLE), std, 1)
+                        _CLEAR_STYLE), ht_text, 1)
         tmpl_name = pg.get('template', 'chapter')
         tmpl = tmplEnv.get_template(tmpl_name + _TEMPLATE_EXT)
-        with open(outfile, 'w') as foo:
-            foo.write(tmpl.render(pg, chapter_content=std,
+        ht_text = tmpl.render(pg, chapter_content=ht_text,
                 header_title=meta['title'] + ' | ' + pg['heading'],
-                pg_meta=pg))
+                pg_meta=pg)
+        if 'query_url' in pg:
+            ht_text = mk_query_urls(ht_text, pg['query_url']['url_re'],
+                                    pg['query_url']['utm'])
+        with open(outfile, 'w') as foo:
+            foo.write(ht_text)
 
     def gen_from_tmpl(pg, pages):
         tmpl_name = pg.get('template')
@@ -596,12 +626,15 @@ def handle_genep(args):
             except FileNotFoundError as e:
                 logging.warning(e)
         tmpl = tmplEnv.get_template(tmpl_name + _TEMPLATE_EXT)
+        ht_text = tmpl.render(meta, pg_meta=pg, pg_data=pg_data, pages=pages,
+                              header_title=pg.get('heading'))
+        if 'query_url' in pg:
+            ht_text = mk_query_urls(ht_text, pg['query_url']['url_re'],
+                                    pg['query_url']['utm'])
         outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] + '.xhtml')
         logging.info('generating %s...', outfile)
         with open(outfile, 'w') as foo:
-            foo.write(tmpl.render(meta, pg_meta=pg,
-                pg_data=pg_data, pages=pages,
-                header_title=pg.get('heading')))
+            foo.write(ht_text)
 
     def gen_content(pages):
         for pg in pages:
