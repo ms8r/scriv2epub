@@ -2,7 +2,7 @@
 ROOT_DIR         = ~/Python/scriv2epub
 S2E              = $(ROOT_DIR)/s2e.py
 TMPL_DIR         = $(ROOT_DIR)/tmpl
-EPUB_CHECKER	 = java -jar ~/EPUB/epubcheck-3.0/epubcheck-3.0.jar
+EPUB_CHECKER	 = java -jar ~/EPUB/epubcheck-4.0.1/epubcheck.jar
 SRC_DIR          = src
 STATIC_SOURCES   = ./src/*.xhtml
 MD_SOURCES       = ./src/*.md
@@ -104,8 +104,7 @@ epub: info
 	@echo "#"
 	@echo "# calling epubcheck to validate $(BOOK).epub..."
 	@echo "#"
-	java -jar /home/markus/EPUB/epubcheck-3.0/epubcheck-3.0.jar \
-		"$(BOOK).epub"
+	$(EPUB_CHECKER) "$(BOOK).epub"
 
 
 .PHONY: content
