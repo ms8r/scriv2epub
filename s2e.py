@@ -33,6 +33,7 @@ _BASIC_CH_PAR_STYLE = 'par-indent'
 _FIRST_CH_PAR_STYLE = 'texttop'
 _DROP_CAP_STYLE = 'dropcap'
 _CLEAR_STYLE = 'clearit'
+_IN_PG_SEC_BREAK_STYLE = 'center-par-tb-space'
 
 logging.basicConfig(level=logging.INFO)
 
@@ -566,6 +567,11 @@ def handle_genep(args):
                 foo.write(ht_text)
 
     mdo = Markdown()
+    # lines with `break_re` in the raw HTML output will be styled as in-page
+    # section breaks
+    break_re = [r'&lt;&lt;&lt;\s*&gt;&gt;&gt;',
+                r'\*\s*\*\s*\*',
+                r'#\s*#\s*#', ]
     def gen_chapter(pg):
         md_base = pg.get('src', pg['id'])
         mdfile = os.path.join(args.epubdir, args.srcdir, md_base + '.md')
@@ -576,6 +582,12 @@ def handle_genep(args):
                 mdfile, par_style)
         with open(mdfile, 'r') as foi:
             ht_text = mdo.convert(foi.read())
+        # styling for in-page section breaks:
+        for pat in break_re:
+            pat = r'<p>\s*(?P<first>{})\s*</p>'.format(pat)
+            ht_text = re.sub(
+                    pat, '<p class="{}">\g<first></p>'.format(
+                    _IN_PG_SEC_BREAK_STYLE), ht_text)
         ht_text = re.sub(r'<p>', r'<p class="{}">'.format(par_style), ht_text)
         if args.dropcaps:
             ht_text = re.sub(
