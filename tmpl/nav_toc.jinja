@@ -1,7 +1,7 @@
 {% extends "xhtml_skeleton.jinja" %}
 {% block body %}
-<h1 class="toc-heading">{{ pg_meta.heading|default('Contents')|e }}</h1>
 <nav epub:type="toc">
+<h1 class="toc-heading">{{ pg_meta.heading|default('Contents')|e }}</h1>
 <ol>
 {% set level = [] %}
 {% for pg in pages recursive %}
