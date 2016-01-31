@@ -4,21 +4,21 @@
 
 <p class="center-par-tb-extra-space">{{ title|e }}</p>
 <p class="center-par-tb-extra-space">{{ copyright|d('Copyright 2015') }} by {{ author|e }}</p>
-<p class="center-par-tb-extra-space"></p>
 {% if authorweb is defined %}
     <p class="center-par-tb-extra-space">{{ autherweb|e }}</p>
 {% endif %}
 {% if authoremail is defined %}
     <p class="center-par-tb-extra-space">{{ authoremail|e }}</p>
 {% endif %}
-<p class="center-par-tb-extra-space"></p>
-{% if editor.name is defined %}<p class="center-par-tb-extra-space">Editing by {{ editor.name|e }}{% endif %}
+{% if editor.name is defined %}<p class="center-par-tb-extra-space">Editing by {{ editor.name|e }}
 {% if editor.web is defined %}<br />{{ editor.web }}{% endif %}
 </p>
+{% endif %}
 <p class="center-par-tb-extra-space"></p>
-{% if coverart.name is defined %}<p class="center-par-tb-extra-space">Cover art by {{ coverart.name|e }}{% endif %}
+{% if coverart.name is defined %}<p class="center-par-tb-extra-space">Cover art by {{ coverart.name|e }}
 {% if coverart.web is defined %}<br />{{ coverart.web }}{% endif %}
 </p>
+{% endif %}
 
 <p class="center-par-tb-extra-space"></p>
 <p class="center-par-tb-extra-space">This book or any portion thereof may not be reproduced or used in any manner without the express written permission of the author except for the use of brief quotations in articles or reviews.</p>
