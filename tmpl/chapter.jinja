@@ -3,10 +3,10 @@
 {% block body %}
 
 {% if heading is defined %}
-    <h2 class="chapter-heading">{{ heading|e }}</h2>
+    <h2 class="chapter-heading {{ hdgalign|default('center') }}">{{ heading|e }}</h2>
 {% endif %}
 {% if subheading is defined %}
-    <h3 class="chapter-heading">{{ subheading|e }}</h3>
+    <h3 class="chapter-heading {{ subalign|default('center') }}">{{ subheading|e }}</h3>
 {% endif %}
 
 {% if pg_meta.beg_raw %}{{ pg_meta.beg_raw }}{% endif %}
