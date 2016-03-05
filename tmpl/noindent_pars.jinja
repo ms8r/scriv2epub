@@ -1,5 +1,7 @@
 {% extends "xhtml_skeleton.jinja" %}
 
+{# pars, beg_raw and end_raw are not HTML escaped below - assumes that these are passed as valid HTML #}
+
 {% block body %}
 
 {% if pg_meta.heading %}<h2>{{ pg_meta.heading|e }}</h2>{% endif %}
@@ -10,7 +12,7 @@
 {% if pg_meta.beg_raw %}{{ pg_meta.beg_raw }}{% endif %}
 
 {% for p in pg_meta.pars %}
-<p class="no-indent">{{ p|e }}</p>
+<p class="no-indent">{{ p }}</p>
 {% endfor %}
 
 {% if pg_meta.end_raw %}{{ pg_meta.end_raw }}{% endif %}

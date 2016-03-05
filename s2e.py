@@ -21,7 +21,7 @@ import logging
 from collections import OrderedDict
 import yaml
 import jinja2 as j2
-from markdown import Markdown
+from markdown import markdown
 from num2eng import num2eng
 
 
@@ -566,7 +566,6 @@ def handle_genep(args):
             with open(target, 'w') as foo:
                 foo.write(ht_text)
 
-    mdo = Markdown()
     # lines with `break_re` in the raw HTML output will be styled as in-page
     # section breaks
     break_re = [r'&lt;&lt;&lt;\s*&gt;&gt;&gt;',
@@ -581,7 +580,7 @@ def handle_genep(args):
         logging.info('generating %s from %s with par style "%s"...', outfile,
                 mdfile, par_style)
         with open(mdfile, 'r') as foi:
-            ht_text = mdo.convert(foi.read())
+            ht_text = markdown(foi.read())
         # styling for in-page section breaks:
         for pat in break_re:
             pat = r'<p>\s*(?P<first>{})\s*</p>'.format(pat)
@@ -613,6 +612,14 @@ def handle_genep(args):
             foo.write(ht_text)
 
     def gen_from_tmpl(pg, pages):
+        # `beg_raw`, `end_raw` and `pars` need to be run through markdown:
+        for raw in ['beg_raw', 'end_raw']:
+            if raw not in pg:
+                continue
+            pg[raw] = markdown(pg[raw])
+        if 'pars' in pg:
+            pg['pars'] = [markdown(p).replace('<p>', '').replace('</p>', '')
+                          for p in pg['pars']]
         tmpl_name = pg.get('template')
         if not tmpl_name:
             tmpl_name = pg['id']
