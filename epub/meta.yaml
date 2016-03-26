@@ -1,5 +1,5 @@
 #==============================================================================
-# Configuration file for scriv2epub - see README.md for genral intro
+# Configuration file for scriv2epub - see README.md for general intro
 #==============================================================================
 
 #------------------------------------------------------------------------------
@@ -7,13 +7,13 @@
 #------------------------------------------------------------------------------
 
 title:          This is the Title
-# subtitle:     # uncommen if you want this to appear
-subplain:       Comment this out if you don't wnat it to appear
+# subtitle:     # uncomment if you want this to appear
+subplain:       Comment this out if you don't want it to appear
 author:         Fred Feuerstein
 authorweb:      www.fredfeuerstein.com      # will not be linked
 authoremail:    fred@feuerstein.com
 # authorlist:
-#  - author one # uncomment if you want multiple author to appear as
+#  - author one # uncomment if you want multiple authors to appear as
                 # creators in content.opf
 #  - author two
 series:         The Flintstones
@@ -38,36 +38,82 @@ keywords:
 #------------------------------------------------------------------------------
 # Book contents
 #------------------------------------------------------------------------------
-# Book will be assembled as
-# - frontmatter (incl. cover page)
-# - mainmatter (defined in separate YAML file)
-# - backmatter
 
 # For opf guide section: id of page to open to:
 start_id:   title
 
-# Label for each item will become page-id with href={label}.xhtml
-# For type == template a template {id}.jinja must exist in templates folder
-# `type` attribute:
-#       static      -   a file {id}.xhtml will be copied from source to target
-#                       directory (source and target can be specified as cmd
-#                       line parameters)
-#       template    -   either a template {id}.jinja must exist in templates
-#                       folder or a 'template' attribute must provide the name
-#                       of the template to be used (without .ninja suffix); an
-#                       additional top-level YAML section can be provided to
-#                       specify the page contents (see example below); the root
-#                       of the data structure generated from this YAML will be
-#                       passed into the template as the pg_data variable; the
-#                       YAML section can also be offshored into a separate YAML
-#                       file named {id}.yaml in a directory specified by the
-#                       --yincl parameter to s2e's `genep` command
-#       chapter     -   will  generate xhtml content from {id}.md in
-#                       source directory and use 'chapter.jinja' in templates
-#                       directory unless another template is specified; the
-#                       dict with the page parameters and the xhtml content
-#                       from the source Markdown file will be passed into the
-#                       template
+# Book will be assembled as
+# - frontmatter (incl. cover page)
+# - mainmatter (defined in separate YAML file)
+# - backmatter
+#
+# Under each of these three sections a list of the pages/chapters is specified
+# in the order in which they are to appear in the book. Each item in these
+# lists includes a mandatory `id` and a mandatory `type` attribute (various
+# other possible attributes are explained below). `type` must be one of the
+# following three types:
+#
+#   static      -   Will simply copy a file named {src}.xhtml from a source
+#                   directory (specified as command line argument to s2e.py) to
+#                   the `OPS` directory under `epub` (if the `src` attribute is
+#                   specified for respective item, otherwise {id}.xhtml will be
+#                   looked for to copy). The destination file will be named
+#                   {id}.xhtml.
+#
+#   template    -   Either a template {id}.jinja must exist in templates
+#                   folder or a `template` attribute must provide the name of
+#                   the template to be used (without .ninja suffix); an
+#                   additional top-level YAML section can be provided to
+#                   specify the page contents (see example below); the root of
+#                   the data structure generated from this YAML will be passed
+#                   into the template as the pg_data variable; the YAML section
+#                   can also be offshored into a separate YAML file named
+#                   {id}.yaml in a directory specified by the --yincl parameter
+#                   to s2e's `genep` command. Check the comments in the
+#                   individual templates in the `tmpl` directory to see what
+#                   arguments the individual templates can process. You can
+#                   also create new templates that can reference metadate above
+#                   and/or page data attributes specified under the respective
+#                   template entry in this file.
+#
+#   chapter     -   Will use `chapter.jinja` in template directory (or
+#                   alternative template specified via optional `template`
+#                   parameter) and generate the content either from {src}.md in
+#                   the source directory (specified as command line argument to
+#                   s2r.py) if `src` attribute is specified for this item.
+#                   Otherwise {id}.md will be looked for. The rendered file
+#                   will be written to {id}.xhtml into the `OPS` directory
+#                   under `epub`. It is possible to specify an alternate source
+#                   directory for a specific item by providing a `srcdir`
+#                   attribute for this item. `srcdir` must be mapped to a
+#                   relative path starting from the `epub` directory this
+#                   `meta.yaml` file resides in.  The `chapter` template
+#                   accepts a number of additional attributes:
+#
+#                       heading     -   Heading text to appear within h2 tag.
+#
+#                       hdgalign    -   Alignment for heading; must be a style
+#                                       defined in `OPS/css/stylesheet.css`;
+#                                       defaults to "center" if not specified.
+#
+#                       subheading  -   Sub-heading text to appear within h3 tag.
+#
+#                       subalign    -   Alignment for sub-heading, see
+#                                       `hdgalign` above.
+#
+#                       beg_raw     -   HTML formatted text that will be placed
+#                                       above the actual chapter content
+#                                       (beneath heading and subheading) if
+#                                       specified.
+#
+#                       end_raw     -   As `beg_raw` but will be placed after
+#                                       chapter content.
+#
+# For all three page types it is possible to specify a `query_url` parameter.
+# This allows to append query parameters to URLs in the generated HTML that
+# match a given regex. The typical use case is to append Google Analytics UTM
+# parameters that allow to trace a click back to the specific location of the
+# link in the book. See example below for details.
 #
 frontmatter:
     - id:       cover
@@ -82,6 +128,17 @@ frontmatter:
     - id:       freebook_dd
       type:     static
       heading:  Free Book
+      query_url:
+          # `query_url` parameter can be used to append url query parameters to
+          # href attributes in the generated HTML that match the regex below.
+          # Parameters and corresponding values are specified under `utm`
+          # below.
+          url_re:  '"(http://(?:www.)?flintstones.com[^"]*)"'
+          utm:
+              utm_source:   some_reference_to_this_book
+              utm_medium:   ebook_kindle
+              utm_campaign: generic
+              utm_content:  freebook_fm
     - id:       booksinseries
       # pg_data will be taken from 'booksinseries' section in this file is
       # avilable or read from booksinseries.yaml
@@ -98,27 +155,27 @@ frontmatter:
 booksinseries:  # if provided in separate file, list starting with '- name'
                 # must be at top level; see comments in book_list.jinja
                 # for avialable variables
-- series:     Some Series Title
-  titlelist:
-  - title:    Blue Moon
-    tclause:  (Book 1)
-    url:      http://...
-  - title:    Yellow Moon
-    tclause:  (the Prequel)
-    url:      http://...
-  addonsep:   'coming soon:'
-  addons:
-  - title:    Distant Sun
-    tclause:  (Book 2)
-    url:      http://...
-- series:     Some other Series Title
-  titlelist:
-  - title:    Deep Sea
-    tclause:  (Book 1)
-    url:      http://...
-  - title:    Shallow Water
-    tclause:  (the Prequel)
-    url:      http://...
+    - series:     Some Series Title
+      titlelist:
+      - title:    Blue Moon
+        tclause:  (Book 1)
+        url:      http://...
+      - title:    Yellow Moon
+        tclause:  (the Prequel)
+        url:      http://...
+      addonsep:   'coming soon:'
+      addons:
+      - title:    Distant Sun
+        tclause:  (Book 2)
+        url:      http://...
+    - series:     Some other Series Title
+      titlelist:
+      - title:    Deep Sea
+        tclause:  (Book 1)
+        url:      http://...
+      - title:    Shallow Water
+        tclause:  (the Prequel)
+        url:      http://...
 
 backmatter:
     - id:       otherbooksbyauthor

@@ -573,8 +573,10 @@ def handle_genep(args):
                 r'\*\s*\*\s*\*',
                 r'#\s*#\s*#', ]
     def gen_chapter(pg):
+        # TODO: run beg_raw and end_raw through markdown
         src_dir = pg.get('srcdir')
-        src_path = os.path.join(args.epubdir, src_dir if src_dir else args.srcdir)
+        src_path = os.path.join(args.epubdir, src_dir if src_dir else
+                                args.srcdir)
         src_path = os.path.abspath(src_path)
         md_base = pg.get('src', pg['id'])
         mdfile = os.path.join(src_path, md_base + '.md')

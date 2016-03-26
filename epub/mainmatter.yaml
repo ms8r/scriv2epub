@@ -1,31 +1,24 @@
 # This file can be generated automatically from a Scrivener project
 # via ``python s2e.py srivx2yaml``
 #
-# Only type == chapter allowed in mainmatter; template chapter.jinja
-# will be used by default, alternative template can be specified via
-# 'template' key
+# See introductory comments in `meta.yaml` for explanation.
 #
 - heading: Chapter One
   id: stuff
-  level: 1
-  src: Files/Docs/12.rtf
   type: chapter
   parstyle: no-indent
 - heading: Chapter Two
   id: more_stuff
-  level: 1
-  src: Files/Docs/123.rtf
   type: chapter
   children:
     - heading: Chapter Two and One Half
       id: subchapter
-      level: 2
       src: Files/Docs/1234.rtf
       type: chapter
 - heading: Thank you
   id: tnote
-  level: 1
+  src: external_source
+  srcdir: '../../other_book/epub/src'
   type: chapter
-  src: Files/Docs/456.rtf
   parstyle: no-indent       # will be used as default paragraph style for
                             # this chapter
