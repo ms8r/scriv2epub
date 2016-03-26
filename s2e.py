@@ -572,8 +572,11 @@ def handle_genep(args):
                 r'\*\s*\*\s*\*',
                 r'#\s*#\s*#', ]
     def gen_chapter(pg):
+        src_dir = pg.get('srcdir')
+        src_path = os.path.join(args.epubdir, src_dir if src_dir else args.srcdir)
+        src_path = os.path.abspath(src_path)
         md_base = pg.get('src', pg['id'])
-        mdfile = os.path.join(args.epubdir, args.srcdir, md_base + '.md')
+        mdfile = os.path.join(src_path, md_base + '.md')
         outfile = os.path.join(args.epubdir, args.htmldir, pg['id'] +
                                '.xhtml')
         par_style = pg.get('parstyle', _BASIC_CH_PAR_STYLE)
