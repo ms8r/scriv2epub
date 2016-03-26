@@ -442,7 +442,8 @@ def handle_body2md(args):
 
 def handle_genlatex(args):
     """
-    Generates LaTeX for print book meta YAML, mainmatter md and template.
+    Generates LaTeX for a print book, given meta YAML, mainmatter md and a
+    template.
     """
     with open(args.metayaml, 'r') as foi:
         meta = yaml.load(foi)
