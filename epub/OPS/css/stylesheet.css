@@ -132,7 +132,9 @@ td  {padding: 0em 0.3125em 0em 0.3125em}
     text-indent: 2em;
 }
 
-h1 + p.par-indent, h2 + p.par-indent, h3 + p.par-indent {
+h1 + p.par-indent, h2 + p.par-indent, h3 + p.par-indent, 
+p.center-par-tb-space + p.par-indent, 
+p.center-par-tb-extra-space + p.par-indent{
     text-indent: 0;
 }
 
