@@ -13,6 +13,15 @@
 
 * __copyright.jinja__: copyright page
 
+* __toc.jinja__: table of contents, supporting nested chapter hierarchy if
+  defined in meta.yaml and mainmatter.yaml via `children` attribute
+
+* __nav_toc.jinja__: table of contents that includes HTML5 `nav` tags to define
+  logical table of contents and landmarks ("cover", "toc", "bodymatter").
+  Double functions as HTML toc and logical toc that can replace NCX toc. Newer
+  Amazon devices are using the `nav` information in this file rather than NCX
+  data to build logical table of contents.
+
 * __chapter.jinja__: mainmatter chapter; default style is ``par-indent``, can
   be changed for a specific page to another style available in
   ``OPS/css/stylesheet.css`` by providing a ``parstyle`` parameter for the
@@ -47,6 +56,9 @@ avoid interfering with LaTeX' {} (see comments in template).
   8" using *memoir* document class. Will ``\inlcude`` mainmatter content which
   needs to available as a separate LaTeX file (file name passed in as
   ``mainmatter`` argument)
+
+* __tex_book_5.06x7.81.jinja__: same as previous but formatted for slightly
+  different book size
 
 * __tex_book_list.jinja__: defines the structure for book listings in front
   and/or backmatter, works with or without images for a single series or
