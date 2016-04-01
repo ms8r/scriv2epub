@@ -1,0 +1,7 @@
+*~
+*.epub
+*.mobi
+*.out
+non-git
+__pychache__
+*.scriv

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<package version="2.0" xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId">
+
+  <!-- *** Metadata Section *** -->
+
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+
+    <dc:title>The Call of the Wild</dc:title>
+    <dc:language>en-us</dc:language>
+    <dc:identifier id="BookId" opf:scheme="uuid">urn:uuid:3f76ce4a-2fdc-c1b4-47b8-534f1233c196</dc:identifier>
+            <dc:creator opf:role="aut" opf:file-as="Last, First">Jack London</dc:creator>
+            <dc:publisher></dc:publisher> <!--Name of Publisher or yourself if self-published-->
+    <dc:date>2008-07-01</dc:date> <!--Published Date in the format YYYY-MM-DD-->
+    <meta name="cover" content="jpeg_cover-img" /> <!--Required for KindleGen, Barnes and Noble, and iBookstore-->
+    <dc:description>The Project Gutenberg EBook of The Call of the Wild, by Jack London
+</dc:description>
+                        <dc:subject>Adventure</dc:subject>
+                    <dc:subject>Animals</dc:subject>
+                <dc:rights>All rights reserved</dc:rights>
+    <dc:type>Text</dc:type>
+    <dc:coverage>Worldwide</dc:coverage>
+        
+  </metadata>
+
+  <!-- *** Manifest Section *** -->
+
+  <manifest>
+
+    <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml" />
+        <item href="html_cover.xhtml" id="html_html_cover" media-type="application/xhtml+xml" />
+            <item href="title.xhtml" id="html_title" media-type="application/xhtml+xml" />
+            <item href="copyright.xhtml" id="html_copyright" media-type="application/xhtml+xml" />
+            <item href="toc.xhtml" id="html_toc" media-type="application/xhtml+xml" />
+            <item href="cotw_01.xhtml" id="html_cotw_01" media-type="application/xhtml+xml" />
+            <item href="cotw_02.xhtml" id="html_cotw_02" media-type="application/xhtml+xml" />
+            <item href="cotw_03.xhtml" id="html_cotw_03" media-type="application/xhtml+xml" />
+            <item href="cotw_04.xhtml" id="html_cotw_04" media-type="application/xhtml+xml" />
+            <item href="cotw_05.xhtml" id="html_cotw_05" media-type="application/xhtml+xml" />
+            <item href="cotw_06.xhtml" id="html_cotw_06" media-type="application/xhtml+xml" />
+            <item href="cotw_07.xhtml" id="html_cotw_07" media-type="application/xhtml+xml" />
+            <item href="gutenberg_org.xhtml" id="html_gutenberg_org" media-type="application/xhtml+xml" />
+            <item href="css/stylesheet.css" id="css-epub" media-type="text/css" />
+            <item href="img/cover.jpg" id="jpeg_cover-img" media-type="image/jpeg" />
+        
+  </manifest>
+
+  <!-- *** Spine Section *** -->
+
+  <spine toc="ncx">
+
+        <itemref idref="html_html_cover" linear="yes"/>
+            <itemref idref="html_title" linear="yes"/>
+            <itemref idref="html_copyright" linear="yes"/>
+            <itemref idref="html_toc" linear="yes"/>
+            <itemref idref="html_cotw_01" linear="yes"/>
+            <itemref idref="html_cotw_02" linear="yes"/>
+            <itemref idref="html_cotw_03" linear="yes"/>
+            <itemref idref="html_cotw_04" linear="yes"/>
+            <itemref idref="html_cotw_05" linear="yes"/>
+            <itemref idref="html_cotw_06" linear="yes"/>
+            <itemref idref="html_cotw_07" linear="yes"/>
+            <itemref idref="html_gutenberg_org" linear="yes"/>
+        
+  </spine>
+
+  <!-- *** Guide Section *** -->
+
+  <guide>
+
+    <reference href="html_cover.xhtml" type="cover" title="Cover" /> <!-- Remove for Kindle -->
+    <reference href="toc.xhtml" type="toc" title="Table of Contents" />
+    <reference href="title.xhtml" type="text" title="Beginning" />
+
+  </guide>
+
+</package>

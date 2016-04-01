@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en">
+
+  <!-- *** Metadata Section *** -->
+  <head>
+    <meta content="3f76ce4a-2fdc-c1b4-47b8-534f1233c196" name="dtb:uid" />
+    <meta content="2" name="dtb:depth" />
+    <meta content="0" name="dtb:totalPageCount" /> <!-- Do Not change -->
+    <meta content="0" name="dtb:maxPageNumber" /> <!-- Do Not change -->
+  </head>
+
+  <!-- *** Title and Author Section *** -->
+  <docTitle>
+    <text>The Call of the Wild</text>
+  </docTitle>
+  <docAuthor>
+    <text>Jack London</text>
+  </docAuthor>
+
+  <!-- *** Navigation Map Section *** -->
+    <navMap>
+          <navPoint id="html_cover" playOrder="1">
+      <navLabel>
+        <text>Cover Page</text>
+      </navLabel>
+      <content src="html_cover.xhtml"></content>
+          </navPoint>
+          <navPoint id="title" playOrder="2">
+      <navLabel>
+        <text>Titel Page</text>
+      </navLabel>
+      <content src="title.xhtml"></content>
+          </navPoint>
+          <navPoint id="copyright" playOrder="3">
+      <navLabel>
+        <text>Project Gutenberg</text>
+      </navLabel>
+      <content src="copyright.xhtml"></content>
+          </navPoint>
+          <navPoint id="toc" playOrder="4">
+      <navLabel>
+        <text>Contents</text>
+      </navLabel>
+      <content src="toc.xhtml"></content>
+          </navPoint>
+          <navPoint id="cotw_01" playOrder="5">
+      <navLabel>
+        <text>Chapter I</text>
+      </navLabel>
+      <content src="cotw_01.xhtml"></content>
+          </navPoint>
+          <navPoint id="cotw_02" playOrder="6">
+      <navLabel>
+        <text>Chapter II</text>
+      </navLabel>
+      <content src="cotw_02.xhtml"></content>
+          </navPoint>
+          <navPoint id="cotw_03" playOrder="7">
+      <navLabel>
+        <text>Chapter III</text>
+      </navLabel>
+      <content src="cotw_03.xhtml"></content>
+          </navPoint>
+          <navPoint id="cotw_04" playOrder="8">
+      <navLabel>
+        <text>Chapter IV</text>
+      </navLabel>
+      <content src="cotw_04.xhtml"></content>
+          </navPoint>
+          <navPoint id="cotw_05" playOrder="9">
+      <navLabel>
+        <text>Chapter V</text>
+      </navLabel>
+      <content src="cotw_05.xhtml"></content>
+          </navPoint>
+          <navPoint id="cotw_06" playOrder="10">
+      <navLabel>
+        <text>Chapter VI</text>
+      </navLabel>
+      <content src="cotw_06.xhtml"></content>
+          </navPoint>
+          <navPoint id="cotw_07" playOrder="11">
+      <navLabel>
+        <text>Chapter VII</text>
+      </navLabel>
+      <content src="cotw_07.xhtml"></content>
+          </navPoint>
+          <navPoint id="gutenberg_org" playOrder="12">
+      <navLabel>
+        <text>Project Gutenberg License</text>
+      </navLabel>
+      <content src="gutenberg_org.xhtml"></content>
+          </navPoint>
+    </navMap>
+</ncx>

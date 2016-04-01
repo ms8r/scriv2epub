@@ -1,0 +1,41 @@
+# mainmatter.yaml: defines the mainmatter content for the book
+#
+# Each item represents one chapter. `id` attribute reference a source file in
+# Markdown format with extension `.md`. The value of `heading` will be inserted
+# as chapter heading and also appear in the table of contents if same is
+# specified in `meta.yaml`.
+#
+# Hierarchical chapter structure can be obtained by including a `children`
+# attribute in the parent item which mapped to a list of chapters.
+#
+- id:           cotw_01
+  type:         chapter
+  heading:      Chapter I
+  subheading:   Into the Primitive
+  # `beg_raw` value wille be inserted as raw HTML below
+  # heading and above chapter text.
+  beg_raw:      <blockquote><p>“Old longings nomadic leap,<br />Chafing at custom's chain;<br />Again from its brumal sleep<br />Wakens the ferine strain.”</p></blockquote>
+- id:           cotw_02
+  type:         chapter
+  heading:      Chapter II
+  subheading:   The Law of Club and Fang
+- id:           cotw_03
+  type:         chapter
+  heading:      Chapter III
+  subheading:   The Dominant Primordial Beast
+- id:           cotw_04
+  type:         chapter
+  heading:      Chapter IV
+  subheading:   Who Has Won to Mastership
+- id:           cotw_05
+  type:         chapter
+  heading:      Chapter V
+  subheading:   The Toil of Trace and Trail
+- id:           cotw_06
+  type:         chapter
+  heading:      Chapter VI
+  subheading:   For the Love of a Man
+- id:           cotw_07
+  type:         chapter
+  heading:      Chapter VII
+  subheading:   The Sounding of the Call

@@ -1,0 +1,56 @@
+#------------------------------------------------------------------------------
+# Metadata
+#------------------------------------------------------------------------------
+
+title:          The Call of the Wild
+author:         Jack London
+authorweb:      www.gutenberg.org
+pubdate:        2008-07-01
+
+description: >
+    The Project Gutenberg EBook of The Call of the Wild, by Jack London
+
+keywords:
+    - Adventure
+    - Animals
+
+#------------------------------------------------------------------------------
+# Book contents
+#------------------------------------------------------------------------------
+
+# For opf guide section: id of page to open to:
+start_id:   title
+
+frontmatter:
+
+    - id:       html_cover
+      type:     static
+      heading:  Cover Page
+
+    - id:       title
+      type:     template
+      heading:  Titel Page
+
+    - id:       copyright
+      heading:  Project Gutenberg
+      beg_raw:  <h3>The Project Gutenberg EBook of <em>The Call of the Wild</em>, by Jack London</h3>
+      type:     template
+      template: noindent_pars
+      # this template allows to specify the content right here as a list of paragraphs
+      pars:
+          - This eBook is for the use of anyone anywhere at no cost and with almost no restrictions whatsoever. You may copy it, give it away or re-use it under the terms of the Project Gutenberg License [included with this eBook](gutenberg_org.xhtml) or online at [www.gutenberg.org](http://www.gutenberg.org)
+          - Creating the works from public domain print editions means that no one owns a United States copyright in these works, so the Foundation (and you!) can copy and distribute it in the United States without permission and without paying copyright royalties. Special rules, set forth in the General Terms of Use part of this license, apply to copying and distributing Project Gutenberg-tm electronic works to protect the PROJECT GUTENBERG-tm concept and trademark. Project Gutenberg is a registered trademark, and may not be used if you charge for the eBooks, unless you receive specific permission. If you do not charge anything for copies of this eBook, complying with the rules is very easy. You may use this eBook for nearly any purpose such as creation of derivative works, reports, performances and research. They may be modified and printed and given away–you may do practically ANYTHING with public domain eBooks. Redistribution is subject to the trademark license, especially commercial redistribution.
+
+    - id:       toc
+      # will automagically generate table of contents from headings in this
+      # file and mainmatter.yaml
+      type:     template
+      heading:  Contents
+
+backmatter:
+
+    - id:       gutenberg_org
+      type:     chapter
+      heading:  Project Gutenberg License
+      subheading: Please read this before you distribute or use this work
+      parstyle: no-indent
