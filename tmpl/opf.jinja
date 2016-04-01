@@ -28,11 +28,15 @@
     <dc:rights>{{ rights|default('All rights reserved')|e }}</dc:rights>
     <dc:type>Text</dc:type>
     <dc:coverage>Worldwide</dc:coverage>
-    {% if editor.name is defined %}
+    {% if editor is defined %}
+      {% if editor.name is defined %}
         <dc:contributor opf:file-as="Last, First" opf:role="edt">{{ editor.name|e }}</dc:contributor>
+      {% endif %}
     {% endif %}
-    {% if coverart.name is defined %}
+    {% if coverart is defined %}
+      {% if coverart.name is defined %}
         <dc:contributor opf:file-as="Last, First" opf:role="art">{{ coverart.name|e }}</dc:contributor>
+      {% endif %}
     {% endif %}
 
   </metadata>

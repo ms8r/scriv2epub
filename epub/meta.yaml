@@ -116,7 +116,7 @@ start_id:   title
 # link in the book. See example below for details.
 #
 frontmatter:
-    - id:       cover
+    - id:       html_cover
       type:     static
       heading:  Cover Page
     - id:       title
