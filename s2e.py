@@ -586,7 +586,7 @@ def handle_genep(args):
         logging.info('generating %s from %s with par style "%s"...', outfile,
                 mdfile, par_style)
         with open(mdfile, 'r') as foi:
-            ht_text = markdown(foi.read())
+            ht_text = markdown(foi.read(), extensions=['smarty',])
         # styling for in-page section breaks:
         for pat in break_re:
             pat = r'<p>\s*(?P<first>{})\s*</p>'.format(pat)
@@ -622,9 +622,10 @@ def handle_genep(args):
         for raw in ['beg_raw', 'end_raw']:
             if raw not in pg:
                 continue
-            pg[raw] = markdown(pg[raw])
+            pg[raw] = markdown(pg[raw], extensions=['smarty',])
         if 'pars' in pg:
-            pg['pars'] = [markdown(p).replace('<p>', '').replace('</p>', '')
+            pg['pars'] = [markdown(p, extensions=['smarty',]).replace(
+                    '<p>', '').replace('</p>', '')
                           for p in pg['pars']]
         tmpl_name = pg.get('template')
         if not tmpl_name:

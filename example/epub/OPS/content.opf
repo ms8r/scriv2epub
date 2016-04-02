@@ -7,7 +7,7 @@
 
     <dc:title>The Call of the Wild</dc:title>
     <dc:language>en-us</dc:language>
-    <dc:identifier id="BookId" opf:scheme="uuid">urn:uuid:3f76ce4a-2fdc-c1b4-47b8-534f1233c196</dc:identifier>
+    <dc:identifier id="BookId" opf:scheme="uuid">urn:uuid:d32568b6-32da-8f92-ff47-3eb862d6124e</dc:identifier>
             <dc:creator opf:role="aut" opf:file-as="Last, First">Jack London</dc:creator>
             <dc:publisher></dc:publisher> <!--Name of Publisher or yourself if self-published-->
     <dc:date>2008-07-01</dc:date> <!--Published Date in the format YYYY-MM-DD-->
