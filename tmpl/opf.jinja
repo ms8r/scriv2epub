@@ -13,7 +13,7 @@
     {% endif %}
     {% if authorlist is defined %}
         {% for aut in authorlist %}
-            <dc:creator opf:role="aut" file-as="Last, First">{{ aut|e }}</dc:creator>
+            <dc:creator opf:role="aut" opf:file-as="Last, First">{{ aut|e }}</dc:creator>
         {% endfor %}
     {% endif %}
     <dc:publisher>{{ publisher|e }}</dc:publisher> <!--Name of Publisher or yourself if self-published-->
