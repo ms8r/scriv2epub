@@ -5,7 +5,16 @@
     {% if subtitle is defined %}
         <p class="subtitle">{{ subtitle|e }}</p>
     {% endif %}
-    <p class="author">by {{ author|e }}</p>
+    {% if author is defined %}
+        <p class="author">by {{ author|e }}</p>
+    {% endif %}
+    {%- if authorlist is defined %}
+      <p class="author">
+      {%- for aut in authorlist -%}
+        {{ aut }}{% if not loop.last %}<br />{% endif %}
+      {%- endfor -%}
+      </p>
+    {% endif %}
     {% if img is defined %}
         <p class="center"><img src="{{ img|e }}" alt="{{ title|e }} /></p>
     {% endif %}
