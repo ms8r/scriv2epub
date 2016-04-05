@@ -2,6 +2,10 @@
 
 {% block body %}
 
+{% if pg_meta.fleuronstr is defined %}
+    <p class="fleuron">{{ pg_meta.fleuronstr }}</p>
+{% endif %}
+
 {% if heading is defined %}
     <h2 class="chapter-heading {{ hdgalign|default('center') }}">{{ heading|e }}</h2>
 {% endif %}
