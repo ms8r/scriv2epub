@@ -2,8 +2,10 @@
 
 {% block body %}
 
-{% if pg_meta.fleuronstr is defined %}
-    <p class="fleuron">{{ pg_meta.fleuronstr }}</p>
+{% if pg_meta.fleuronimg is defined %}
+    <div class="fleuron">
+        <img src="{{ pg_meta.fleuronimg }}" alt="fleuron image" />
+    </div>
 {% endif %}
 
 {% if heading is defined %}
