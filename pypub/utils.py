@@ -1,3 +1,40 @@
+import math
+import re
+import subprocess
+from urllib.parse import urlsplit, urlunsplit, urlencode, parse_qs
+import logging
+
+
+def run_script(*args):
+    """
+    Runs external executable `script` with list of arguments in `args`.
+
+    Returns a tuple (stdout, stderr) with script output.
+    """
+    logging.debug('calling Popen with args: %s', ' '.join(args))
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+    return proc.communicate()
+
+
+def mk_query_urls(ht_text, url_re, qmap):
+    """
+    Appends a URL query string contructed from `qmap` to all URLs that match
+    `url_re` in `ht_text`. If the original URL already contained one of the
+    query elements in `qmap` this will be overwritten with the `qmap` version.
+    Returns the text with substitutions made.
+    """
+    links = re.findall(url_re, ht_text)
+    for ll in set(links):
+        old = urlsplit(ll)
+        if old.query:
+            qmap = dict(list(parse_qs(old.query).items()) + list(qmap.items()))
+        new = list(old[:3]) + [urlencode(qmap)] + [old[-1]]
+        ht_text = ht_text.replace('"{}"'.format(ll),
+                '"{}"'.format(urlunsplit(new).replace('&', '&amp;')))
+    return ht_text
+
+
+
 """Convert number to English words
 
 Adapted from Miki Tebeka's blog [1] to work with Python 3 and to strip trailing
@@ -7,13 +44,7 @@ Algorithm from http://mini.net/tcl/591
 
 [1] http://www.blog.pythonlibrary.org/2012/06/02/how-to-convert-decimal-numbers-to-words-with-python/
     email: tebeka@cs.bgu.ac.il
-
-
 """
-
-from __future__ import division
-
-import math
 
 # Tokens from 1000 and up
 _PRONOUNCE = [
@@ -73,11 +104,11 @@ _SMALL = {
     '90' : 'ninety'
 }
 
-def get_num(num):
+def _get_num(num):
     '''Get token <= 90, return '' if not matched'''
     return _SMALL.get(num, '')
 
-def triplets(l):
+def _triplets(l):
     '''Split list to triplets. Pad last one with '' if needed'''
     res = []
     for i in range(int(math.ceil(len(l) / 3.0))):
@@ -87,26 +118,26 @@ def triplets(l):
         res.append(sect)
     return res
 
-def norm_num(num):
+def _norm_num(num):
     """Normelize number (remove 0's prefix). Return number and string"""
     n = int(num)
     return n, str(n)
 
-def small2eng(num):
+def _small2eng(num):
     '''English representation of a number <= 999'''
-    n, num = norm_num(num)
+    n, num = _norm_num(num)
     hundred = ''
     ten = ''
     if len(num) == 3: # Got hundreds
-        hundred = get_num(num[0]) + ' hundred'
+        hundred = _get_num(num[0]) + ' hundred'
         num = num[1:]
-        n, num = norm_num(num)
+        n, num = _norm_num(num)
     if (n > 20) and (n % 10 > 0): # Got ones
-        tens = get_num(num[0] + '0')
-        ones = get_num(num[1])
+        tens = _get_num(num[0] + '0')
+        ones = _get_num(num[1])
         ten = tens + ' ' + ones
     else:
-        ten = get_num(num)
+        ten = _get_num(num)
     if hundred and ten:
         return hundred + ' ' + ten
         #return hundred + ' and ' + ten
@@ -127,8 +158,8 @@ def num2eng(num):
     x.reverse()
     pron = [] # Result accumolator
     ct = len(_PRONOUNCE) - 1 # Current index
-    for a, b, c in triplets(x): # Work on triplets
-        p = small2eng(c + b + a)
+    for a, b, c in _triplets(x): # Work on triplets
+        p = _small2eng(c + b + a)
         if p:
             pron.append(p + ' ' + _PRONOUNCE[ct])
         ct -= 1
@@ -136,17 +167,3 @@ def num2eng(num):
     pron.reverse()
     return (', '.join(pron)).strip()
 
-if __name__ == '__main__':
-
-    numbers = [1.37, 0.07, 123456.00, 987654.33]
-    for number in numbers:
-        dollars, cents = [int(num) for num in str(number).split(".")]
-
-        dollars = num2eng(dollars)
-        if dollars.strip() == "one":
-            dollars = dollars + "dollar and "
-        else:
-            dollars = dollars + "dollars and "
-
-        cents = num2eng(cents) + "cents"
-        print(dollars + cents)
