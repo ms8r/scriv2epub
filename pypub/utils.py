@@ -7,7 +7,7 @@ import logging
 
 def run_script(*args):
     """
-    Runs external executable `script` with list of arguments in `args`.
+    Runs external executable with list of arguments in `args`.
 
     Returns a tuple (stdout, stderr) with script output.
     """
