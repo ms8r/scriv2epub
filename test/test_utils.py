@@ -1,24 +1,28 @@
 import unittest
+import re
+from urllib.parse import urlparse, parse_qsl, unquote_plus
 
 from pypub import utils
 
 
-#-----------------------------------------------------------------------------
-# Data for UrlQueryTest:
-#-----------------------------------------------------------------------------
-_url_query_text_in = \
-"""<p>You can read more about this project on <a href="https://github.com/ms8r/scriv2epub">GitHub</a> where you can look at the <href="https://github.com/ms8r/scriv2epub/blob/master/README.md?utm_campaign=generic&some_parameter=some_value">README</a> file. A related repo on GitHub is @wcember's <a href="https://github.com/wcember/pypub">PyPub</a> on GitHub.</p>"""
+# from http://stackoverflow.com/a/9468284
+class Url(object):
+    '''A url object that can be compared with other url orbjects
+    without regard to the vagaries of encoding, escaping, and ordering
+    of parameters in query strings.'''
 
-_url_re = '"(https://(?:www.)?github.com/ms8r[^"]*)"'
+    def __init__(self, url):
+        parts = urlparse(url)
+        _query = frozenset(parse_qsl(parts.query))
+        _path = unquote_plus(parts.path)
+        parts = parts._replace(query=_query, path=_path)
+        self.parts = parts
 
-_qmap = {
-    'utm_campaign': 'url_query_test',
-    'utm_medium': 'a_python_script',
-    'utm_source': 'the_same_script'
-}
+    def __eq__(self, other):
+        return self.parts == other.parts
 
-_url_query_text_out = \
-"""<p>You can read more about this project on <a href="https://github.com/ms8r/scriv2epub?utm_campaign=url_query_test&amp;utm_source=the_same_script&amp;utm_medium=a_python_script">GitHub</a> where you can look at the <href="https://www.github.com/ms8r/scriv2epub/blob/master/README.md?utm_campaign=url_query_test&amp;some_parameter=some_value&amp;utm_medium=a_python_script&amp;utm_source=the_same_script">README</a> file. A related repo on GitHub is @wcember's <a href="https://github.com/wcember/pypub">PyPub</a> on GitHub.</p>"""
+    def __hash__(self):
+        return hash(self.parts)
 
 
 class Num2EngTest(unittest.TestCase):
@@ -34,8 +38,37 @@ class Num2EngTest(unittest.TestCase):
 class UrlQueryTest(unittest.TestCase):
 
     def test_mk_query_urls(self):
-        self.assertEqual(utils.mk_query_urls(_url_query_text_in, _url_re,
-                         _qmap), _url_query_text_out)
+        # set up test data:
+        in_urls = ['https://www.github.com/ms8r/scriv2epub',
+                   'https://github.com/ms8r/scriv2epub/blob/master/README.md'
+                   '?utm_campaign=generic&some_parameter=some_value',
+                   'https://github.com/wcember/pypub']
+        ht_in = """<p>You can read more about this project on
+            <a href="{}">GitHub</a> where you can look at the
+            <href="{}">README</a> file. A related repo on GitHub is @wcember's
+            <a href="{}">PyPub</a> on GitHub.</p>""".format(*in_urls)
+        query_url_re = '"(https://(?:www.)?github.com/ms8r[^"]*)"'
+        qmap = {
+            'utm_campaign': 'url_query_test',
+            'utm_medium': 'a_python_script',
+            'utm_source': 'the_same_script'
+        }
+        expected_out = [
+                'https://www.github.com/ms8r/scriv2epub'
+                '?utm_medium=a_python_script&amp;utm_campaign=url_query_test'
+                '&amp;utm_source=the_same_script',
+                'https://github.com/ms8r/scriv2epub/blob/master/README.md'
+                '?utm_medium=a_python_script&amp;utm_source=the_same_script'
+                '&amp;utm_campaign=url_query_test'
+                '&amp;some_parameter=some_value',
+                'https://github.com/wcember/pypub']
+
+        ht_out = utils.mk_query_urls(ht_in, query_url_re, qmap)
+        generic_url_re = '"(http(?:s)?://[^"]*)"'
+        out_urls = re.findall(generic_url_re, ht_out)
+        self.assertEqual(len(expected_out), len(out_urls))
+        for actual, expected in zip(out_urls, expected_out):
+            self.assertEqual(Url(actual), Url(expected))
 
 
 class RunScriptTest(unittest.TestCase):

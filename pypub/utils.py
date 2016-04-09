@@ -1,7 +1,7 @@
 import math
 import re
 import subprocess
-from urllib.parse import urlsplit, urlunsplit, urlencode, parse_qs
+from urllib.parse import urlsplit, urlunsplit, urlencode, parse_qsl
 import logging
 
 
@@ -27,8 +27,10 @@ def mk_query_urls(ht_text, url_re, qmap):
     for ll in set(links):
         old = urlsplit(ll)
         if old.query:
-            qmap = dict(list(parse_qs(old.query).items()) + list(qmap.items()))
-        new = list(old[:3]) + [urlencode(qmap)] + [old[-1]]
+            updated_qmap = dict(parse_qsl(old.query) + list(qmap.items()))
+        else:
+            updated_qmap = qmap
+        new = list(old[:3]) + [urlencode(updated_qmap)] + list(old[-1:])
         ht_text = ht_text.replace('"{}"'.format(ll),
                 '"{}"'.format(urlunsplit(new).replace('&', '&amp;')))
     return ht_text
