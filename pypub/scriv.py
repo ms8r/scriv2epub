@@ -193,8 +193,8 @@ def to_md(mmyaml, projdir, mddir):
     return i
 
 
-def to_yaml(projdir, scrivxml, rtfdir, toptitle, typefilter, type, hoffset,
-        output):
+def to_yaml(projdir, scrivxml, rtfdir, toptitle, typefilter, src_type, hoffset,
+        headings, output):
     """
     Converts the 'Manuscript' section a Scrivener project XML file into a YAML
     file, augmenting with additional info such as rtf source
@@ -204,23 +204,23 @@ def to_yaml(projdir, scrivxml, rtfdir, toptitle, typefilter, type, hoffset,
     ms_bi = get_top_bi(scriv_xml=xml_path, top_title=toptitle)
     ch, count = get_chapters(top=ms_bi, type_filter=typefilter)
 
-    if getattr(args, 'headings', False):
+    if headings:
         headings = hoffset * ['']
         headings += ['Chapter ' + utils.num2eng(i + 1).title().replace(' ', '-')
                      for i in range(count - hoffset)]
     else:
         headings = None
 
-    chapters_to_dict(ch, src_dir=rtfdir, src_type=type,
+    chapters_to_dict(ch, src_dir=rtfdir, src_type=src_type,
                      headings=headings, in_place=True)
 
     foo = output if output else sys.stdout
     yaml.dump(ch, stream=foo, default_flow_style=False)
     if output:
-            args.output.close()
+            output.close()
 
 
-def body2md(bodydir, startnum, stopnum, mdprefix, hoffset, yamlout):
+def body2md(bodydir, startnum, stopnum, mdprefix, hoffset, headings, yamlout):
     """
     Converts a set of body XHTML files (already "<em></em> cleansed") into
     Markdown files and creates YAML mainmatter output. Optionally headings of
@@ -231,7 +231,7 @@ def body2md(bodydir, startnum, stopnum, mdprefix, hoffset, yamlout):
     NOTE: this is quick and dirty and specific to ALB
     """
     num_files = stopnum - startnum + 1
-    if getattr(args, 'headings', False):
+    if headings:
         headings = hoffset * ['']
         headings += ['Chapter ' + utils.num2eng(i + 1).title().replace(' ', '-')
                      for i in range(num_files - hoffset)]
