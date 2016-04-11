@@ -79,34 +79,19 @@ def navMap2dict(nav_map, chtype='chapter', headings=False, hoffset=0):
     return records
 
 
-def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
-           dropcaps=False):
+def build_img_inventory(epubdir, imgdir, opfdir):
     """
-    Generates the files required for an EPUB ebook
+    Build list of image dicts for opf manifest.
     """
-    epub_meta = {
-            'opf': ('opf.jinja', os.path.join(htmldir, 'content.opf')),
-            'ncx': ('ncx.jinja', os.path.join(htmldir, 'toc.ncx')),
-    }
-
     img_ext2fmt = {'jpg': 'jpeg',
                    'jpeg': 'jpeg',
                    'png': 'png',
                    'gif': 'gif',
                    'svg': 'svg'}
 
-    with open(os.path.join(epubdir, metayaml), 'r') as foi:
-        meta = yaml.load(foi)
-    with open(os.path.join(epubdir, mmyaml), 'r') as foi:
-        mainmatter = yaml.load(foi)
-
-    tmplLoader = j2.FileSystemLoader(searchpath=params._TEMPLATE_PATH)
-    tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True)
-
-    # build images dict for opf manifest:
     logging.info('building image inventory...')
     img_dir = os.path.join(epubdir, imgdir)
-    opf_dir = os.path.join(epubdir, os.path.dirname(epub_meta['opf'][1]))
+    opf_dir = os.path.join(epubdir, os.path.dirname(opfdir))
     opf2img_path = os.path.relpath(img_dir, opf_dir)
     images = []
     for item in os.listdir(img_dir):
@@ -119,141 +104,206 @@ def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
         img['format'] = img_ext2fmt[item.split('.')[-1].lower()]
         images.append(img)
 
-    fm = meta.get('frontmatter', [])
-    bm = meta.get('backmatter', [])
-    pages = (fm if fm else []) + mainmatter + (bm if bm else [])
+    return images
 
-    # generate metadata files:
-    uuid = gen_uuid(meta.__str__() + dt.utcnow().__str__())
-    kwargs = {'images': images, 'uuid': uuid}
-    for tmpl_file, out_file in epub_meta.values():
+
+def render_output(tmpl_env, tmpl_name, out_file=None, **kwargs):
+    """
+    Renders output from template with option to write to file.
+
+    Args:
+        tmpl_env: jinja Environment object to be used to get `tmpl_file`
+        tmpl_name (str): name of the jinja template file to use (without
+            extension)
+        out_file (str): path to output file to be generated: if `None` rendered
+            string will be returned.
+
+        Additional file specific kwargs may be required, depending on template.
+
+    Returns:
+        Rendered text as string if `out_file` is `None`. Otherwise length of
+        string written to `out_file`.
+    """
+    tmpl = tmpl_env.get_template(tmpl_name + params._TEMPLATE_EXT)
+    text = tmpl.render(**kwargs)
+    if not out_file:
+        return text
+    with open(out_file, 'w') as foo:
         logging.info('generating %s...', out_file)
-        tmpl = tmplEnv.get_template(tmpl_file)
-        with open(os.path.join(epubdir, out_file), 'w') as foo:
-            foo.write(tmpl.render(meta, pages=pages, **kwargs))
+        foo.write(text)
+    return len(text)
 
-    # now content:
-    def cp_static(pg):
-        src_base = pg.get('src', pg['id'])
-        source = os.path.join(epubdir, srcdir, src_base + '.xhtml')
-        target = os.path.join(epubdir, htmldir, pg['id'] + '.xhtml')
-        logging.info('copying %s to %s...', source, target)
-        shutil.copy(source, target)
-        if 'query_url' in pg:
-            with open(target, 'r') as foi:
-                ht_text = utils.mk_query_urls(foi.read(),
-                        pg['query_url']['url_re'], pg['query_url']['utm'])
-            with open(target, 'w') as foo:
-                foo.write(ht_text)
 
+def cp_static(pg, epubdir, srcdir, htmldir, **kwargs):
+    """
+    Copies static source file to htmldir, inserting url query params if
+    specified in `pg`.
+    """
+    src_base = pg.get('src', pg['id'])
+    source = os.path.join(epubdir, srcdir, src_base + '.xhtml')
+    target = os.path.join(epubdir, htmldir, pg['id'] + '.xhtml')
+    logging.info('copying %s to %s...', source, target)
+    shutil.copy(source, target)
+    if 'query_url' in pg:
+        with open(target, 'r') as foi:
+            ht_text = utils.mk_query_urls(foi.read(),
+                    pg['query_url']['url_re'], pg['query_url']['utm'])
+        with open(target, 'w') as foo:
+            foo.write(ht_text)
+
+
+def gen_chapter(pg, meta, tmpl_env, epubdir, srcdir, htmldir, dropcaps,
+                **kwargs):
+    """
+    Generates HTML chapter file from md source.
+    """
     # lines with `break_re` in the raw HTML output will be styled as in-page
     # section breaks
     break_re = [r'&lt;&lt;&lt;\s*&gt;&gt;&gt;',
                 r'\*\s*\*\s*\*',
                 r'#\s*#\s*#', ]
 
-    def gen_chapter(pg):
-        # TODO: run beg_raw and end_raw through markdown
-        src_dir = pg.get('srcdir')
-        src_path = os.path.join(epubdir, src_dir if src_dir else
-                                srcdir)
-        src_path = os.path.abspath(src_path)
-        md_base = pg.get('src', pg['id'])
-        mdfile = os.path.join(src_path, md_base + '.md')
-        outfile = os.path.join(epubdir, htmldir, pg['id'] +
-                               '.xhtml')
-        par_style = pg.get('parstyle', params._BASIC_CH_PAR_STYLE)
-        logging.info('generating %s from %s with par style "%s"...', outfile,
-                mdfile, par_style)
-        with open(mdfile, 'r') as foi:
-            ht_text = markdown(foi.read(), extensions=['smarty'])
-        # styling for in-page section breaks:
-        for pat in break_re:
-            pat = r'<p>\s*(?P<first>{})\s*</p>'.format(pat)
-            ht_text = re.sub(
-                    pat, '<p class="{}">\g<first></p>'.format(
-                    params._IN_PG_SEC_BREAK_STYLE), ht_text)
-        ht_text = re.sub(r'<p>', r'<p class="{}">'.format(par_style), ht_text)
-        if dropcaps:
-            ht_text = re.sub(
-                    r'<p class="{}">\s*'
-                    '(?P<pre_tag>(<[^>]*>)*)'
-                    '(?P<first>[^a-zA-Z0-9]*[a-zA-Z0-9])'.format(
-                        params._BASIC_CH_PAR_STYLE),
-                    '<p class="{0}">\g<pre_tag><span class="{1}">'
-                    '\g<first></span>'.format(params._FIRST_CH_PAR_STYLE,
-                        params._DROP_CAP_STYLE), ht_text, 1)
-            ht_text = re.sub(r'<p class="{}">'.format(
+    # TODO: run beg_raw and end_raw through markdown
+    src_dir = pg.get('srcdir')
+    src_path = os.path.join(epubdir, src_dir if src_dir else
+                            srcdir)
+    src_path = os.path.abspath(src_path)
+    md_base = pg.get('src', pg['id'])
+    mdfile = os.path.join(src_path, md_base + '.md')
+    outfile = os.path.join(epubdir, htmldir, pg['id'] +
+                           '.xhtml')
+    par_style = pg.get('parstyle', params._BASIC_CH_PAR_STYLE)
+    logging.info('generating %s from %s with par style "%s"...', outfile,
+            mdfile, par_style)
+    with open(mdfile, 'r') as foi:
+        ht_text = markdown(foi.read(), extensions=['smarty'])
+    # styling for in-page section breaks:
+    for pat in break_re:
+        pat = r'<p>\s*(?P<first>{})\s*</p>'.format(pat)
+        ht_text = re.sub(
+                pat, '<p class="{}">\g<first></p>'.format(
+                params._IN_PG_SEC_BREAK_STYLE), ht_text)
+    ht_text = re.sub(r'<p>', r'<p class="{}">'.format(par_style), ht_text)
+    if dropcaps:
+        ht_text = re.sub(
+                r'<p class="{}">\s*'
+                '(?P<pre_tag>(<[^>]*>)*)'
+                '(?P<first>[^a-zA-Z0-9]*[a-zA-Z0-9])'.format(
                     params._BASIC_CH_PAR_STYLE),
-                    '<p class="{0} {1}">'.format(params._BASIC_CH_PAR_STYLE,
-                    params._CLEAR_STYLE), ht_text, 1)
-        tmpl_name = pg.get('template', 'chapter')
-        tmpl = tmplEnv.get_template(tmpl_name + params._TEMPLATE_EXT)
-        ht_text = tmpl.render(pg, chapter_content=ht_text,
-                header_title=meta['title'] + ' | ' + pg['heading'],
-                pg_meta=pg)
-        if 'query_url' in pg:
-            ht_text = utils.mk_query_urls(ht_text, pg['query_url']['url_re'],
-                                          pg['query_url']['utm'])
-        with open(outfile, 'w') as foo:
-            foo.write(ht_text)
+                '<p class="{0}">\g<pre_tag><span class="{1}">'
+                '\g<first></span>'.format(params._FIRST_CH_PAR_STYLE,
+                    params._DROP_CAP_STYLE), ht_text, 1)
+        ht_text = re.sub(r'<p class="{}">'.format(
+                params._BASIC_CH_PAR_STYLE),
+                '<p class="{0} {1}">'.format(params._BASIC_CH_PAR_STYLE,
+                params._CLEAR_STYLE), ht_text, 1)
+    tmpl_name = pg.get('template', 'chapter')
+    ht_text = render_output(tmpl_env, tmpl_name, chapter_content=ht_text,
+            header_title=meta['title'] + ' | ' + pg['heading'], pg_meta=pg)
+    if 'query_url' in pg:
+        ht_text = utils.mk_query_urls(ht_text, pg['query_url']['url_re'],
+                                      pg['query_url']['utm'])
+    with open(outfile, 'w') as foo:
+        foo.write(ht_text)
 
-    def gen_from_tmpl(pg, pages):
-        # `beg_raw`, `end_raw` and `pars` need to be run through markdown:
-        for raw in ['beg_raw', 'end_raw']:
-            if raw not in pg:
-                continue
-            pg[raw] = markdown(pg[raw], extensions=['smarty'])
-        if 'pars' in pg:
-            pg['pars'] = [markdown(p, extensions=['smarty']).replace(
-                    '<p>', '').replace('</p>', '')
-                          for p in pg['pars']]
-        tmpl_name = pg.get('template')
-        if not tmpl_name:
-            tmpl_name = pg['id']
-        pg_data = meta.get(pg['id'])
-        if not pg_data:
-            # look for supplementary YAML file with page data,
-            # first in current dir, then in epubdir, then in yincl:
-            try:
-                with open(pg['id'] + '.yaml', 'r') as foi:
-                    pg_data = yaml.load(foi)
-            except FileNotFoundError as e:
-                logging.warning(e)
-            try:
-                with open(os.path.join(epubdir, pg['id'] + '.yaml'),
-                          'r') as foi:
-                    pg_data = yaml.load(foi)
-            except FileNotFoundError as e:
-                logging.warning(e)
-            try:
-                with open(os.path.join(yaml_incl_dir, pg['id'] +
-                          '.yaml'), 'r') as foi:
-                    pg_data = yaml.load(foi)
-            except FileNotFoundError as e:
-                logging.warning(e)
-        tmpl = tmplEnv.get_template(tmpl_name + params._TEMPLATE_EXT)
-        ht_text = tmpl.render(meta, pg_meta=pg, pg_data=pg_data, pages=pages,
-                              header_title=pg.get('heading'))
-        if 'query_url' in pg:
-            ht_text = utils.mk_query_urls(ht_text, pg['query_url']['url_re'],
-                                          pg['query_url']['utm'])
-        outfile = os.path.join(epubdir, htmldir, pg['id'] + '.xhtml')
-        logging.info('generating %s...', outfile)
-        with open(outfile, 'w') as foo:
-            foo.write(ht_text)
 
-    def gen_content(pages):
+def gen_from_tmpl(pg, pages, meta, tmpl_env, epubdir, srcdir, htmldir,
+                  yaml_incl_dir, **kwargs):
+    """
+    Generates HTML output from (page-) metadata
+    """
+    # `beg_raw`, `end_raw` and `pars` need to be run through markdown:
+    for raw in ['beg_raw', 'end_raw']:
+        if raw not in pg:
+            continue
+        pg[raw] = markdown(pg[raw], extensions=['smarty'])
+    if 'pars' in pg:
+        pg['pars'] = [markdown(p, extensions=['smarty']).replace(
+                '<p>', '').replace('</p>', '')
+                      for p in pg['pars']]
+    tmpl_name = pg.get('template')
+    if not tmpl_name:
+        tmpl_name = pg['id']
+    pg_data = meta.get(pg['id'])
+    if not pg_data:
+        # look for supplementary YAML file with page data,
+        # first in current dir, then in epubdir, then in yincl:
+        try:
+            with open(pg['id'] + '.yaml', 'r') as foi:
+                pg_data = yaml.load(foi)
+        except FileNotFoundError as e:
+            logging.warning(e)
+        try:
+            with open(os.path.join(epubdir, pg['id'] + '.yaml'),
+                      'r') as foi:
+                pg_data = yaml.load(foi)
+        except FileNotFoundError as e:
+            logging.warning(e)
+        try:
+            with open(os.path.join(yaml_incl_dir, pg['id'] +
+                      '.yaml'), 'r') as foi:
+                pg_data = yaml.load(foi)
+        except FileNotFoundError as e:
+            logging.warning(e)
+    ht_text = render_output(tmpl_env, tmpl_name, pg_meta=pg,
+            pg_data=pg_data, pages=pages, header_title=pg.get('heading'),
+            **meta)
+    if 'query_url' in pg:
+        ht_text = utils.mk_query_urls(ht_text, pg['query_url']['url_re'],
+                                      pg['query_url']['utm'])
+    outfile = os.path.join(epubdir, htmldir, pg['id'] + '.xhtml')
+    logging.info('generating %s...', outfile)
+    with open(outfile, 'w') as foo:
+        foo.write(ht_text)
+
+
+def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
+           dropcaps=False):
+    """
+    Generates the files required for an EPUB ebook
+    """
+    epub_meta = {
+            # maps meta type to (template, output_path)
+            'opf': ('opf', os.path.join(htmldir, 'content.opf')),
+            'ncx': ('ncx', os.path.join(htmldir, 'toc.ncx')),
+    }
+
+    with open(os.path.join(epubdir, metayaml), 'r') as foi:
+        meta = yaml.load(foi)
+    with open(os.path.join(epubdir, mmyaml), 'r') as foi:
+        mainmatter = yaml.load(foi)
+    fm = meta.get('frontmatter', [])
+    bm = meta.get('backmatter', [])
+    pages = (fm if fm else []) + mainmatter + (bm if bm else [])
+
+    tmplLoader = j2.FileSystemLoader(searchpath=params._TEMPLATE_PATH)
+    tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True)
+
+    images = build_img_inventory(epubdir, imgdir, epub_meta['opf'][1])
+
+    # generate metadata files:
+    uuid = gen_uuid(meta.__str__() + dt.utcnow().__str__())
+    for tmpl_file, out_file in epub_meta.values():
+        render_output(tmplEnv, tmpl_file, pages=pages,
+                images=images, uuid=uuid,
+                out_file=os.path.join(epubdir, out_file), **meta)
+
+    # now content:
+    kwargs = {'meta': meta, 'epubdir': epubdir, 'srcdir': srcdir,
+             'htmldir': htmldir, 'tmpl_env': tmplEnv,
+             'yaml_incl_dir': yaml_incl_dir, 'dropcaps': dropcaps}
+
+    def gen_content(pages, **kwargs):
         for pg in pages:
             if pg['type'] == 'chapter':
-                gen_chapter(pg)
+                gen_chapter(pg, **kwargs)
             elif pg['type'] == 'static':
-                cp_static(pg)
+                cp_static(pg, **kwargs)
             elif pg['type'] == 'template':
-                gen_from_tmpl(pg, pages)
+                gen_from_tmpl(pg, pages, **kwargs)
             if 'children' in pg:
-                gen_content(pg['children'])
+                gen_content(pg['children'], **kwargs)
 
-    gen_content(pages)
+    gen_content(pages, **kwargs)
 
-    return
+    return None
