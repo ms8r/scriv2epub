@@ -2,6 +2,7 @@
 Functions for generating LaTeX output from mainmatter Markdown source files.
 """
 
+import sys
 import re
 import os.path
 import logging
@@ -62,7 +63,7 @@ def mmcat(mmyaml, outfile, mddir, hoffset=0, lbreak=False):
     with open(mmyaml, 'r') as foi:
         mainmatter = yaml.load(foi)
 
-    foo = outfile if args.outfile else sys.stdout
+    foo = outfile if outfile else sys.stdout
     for m in mm_gen(mainmatter, mddir, hoffset):
         if lbreak:
             m = fleuronize(m)
@@ -76,7 +77,7 @@ def mkbook(metayaml, book, tmpl):
     Generates LaTeX for a print book, given meta YAML, mainmatter md and a
     template.
     """
-    with open(args.metayaml, 'r') as foi:
+    with open(metayaml, 'r') as foi:
         meta = yaml.load(foi)
 
     tmplLoader = j2.FileSystemLoader(searchpath=params._TEMPLATE_PATH)
@@ -92,9 +93,9 @@ def mkbook(metayaml, book, tmpl):
 
     # generate main document file:
     logging.info('generating main file %s from template %s...',
-            args.book + '.tex', args.tmpl + params._TEMPLATE_EXT)
-    tmpl = tmplEnv.get_template(args.tmpl + params._TEMPLATE_EXT)
-    with open(args.book + '.tex', 'w') as foo:
+            book + '.tex', tmpl + params._TEMPLATE_EXT)
+    tmpl = tmplEnv.get_template(tmpl + params._TEMPLATE_EXT)
+    with open(book + '.tex', 'w') as foo:
         foo.write(tmpl.render(meta))
 
     # generate any dynamic front or backmatter files:
@@ -120,7 +121,7 @@ def mkbook(metayaml, book, tmpl):
             except FileNotFoundError as e:
                 logging.warning(e)
             try:
-                with open(os.path.join(args.yincl, pg['id'] +
+                with open(os.path.join(yincl, pg['id'] +
                           '.yaml'), 'r') as foi:
                     pg_data = yaml.load(foi)
             except FileNotFoundError as e:
