@@ -15,14 +15,14 @@
       {%- endfor -%}
       </p>
     {% endif %}
-    {% if img is defined %}
-        <p class="center-par"><img src="{{ img|e }}" alt="{{ title|e }}" /></p>
-    {% endif %}
     {% if subplain is defined %}
         <p class="center-par">{{ subplain|e }}</p>
     {% endif %}
     {% if series is defined %}
         <p class="series">{{ series|e }}</p>
+    {% endif %}
+    {% if img is defined %}
+        <p class="center-par"><img src="{{ img|e }}" alt="{{ title|e }}" /></p>
     {% endif %}
 </div>
 {% endblock %}
