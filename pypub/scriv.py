@@ -5,6 +5,8 @@ import os.path
 from copy import deepcopy
 import logging
 
+import yaml
+
 from . import params
 from . import utils
 
