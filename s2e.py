@@ -165,7 +165,7 @@ def handle_scriv2md(args):
 
     Returns number of items written.
     """
-    pypup.scriv.to_md(args.mmyaml, args.projdir, args.mddir)
+    scriv.to_md(args.mmyaml, args.projdir, args.mddir)
 
 
 def handle_scrivx2yaml(args):
@@ -174,7 +174,7 @@ def handle_scrivx2yaml(args):
     YAML file, augmenting with additional info such as rtf source file
     location and unique label.
     """
-    pypup.scriv.to_yaml(args.projdir, args.scrivxml, args.rtfdir,
+    scriv.to_yaml(args.projdir, args.scrivxml, args.rtfdir,
             args.toptitle, args.typefilter, args.type, args.hoffset,
             args.headings, args.output)
 
@@ -189,7 +189,7 @@ def handle_body2md(args):
 
     NOTE: this is quick and dirty and specific to ALB
     """
-    pypup.scriv.body2md(args.bodydir, args.startnum, args.stopnum,
+    scriv.body2md(args.bodydir, args.startnum, args.stopnum,
             args.mdprefix, args.hoffset, args.headings, args.yamlout)
 
 
