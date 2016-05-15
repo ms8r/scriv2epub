@@ -10,7 +10,7 @@ import logging
 import re
 import yaml
 import jinja2 as j2
-from markdown import markdown
+import markdown
 
 from . import params
 from . import utils
@@ -164,26 +164,19 @@ def gen_chapter(pg, meta, tmpl_env, epubdir, srcdir, htmldir, dropcaps,
                 r'#\s*#\s*#', ]
 
     # TODO: run beg_raw and end_raw through markdown
-    src_dir = pg.get('srcdir')
-    src_path = os.path.join(epubdir, src_dir if src_dir else
-                            srcdir)
-    src_path = os.path.abspath(src_path)
-    md_base = pg.get('src', pg['id'])
-    mdfile = os.path.join(src_path, md_base + '.md')
     outfile = os.path.join(epubdir, htmldir, pg['id'] +
                            '.xhtml')
-    par_style = pg.get('parstyle', params._BASIC_CH_PAR_STYLE)
     logging.info('generating %s from %s with par style "%s"...', outfile,
-            mdfile, par_style)
-    with open(mdfile, 'r') as foi:
-        ht_text = markdown(foi.read(), extensions=['smarty'])
+            pg['mdfile'], pg['parstyle'])
+    with open(pg['mdfile'], 'r') as foi:
+        ht_text = markdown.markdown(foi.read(), extensions=['meta', 'smarty'])
     # styling for in-page section breaks:
     for pat in break_re:
         pat = r'<p>\s*(?P<first>{})\s*</p>'.format(pat)
         ht_text = re.sub(
                 pat, '<p class="{}">\g<first></p>'.format(
                 params._IN_PG_SEC_BREAK_STYLE), ht_text)
-    ht_text = re.sub(r'<p>', r'<p class="{}">'.format(par_style), ht_text)
+    ht_text = re.sub(r'<p>', r'<p class="{}">'.format(pg['parstyle']), ht_text)
     if dropcaps:
         ht_text = re.sub(
                 r'<p class="{}">\s*'
@@ -197,9 +190,12 @@ def gen_chapter(pg, meta, tmpl_env, epubdir, srcdir, htmldir, dropcaps,
                 params._BASIC_CH_PAR_STYLE),
                 '<p class="{0} {1}">'.format(params._BASIC_CH_PAR_STYLE,
                 params._CLEAR_STYLE), ht_text, 1)
+    header_title = meta['title']
+    if pg.get('heading'):
+        header_title += ' | ' + pg['heading']
     tmpl_name = pg.get('template', 'chapter')
     ht_text = render_output(tmpl_env, tmpl_name, chapter_content=ht_text,
-            header_title=meta['title'] + ' | ' + pg['heading'], pg_meta=pg)
+                            header_title=header_title, pg_meta=pg)
     if 'query_url' in pg:
         ht_text = utils.mk_query_urls(ht_text, pg['query_url']['url_re'],
                                       pg['query_url']['utm'])
@@ -257,6 +253,61 @@ def gen_from_tmpl(pg, pages, meta, tmpl_env, epubdir, srcdir, htmldir,
         foo.write(ht_text)
 
 
+def augment_mm(mm_item, epubdir, srcdir):
+    """
+    Augment with metadata defined in individual mainmatter source
+    files.
+    """
+    # Page level metadata items for which the chapter template expects single
+    # values rather than lists (need to be extracted from lists if defined in
+    # sourve pages):
+    delist = ['heading', 'subheading', 'hdgalign', 'subalign', 'beg_raw',
+              'end_raw']
+    md = markdown.Markdown(extensions=['meta'])
+    item = mm_item.copy()
+    src_dir = item.get('srcdir')
+    src_path = os.path.join(epubdir, src_dir if src_dir else
+                            srcdir)
+    src_path = os.path.abspath(src_path)
+    md_base = item.get('src', item['id'])
+    mdfile = os.path.join(src_path, md_base + '.md')
+    # Note: the following will change the item in `mainmatter` list
+    item['mdfile'] = mdfile
+    item['parstyle'] = item.get('parstyle', params._BASIC_CH_PAR_STYLE)
+    with open(mdfile, 'r') as foi:
+        # we're only interested in metadata, throw away html:
+        md.convert(foi.read())
+    mdm = { key: value[0] if key in delist else value
+                     for key, value in md.Meta.items()}
+    item = utils.merge_dicts(mdm, item)
+
+    return item
+
+
+def get_mainmatter(epubdir, mmyaml, srcdir):
+    """
+    Generates mainmatter list augmenting `mmyaml` with page metadata contained
+    in individual source files (*.md).
+
+    Will also add an 'mdfile' key for each mainmatter items that has the full
+    absolute path to the corresponding Markdown source file. Similarly, the
+    'parstyle' value will be defined for each item.
+    """
+    with open(os.path.join(epubdir, mmyaml), 'r') as foi:
+        mainmatter = yaml.load(foi)
+
+    def gen_mm(mm_list):
+        # TODO: implement as generator
+        out = []
+        for item in mm_list:
+            if 'children' in item:
+                item['children'] = gen_mm(item['children'])
+            out.append(augment_mm(item, epubdir, srcdir))
+        return out
+
+    return gen_mm(mainmatter)
+
+
 def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
            dropcaps=False):
     """
@@ -270,8 +321,7 @@ def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
 
     with open(os.path.join(epubdir, metayaml), 'r') as foi:
         meta = yaml.load(foi)
-    with open(os.path.join(epubdir, mmyaml), 'r') as foi:
-        mainmatter = yaml.load(foi)
+    mainmatter = get_mainmatter(epubdir, mmyaml, srcdir)
     fm = meta.get('frontmatter', [])
     bm = meta.get('backmatter', [])
     pages = (fm if fm else []) + mainmatter + (bm if bm else [])

@@ -9,11 +9,16 @@
 {% endif %}
 
 {% if pg_meta.heading is defined %}
-    <h2 class="chapter-heading {{ hdgalign|default('center') }}">{{ pg_meta.heading|e }}</h2>
+    <h2 class="chapter-heading {{ pg_meta.hdgalign|default('center') }}">{{ pg_meta.heading|e }}</h2>
 {% endif %}
 {% if pg_meta.subheading is defined %}
-    <h3 class="chapter-heading {{ subalign|default('center') }}">{{ pg_meta.subheading|e }}</h3>
+    <h3 class="chapter-heading {{ pg_meta.subalign|default('center') }}">{{ pg_meta.subheading|e }}</h3>
 {% endif %}
+
+{% for line in pg_meta.introlines %}
+    <p class="{{ pg_meta.introstyle|default('introline left') }}">{{ line|e }}</p>
+{% endfor %}
+
 
 {% if pg_meta.beg_raw %}{{ pg_meta.beg_raw }}{% endif %}
 

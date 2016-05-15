@@ -121,6 +121,14 @@ td  {padding: 0em 0.3125em 0em 0.3125em}
     margin-right: 0em;
     text-indent: 0em;
 }
+.introline {
+    margin-left: 0em;
+    margin-bottom: 0.5em;
+    margin-top: 0em;
+    margin-right: 0em;
+    text-indent: 0em;
+    font-style: italic;
+}
 .heading {
     font-weight: bold;
     font-size: 150%;
@@ -136,18 +144,20 @@ td  {padding: 0em 0.3125em 0em 0.3125em}
 div.fleuron {
     margin-left: 0em;
     text-align: center;
-    margin-bottom: -20px;
+    margin-bottom: 1em;
     margin-right: 0em;
     margin-left: 0em;
     text-indent: 0em;
 }
 
 div.fleuron img {
-    width: 18%;
+    width: 22%;
 }
 
 h1 + p.par-indent, h2 + p.par-indent, h3 + p.par-indent,
-p.center-par-tb-space + p.par-indent, 
+p.center-par-tb-space + p.par-indent,
+p.introline + p.par-indent,
+div.fleuron + p.par-indent,
 p.center-par-tb-extra-space + p.par-indent{
     text-indent: 0;
 }
