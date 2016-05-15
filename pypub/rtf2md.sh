@@ -5,7 +5,7 @@
 #   usage:  rtf2md <RTF input file> <Markdown output file>
 #
 unrtf --html $1 | \
-    pandoc --normalize --smart --wrap=none -f html -t markdown | \
+    pandoc --normalize --smart --no-wrap -f html -t markdown | \
     # remove backslash inserted by unrtf at end of each paragraph
     sed 's/\\$/\n/g' | \
     # insert space after smushed italics '*'
