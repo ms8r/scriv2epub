@@ -10,14 +10,18 @@
 {% if authoremail is defined %}
     <p class="center-par-tb-extra-space">{{ authoremail|e }}</p>
 {% endif %}
+{% if editor is defined %}
 {% if editor.name is defined %}<p class="center-par-tb-extra-space">Editing by {{ editor.name|e }}
 {% if editor.web is defined %}<br />{{ editor.web }}{% endif %}
 </p>
 {% endif %}
+{% endif %}
 <p class="center-par-tb-extra-space"></p>
+{% if coverart is defined %}
 {% if coverart.name is defined %}<p class="center-par-tb-extra-space">Cover art by {{ coverart.name|e }}
 {% if coverart.web is defined %}<br />{{ coverart.web }}{% endif %}
 </p>
+{% endif %}
 {% endif %}
 
 <p class="center-par-tb-extra-space"></p>
