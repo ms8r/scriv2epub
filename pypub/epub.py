@@ -212,11 +212,10 @@ def gen_from_tmpl(pg, pages, meta, tmpl_env, epubdir, srcdir, htmldir,
     for raw in ['beg_raw', 'end_raw']:
         if raw not in pg:
             continue
-        pg[raw] = markdown(pg[raw], extensions=['smarty'])
+        pg[raw] = markdown.markdown(pg[raw], extensions=['smarty'])
     if 'pars' in pg:
-        pg['pars'] = [markdown(p, extensions=['smarty']).replace(
-                '<p>', '').replace('</p>', '')
-                      for p in pg['pars']]
+        pg['pars'] = [markdown.markdown(p, extensions=['smarty']).replace(
+                '<p>', '').replace('</p>', '') for p in pg['pars']]
     tmpl_name = pg.get('template')
     if not tmpl_name:
         tmpl_name = pg['id']
@@ -253,18 +252,20 @@ def gen_from_tmpl(pg, pages, meta, tmpl_env, epubdir, srcdir, htmldir,
         foo.write(ht_text)
 
 
-def augment_mm(mm_item, epubdir, srcdir):
+def augment_meta(meta_item, epubdir, srcdir):
     """
-    Augment with metadata defined in individual mainmatter source
-    files.
+    Augment with metadata defined in individual source files for entries of
+    type 'chapter'.
     """
+    item = meta_item.copy()
+    if item['type'] != 'chapter':
+        return item
     # Page level metadata items for which the chapter template expects single
     # values rather than lists (need to be extracted from lists if defined in
     # sourve pages):
     delist = ['heading', 'subheading', 'hdgalign', 'subalign', 'beg_raw',
               'end_raw']
     md = markdown.Markdown(extensions=['meta'])
-    item = mm_item.copy()
     src_dir = item.get('srcdir')
     src_path = os.path.join(epubdir, src_dir if src_dir else
                             srcdir)
@@ -284,28 +285,25 @@ def augment_mm(mm_item, epubdir, srcdir):
     return item
 
 
-def get_mainmatter(epubdir, mmyaml, srcdir):
+def get_meta(epubdir, yaml_meta, srcdir):
     """
-    Generates mainmatter list augmenting `mmyaml` with page metadata contained
-    in individual source files (*.md).
+    Generates metayaml list augmenting ``yaml_meta`` with page metadata
+    contained in individual source files (*.md) for pages of type 'chapter'.
 
-    Will also add an 'mdfile' key for each mainmatter items that has the full
+    Will also add an 'mdfile' key for each mainmatter item that has the full
     absolute path to the corresponding Markdown source file. Similarly, the
     'parstyle' value will be defined for each item.
     """
-    with open(os.path.join(epubdir, mmyaml), 'r') as foi:
-        mainmatter = yaml.load(foi)
 
-    def gen_mm(mm_list):
-        # TODO: implement as generator
+    def genmeta(mm_list):
         out = []
         for item in mm_list:
             if 'children' in item:
-                item['children'] = gen_mm(item['children'])
-            out.append(augment_mm(item, epubdir, srcdir))
+                item['children'] = genmeta(item['children'])
+            out.append(augment_meta(item, epubdir, srcdir))
         return out
 
-    return gen_mm(mainmatter)
+    return genmeta(yaml_meta)
 
 
 def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
@@ -321,10 +319,12 @@ def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
 
     with open(os.path.join(epubdir, metayaml), 'r') as foi:
         meta = yaml.load(foi)
-    mainmatter = get_mainmatter(epubdir, mmyaml, srcdir)
-    fm = meta.get('frontmatter', [])
-    bm = meta.get('backmatter', [])
-    pages = (fm if fm else []) + mainmatter + (bm if bm else [])
+    fm = get_meta(epubdir, meta.get('frontmatter', []), srcdir)
+    bm = get_meta(epubdir, meta.get('backmatter', []), srcdir)
+    with open(os.path.join(epubdir, mmyaml), 'r') as foi:
+        mainmatter = yaml.load(foi)
+    mm = get_meta(epubdir, mainmatter, srcdir)
+    pages = (fm if fm else []) + mm + (bm if bm else [])
 
     tmplLoader = j2.FileSystemLoader(searchpath=params._TEMPLATE_PATH)
     tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True)
