@@ -17,8 +17,12 @@ Passed in variables:
     pg_data: sequence
         List with the different series to be listed. Each item is a dict with
         the following items:
-            name: str
+            series: str
                 Series name / title
+            url: str
+                Link to series landing page
+            slogan: str
+                Tag line to appear under series name / title
             img: str
                 url of an image to be shown centered above the listing of the
                 individual titles in the series.
@@ -39,7 +43,8 @@ Passed in variables:
 <div class="center">
     {% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
     {% for series in pg_data %}
-        {% if series.series %}<h3 class="chapter-heading">{{ series.series|e }}</h3>{% endif %}
+        {% if series.series %}<h3 class="chapter-heading">{% if series.url %}<a href="{{ series.url|e }}">{% endif %}{{ series.series|e }}{% if series.url %}</a>{% endif %}</h3>{% endif %}
+        {% if series.slogan %}<p class="center-par-b-space italic-par">{{ series.slogan|e }}</p>{% endif %}
         {% if series.img %}<p class="center-par"><img width="400" src="{{ series.img|e }}" alt="{{ series.series|e }}" /></p>{% endif %}
         {% for t in series.titlelist %}
             {% if t.img %}<p class="center-par">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}" alt="Cover image for {{ t.title|e }}" />{% if t.url %}</a>{% endif %}</p>{% endif %}
