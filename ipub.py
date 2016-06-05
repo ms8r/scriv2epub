@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
 """
-s2e.py: EPUB Pre-Processor - utilities for converting Scrivener
+ipub.py: EPUB Pre-Processor - utilities for converting Scrivener
 projects into good looking EPUBs and print books(written for Python 3)
 
-Run `python s2e.py -h` for more info
+Run `python ipub.py -h` for more info
 """
 
 import argparse
 import logging
 
-from pypub import epub, scriv, latex
+from ipub import epub, scriv, latex
 
 
 logging.basicConfig(level=logging.INFO)

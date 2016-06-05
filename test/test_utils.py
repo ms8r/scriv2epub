@@ -2,7 +2,7 @@ import unittest
 import re
 from urllib.parse import urlparse, parse_qsl, unquote_plus
 
-from pypub import utils
+from ipub import utils
 
 
 # from http://stackoverflow.com/a/9468284

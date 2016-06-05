@@ -4,8 +4,8 @@ from io import StringIO
 import sys
 import logging
 
-from pypub import epub
-from pypub import params
+from ipub import epub
+from ipub import params
 
 
 logging.basicConfig(level=logging.INFO)
@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 class InitTest(unittest.TestCase):
 
-    @patch('pypub.epub.utils.run_script', return_value=(
+    @patch('ipub.epub.utils.run_script', return_value=(
             b'this should print as info', b'this should print as error'))
     def test_init(self, run_script_mock):
         target = 'target_dir'
