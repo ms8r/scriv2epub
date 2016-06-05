@@ -1,6 +1,6 @@
-# set ROOT_DIR to path to directory that contains s2e.py
-ROOT_DIR         = ~/Python/scriv2epub
-S2E              = $(ROOT_DIR)/s2e.py
+# set ROOT_DIR to path to directory that contains ipub.py
+ROOT_DIR         = ~/Python/ipub
+S2E              = $(ROOT_DIR)/ipub.py
 TMPL_DIR         = $(ROOT_DIR)/tmpl
 EPUB_CHECKER	 = java -jar ~/EPUB/epubcheck-4.0.1/epubcheck.jar
 SRC_DIR          = src
