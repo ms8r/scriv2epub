@@ -156,7 +156,7 @@ def handle_genlatex(args):
     Generates LaTeX for a print book, given meta YAML, mainmatter md and a
     template.
     """
-    latex.mkbook(args.metayaml, args.book, args.tmpl)
+    latex.mkbook(args.metayaml, args.book, args.tmpl, args.yincl)
 
 
 def handle_scriv2md(args):

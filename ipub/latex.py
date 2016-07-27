@@ -72,7 +72,7 @@ def mmcat(mmyaml, outfile, mddir, hoffset=0, lbreak=False):
     foo.close()
 
 
-def mkbook(metayaml, book, tmpl):
+def mkbook(metayaml, book, tmpl, yincl):
     """
     Generates LaTeX for a print book, given meta YAML, mainmatter md and a
     template.
