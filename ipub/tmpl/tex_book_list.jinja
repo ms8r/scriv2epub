@@ -32,7 +32,11 @@ Passed in variables:
 <% if pg_meta.heading %>\chapter{<& pg_meta.heading &>}<% endif %>
 \begin{center}
 <% for series in pg_data %>
+    <%- if not loop.first -%>
+       \newpage 
+    <%- endif %>
     <% if series.series %>{\LARGE <& series.series &>}\plainbreak{0.5}<% endif %>
+    <% if series.slogan %>{\large\itshape <& series.slogan &>}\plainbreak{0.5}<% endif %>
     <% if series.img %>\includegraphics[width=0.75\linewidth]{<& series.img &>}\plainbreak{0.5}<% endif %>
     <% for t in series.titlelist %>
         <& t.title &><% if t.tclause %> <& t.tclause &><% endif %><% if t.subtitle %>\\<& t.subtitle &><% endif %>
