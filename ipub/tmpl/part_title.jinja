@@ -11,7 +11,9 @@
     {% if pg_meta.series is defined %}
         <p class="series">{{ pg_meta.series|e }}</p>
     {% endif %}
-    <p class="author">by {{ pg_meta.author|e }}</p>
+    {% if pg_meta.author is defined %}
+        <p class="author">by {{ pg_meta.author|e }}</p>
+    {% endif %}
     {% if pg_meta.img is defined %}
         <p class="center"><img src="{{ pg_meta.img|e }}" alt="{{ pg_meta.title|e }}" /></p>
     {% endif %}
