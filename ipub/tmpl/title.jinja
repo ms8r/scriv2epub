@@ -6,7 +6,8 @@
         <p class="subtitle">{{ subtitle|e }}</p>
     {% endif %}
     {% if author is defined %}
-        <p class="author">by {{ author|e }}</p>
+        <p>by</p>
+        <p class="author">{{ author|e }}</p>
     {% endif %}
     {%- if authorlist is defined %}
       <p class="author">
