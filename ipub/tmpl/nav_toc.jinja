@@ -1,3 +1,5 @@
+{% extends "xhtml_skeleton.jinja" %}
+
 {# ---------------------------------------------------------------------
     Extended TOC with nav blocks (can be used to replace ncx toc)
 
@@ -8,7 +10,6 @@
     `no_toc: True` in the respective page's meta data.
  --------------------------------------------------------------------- #}
 
-{% extends "xhtml_skeleton.jinja" %}
 {% block body %}
 <nav epub:type="toc">
 <h1 class="toc-heading">{{ pg_meta.heading|default('Contents')|e }}</h1>
