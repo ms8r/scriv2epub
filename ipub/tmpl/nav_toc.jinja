@@ -1,13 +1,25 @@
+{# ---------------------------------------------------------------------
+    Extended TOC with nav blocks (can be used to replace ncx toc)
+
+    If `max_depth` is defined as part of toc meta data only entries up
+    to (and including) that depth will be printed.
+
+    Individual pages can be ommitted from toc by specifying
+    `no_toc: True` in the respective page's meta data.
+ --------------------------------------------------------------------- #}
+
 {% extends "xhtml_skeleton.jinja" %}
 {% block body %}
 <nav epub:type="toc">
 <h1 class="toc-heading">{{ pg_meta.heading|default('Contents')|e }}</h1>
 <ol>
 {% set level = [] %}
-{% for pg in pages recursive %}
+{% for pg in pages if not pg.no_toc recursive %}
     {% if level.append(1) %}{% endif %}
-    <li class="toc-item-{{ level|length }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((level|length - 1) * 4, true) }}</a> {{ pg.suffix|e }}
-    {% if pg.children %}<ol>{{ loop(pg.children) }}</ol>{% endif %}
+    {% if not pg_meta.max_depth or level|length <= pg_meta.max_depth %}
+        <li class="toc-item-{{ level|length }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((level|length - 1) * 4, true) }}</a> {{ pg.suffix|e }}
+        {% if pg.children %}<ol>{{ loop(pg.children) }}</ol>{% endif %}
+    {% endif %}
     {% if level.pop(0) %}{% endif %}</li>
 {% endfor %}
 </ol>
