@@ -8,5 +8,7 @@ unrtf --html $1 | \
     pandoc --normalize --smart --no-wrap -f html -t markdown | \
     # remove backslash inserted by unrtf at end of each paragraph
     sed 's/\\$/\n/g' | \
+    # remove any left oer" spans
+    sed 's/<\/\?span[^>]*>//g' | \
     # insert space after smushed italics '*'
     sed 's/\([\.,;:\!\?…*]\)\*\([a-zA-Z0-9“]\)/\1 \*\2/g' > $2
