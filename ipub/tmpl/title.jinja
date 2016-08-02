@@ -10,7 +10,8 @@
         <p class="author">{{ author|e }}</p>
     {% endif %}
     {%- if authorlist is defined %}
-      <p class="author">
+        <p>by</p>
+        <p class="author">
       {%- for aut in authorlist -%}
         {{ aut }}{% if not loop.last %}<br />{% endif %}
       {%- endfor -%}
