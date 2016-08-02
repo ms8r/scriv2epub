@@ -17,23 +17,28 @@ Passed in variables:
                 Optional. URL to be linked to the author name (file name in
                 epub if to reference internally)
             suffix: str
-                Optional. Text to be placed after author name, outside of link,
-                separated by space.
+                Optional. Text to be placed after author name, outside of link.
             links: sequence of dicts
-                Will appear as bulleted list under author name. Each item
-                consists of 
-                    - label (optional), placed before link, separated by ': '
+                Will appear as bulleted list underparting statement. Each item
+                consists of
+                    - prefix (optional), placed before link (no separation)
                     - text
                     - url (optional), will be used to link text
+                    - suffix (optional), placed after link text (no separation)
+                None of these will be html excaped in order to allow formatting
+                such as italics. Hence, you can also put te entire link content
+                into the `text` item if you need moe flexibility.
 ----------------------------------------------------------------------------#}
 
 {% block body %}
 
 {% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
 {% for author in pg_data %}
-<h3>{% if author.href %}<a href="{{ author.href|e }}">{% endif %}{{ author.name|e }}{% if author.href %}</a>{% endif %}{% if author.suffix %} {{author.suffix|e }}{% endif %}</h3>
+<h3>{% if author.href %}<a href="{{ author.href }}">{% endif %}{{ author.name|e }}{% if author.href %}</a>{% endif %}{% if author.suffix %}{{ author.suffix }}{% endif %}</h3>
 <ul>
-{% for link in author.links %}<li>{% if link.label %}{{ link.label|e }}: {% endif %}{% if link.url %}<a href="{{ link.url|e }}">{% endif %}{{ link.text|e }}{% if link.url %}</a>{% endif %}</li>{% endfor %}
+{% for link in author.links %}
+    <li>{% if link.prefix %}{{ link.prefix }}{% endif %}{% if link.url %}<a href="{{ link.url }}">{% endif %}{{ link.text }}{% if link.url %}</a>{% endif %}{% if link.suffix %}{{ link.suffix }}{% endif %}</li>
+{% endfor %}
 </ul>
 {% endfor %}
 

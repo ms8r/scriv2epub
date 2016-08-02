@@ -1,0 +1,36 @@
+{% extends "xhtml_skeleton.jinja" %}
+{#----------------------------------------------------------------------------
+Thank you page at the end of each book in a box set, author's parting statement
+and links to Amazon, social media, ...
+
+Passed in variables:
+    title_heading: str
+        Used in xhtml_skeleton
+    pg_meta: dict
+        heading: str
+            Used as page heading. Required for toc.
+        parting: str
+            Valid html with author's parting statement.
+        links: sequence of dicts
+            Will appear as bulleted list underparting statement. Each item
+            consists of
+                - prefix (optional), placed before link (no separation)
+                - text
+                - url (optional), will be used to link text
+                - suffix (optional), placed after link text (no separation)
+            None of these will be html excaped in order to allow formatting
+            such as italics. Hence, you can also put te entire link content
+            into the `text` item if you need moe flexibility.
+----------------------------------------------------------------------------#}
+
+{% block body %}
+
+{% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
+{{ pg_meta.parting }}
+<ul>
+{% for link in page_meta.links %}
+    <li>{% if link.prefix %}{{ link.prefix }}{% endif %}{% if link.url %}<a href="{{ link.url }}">{% endif %}{{ link.text }}{% if link.url %}</a>{% endif %}{% if link.suffix %}{{ link.suffix }}{% endif %}</li>
+{% endfor %}
+</ul>
+
+{% endblock %}
