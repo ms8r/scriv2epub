@@ -24,20 +24,26 @@ Passed in variables:
                 title.
             pars: sequence
                 List with the individual paragraphs to be printed fro this book
-                (will be html escaped).
+                (will not be html escaped).
 ----------------------------------------------------------------------------#}
 
 {% block body %}
 
 {% if pg_meta.heading %}<h2 class="chapter-heading center">{{ pg_meta.heading|e }}</h2>{% endif %}
+{% if pg_meta.subheading %}<h3 class="chapter-heading center">{{ pg_meta.subheading|e }}</h3>{% endif %}
+
+{% if pg_meta.beg_raw %}{{ pg_meta.beg_raw }}{% endif %}
+
 {% for blurb in pg_data %}
 
-<h3 class="center">{% if blurb.href %}<a href="{{ blurb.href|e }}">{% endif %}{{ blurb.title|e }}{% if blurb.href %}</a>{% endif %}{% if blurb.suffix %} {{blurb.suffix|e }}{% endif %}</h3>
+<h3 class="center">{% if blurb.href %}<a href="{{ blurb.href|e }}">{% endif %}{% if blurb.title %}{{ blurb.title|e }}{% endif %}{% if blurb.href %}</a>{% endif %}{% if blurb.suffix %} {{blurb.suffix|e }}{% endif %}</h3>
 {% if blurb.subtitle %}<p class="center-par-tb-space"><em>{{ blurb.subtitle|e }}</em></p>{% endif %}
 {% if blurb.pars %}
-{% for par in blurb.pars %}<p class="no-indent">{{ par|e }}</p>{% endfor %}
+{% for par in blurb.pars %}<p class="no-indent">{{ par }}</p>{% endfor %}
 {% endif %}
 
 {% endfor %}
+
+{% if pg_meta.end_raw %}{{ pg_meta.end_raw }}{% endif %}
 
 {% endblock %}

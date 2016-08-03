@@ -4,8 +4,8 @@
 
 {% block body %}
 
-{% if pg_meta.heading %}<h2>{{ pg_meta.heading|e }}</h2>{% endif %}
-{% if pg_meta.subheading %}<h3>{{ pg_meta.subheading|e }}</h3>{% endif %}
+{% if pg_meta.heading %}<h2{% if pg_meta.centerheadings %} class="chapter-heading center"{% endif %}>{{ pg_meta.heading|e }}</h2>{% endif %}
+{% if pg_meta.subheading %}<h3{% if pg_meta.centerheadings %} class="chapter-heading center"{% endif %}>{{ pg_meta.subheading|e }}</h3>{% endif %}
 
 {% if pg_meta.beg_img %}<p class="center"><img src="{{ pg_meta.beg_img.url|e }}" alt="{{ pg_meta.beg_img.alt|e }}" /></p>{% endif %}
 
