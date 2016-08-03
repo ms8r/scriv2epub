@@ -28,7 +28,7 @@ Passed in variables:
 {% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
 {{ pg_meta.parting }}
 <ul>
-{% for link in page_meta.links %}
+{% for link in pg_meta.links %}
     <li>{% if link.prefix %}{{ link.prefix }}{% endif %}{% if link.url %}<a href="{{ link.url }}">{% endif %}{{ link.text }}{% if link.url %}</a>{% endif %}{% if link.suffix %}{{ link.suffix }}{% endif %}</li>
 {% endfor %}
 </ul>
