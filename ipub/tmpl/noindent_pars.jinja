@@ -4,6 +4,12 @@
 
 {% block body %}
 
+{% if pg_meta.fleuronimg is defined %}
+    <div class="fleuron">
+        <img src="{{ pg_meta.fleuronimg }}" alt="fleuron image" />
+    </div>
+{% endif %}
+
 {% if pg_meta.heading %}<h2{% if pg_meta.centerheadings %} class="chapter-heading center"{% endif %}>{{ pg_meta.heading|e }}</h2>{% endif %}
 {% if pg_meta.subheading %}<h3{% if pg_meta.centerheadings %} class="chapter-heading center"{% endif %}>{{ pg_meta.subheading|e }}</h3>{% endif %}
 

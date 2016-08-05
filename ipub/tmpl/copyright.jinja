@@ -28,4 +28,8 @@
 <p class="center-par-tb-extra-space">This book or any portion thereof may not be reproduced or used in any manner without the express written permission of the author except for the use of brief quotations in articles or reviews.</p>
 <p class="center-par-tb-space">This is a work of fiction. Any resemblance to actual persons is purely coincidental.</p>
 
+{% if pg_meta.end_raw %}
+{{ pg_meta.end_raw }}
+{% endif %}
+
 {% endblock %}
