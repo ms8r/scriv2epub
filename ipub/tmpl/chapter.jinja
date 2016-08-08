@@ -20,11 +20,11 @@
 {% endfor %}
 
 
-{% if pg_meta.beg_raw %}{{ pg_meta.beg_raw }}{% endif %}
+{% if pg_meta.beg_raw %}{{ pg_meta.beg_raw|markdown() }}{% endif %}
 
 {{ chapter_content }}
 
-{% if pg_meta.end_raw %}{{ pg_meta.end_raw }}{% endif %}
+{% if pg_meta.end_raw %}{{ pg_meta.end_raw|markdown() }}{% endif %}
 
 {% endblock %}
 
