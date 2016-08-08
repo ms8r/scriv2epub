@@ -24,7 +24,7 @@ Passed in variables:
                 title.
             pars: sequence
                 List with the individual paragraphs to be printed fro this book
-                (will not be html escaped).
+                (will be run through custom markdown filter).
 ----------------------------------------------------------------------------#}
 
 {% block body %}
@@ -39,7 +39,7 @@ Passed in variables:
 <h3 class="center">{% if blurb.href %}<a href="{{ blurb.href|e }}">{% endif %}{% if blurb.title %}{{ blurb.title|e }}{% endif %}{% if blurb.href %}</a>{% endif %}{% if blurb.suffix %} {{blurb.suffix|e }}{% endif %}</h3>
 {% if blurb.subtitle %}<p class="center-par-tb-space"><em>{{ blurb.subtitle|e }}</em></p>{% endif %}
 {% if blurb.pars %}
-{% for par in blurb.pars %}<p class="no-indent">{{ par }}</p>{% endfor %}
+{% for par in blurb.pars %}{{ par|markdown(par_style="no-indent") }}{% endfor %}
 {% endif %}
 
 {% endfor %}

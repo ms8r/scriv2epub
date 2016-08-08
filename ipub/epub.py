@@ -208,14 +208,6 @@ def gen_from_tmpl(pg, pages, meta, tmpl_env, epubdir, srcdir, htmldir,
     """
     Generates HTML output from (page-) metadata
     """
-    # `beg_raw`, `end_raw` and `pars` need to be run through markdown:
-    for raw in ['beg_raw', 'end_raw']:
-        if raw not in pg:
-            continue
-        pg[raw] = markdown.markdown(pg[raw], extensions=['smarty'])
-    if 'pars' in pg:
-        pg['pars'] = [markdown.markdown(p, extensions=['smarty']).replace(
-                '<p>', '').replace('</p>', '') for p in pg['pars']]
     tmpl_name = pg.get('template')
     if not tmpl_name:
         tmpl_name = pg['id']
@@ -306,6 +298,24 @@ def get_meta(epubdir, yaml_meta, srcdir):
     return genmeta(yaml_meta)
 
 
+def md2ht(text, par_style=None, trim_tags=False):
+    """
+    Converts Markdown `text` to HTML, optionally stripping outer <p>/<h.> and
+    </p>/</h> tags ('trim_tags=True`, works for single paragrpahs only).
+    `par_style` can be used to specify a CSS class which will be added as an
+    attribute to remaining `<p>` tags. Uses smartypants and will leave input
+    HTML untouched.
+    """
+    html = markdown.markdown(text, extensions=['smarty'])
+    if trim_tags:
+        html = re.match(r'^\s*<[ph][^>]*>(.*)</[ph]\s*>\s*$', html,
+                        flags=re.MULTILINE + re.DOTALL).group(1)
+    if par_style:
+        html = html.replace('<p>', '<p class="%s">' % par_style)
+
+    return html
+
+
 def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
            dropcaps=False):
     """
@@ -328,6 +338,7 @@ def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
 
     tmplLoader = j2.FileSystemLoader(searchpath=params._TEMPLATE_PATH)
     tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True)
+    tmplEnv.filters['markdown'] = md2ht
 
     images = build_img_inventory(epubdir, imgdir, epub_meta['opf'][1])
 
