@@ -17,13 +17,13 @@
 
 {% if pg_meta.beg_img %}<p class="center"><img src="{{ pg_meta.beg_img.url|e }}" alt="{{ pg_meta.beg_img.alt|e }}" /></p>{% endif %}
 
-{% if pg_meta.beg_raw %}{{ pg_meta.beg_raw|markdown() }}{% endif %}
+{% if pg_meta.beg_raw %}{{ pg_meta.beg_raw|markdown(par_style="no-indent") }}{% endif %}
 
 {% for p in pg_meta.pars %}
 {{ p|markdown(par_style="no-indent") }}
 {% endfor %}
 
-{% if pg_meta.end_raw %}{{ pg_meta.end_raw|markdown() }}{% endif %}
+{% if pg_meta.end_raw %}{{ pg_meta.end_raw|markdown(par_style="no-indent") }}{% endif %}
 
 {% if pg_meta.end_img %}<p class="center"><img src="{{ pg_meta.end_img.url|e }}" alt="{{ pg_meta.end_img.alt|e }}" /></p>{% endif %}
 

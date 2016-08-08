@@ -32,7 +32,7 @@ Passed in variables:
 {% if pg_meta.heading %}<h2 class="chapter-heading center">{{ pg_meta.heading|e }}</h2>{% endif %}
 {% if pg_meta.subheading %}<h3 class="chapter-heading center">{{ pg_meta.subheading|e }}</h3>{% endif %}
 
-{% if pg_meta.beg_raw %}{{ pg_meta.beg_raw }}{% endif %}
+{% if pg_meta.beg_raw %}{{ pg_meta.beg_raw|markdown(par_style="no-indent") }}{% endif %}
 
 {% for blurb in pg_data %}
 
@@ -44,6 +44,6 @@ Passed in variables:
 
 {% endfor %}
 
-{% if pg_meta.end_raw %}{{ pg_meta.end_raw }}{% endif %}
+{% if pg_meta.end_raw %}{{ pg_meta.end_raw|markdown(par_style="no-indent") }}{% endif %}
 
 {% endblock %}
