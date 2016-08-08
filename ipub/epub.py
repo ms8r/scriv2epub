@@ -306,6 +306,9 @@ def md2ht(text, par_style=None, trim_tags=False):
     attribute to remaining `<p>` tags. Uses smartypants and will leave input
     HTML untouched.
     """
+    # remove '</p> <p>' spaces which seem to trip up markdown
+    text = re.sub(r'</p\s*>\s+<p', '</p><p', text)
+
     html = markdown.markdown(text, extensions=['smarty'])
     if trim_tags:
         html = re.match(r'^\s*<[ph][^>]*>(.*)</[ph]\s*>\s*$', html,
