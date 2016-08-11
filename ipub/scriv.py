@@ -161,9 +161,13 @@ def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
     return chapters
 
 
-def to_md(mmyaml, projdir, mddir):
+def to_md(mmyaml, projdir, mddir, use_synopsis=False):
     """
     Generates markdown files from Scrivener RTF sources.
+
+    If `use_synopsis` is `True` the Scrivener synopsis text files for each
+    chapter must contain valid yaml `key: value` pairs. These will be prepended
+    to the chapter markdown as metadata.
 
     Returns number of items written.
     """
@@ -192,6 +196,23 @@ def to_md(mmyaml, projdir, mddir):
         std, err = utils.run_script(cmd, infile, outfile)
         if err: logging.error(err.decode('utf-8'))
         if std: logging.info(std.decode('utf-8'))
+
+        if not use_synopsis:
+            continue
+
+        # synopsis file: {rtf number}_synopsis.txt
+        syn_file = os.path.join(projdir, os.path.splitext(s)[0] +
+                                '_synopsis.txt')
+        try:
+            with open(syn_file, 'r') as foi:
+                meta = foi.read()
+        except FileNotFoundError:
+            continue
+        logging.info('fetching chapter meta data from %s', syn_file)
+        with open(outfile, 'r') as foi:
+            content = foi.read()
+        with open(outfile, 'w') as foo:
+            foo.write('{}\n---\n\n{}'.format(meta, content))
 
     return i
 

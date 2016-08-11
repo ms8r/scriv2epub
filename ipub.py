@@ -28,6 +28,9 @@ def setup_parser_scriv2md(p):
             help="directory to which to write markdown output")
     p.add_argument('--projdir', required=True,
             help="path to Scrivener project directory")
+    p.add_argument('--use_synopsis', action='store_true',
+            help="""will look for Scrivener synopsis files and prepend
+            content as metadata to respective  Markdown content files""")
 
 
 def setup_parser_mmcat(p):
@@ -165,7 +168,7 @@ def handle_scriv2md(args):
 
     Returns number of items written.
     """
-    scriv.to_md(args.mmyaml, args.projdir, args.mddir)
+    scriv.to_md(args.mmyaml, args.projdir, args.mddir, args.use_synopsis)
 
 
 def handle_scrivx2yaml(args):
