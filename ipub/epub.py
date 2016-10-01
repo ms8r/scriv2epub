@@ -340,7 +340,8 @@ def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
     pages = (fm if fm else []) + mm + (bm if bm else [])
 
     tmplLoader = j2.FileSystemLoader(searchpath=params._TEMPLATE_PATH)
-    tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True)
+    tmplEnv = j2.Environment(loader=tmplLoader, trim_blocks=True,
+            lstrip_blocks=True)
     tmplEnv.filters['markdown'] = md2ht
 
     images = build_img_inventory(epubdir, imgdir, epub_meta['opf'][1])

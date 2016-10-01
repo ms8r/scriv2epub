@@ -14,26 +14,20 @@
 <nav epub:type="toc">
 <h1 class="toc-heading">{{ pg_meta.heading|default('Contents')|e }}</h1>
 
-{#
 {% set level = [] %}
-{% for pg in pages recursive %}
-    {% if level.append(1) %}{% endif %}
-    <li class="toc-item-{{ level|length }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((level|length - 1) * 4, true) }}</a> {{ pg.suffix|e }}
-    {% if pg.children %}<ol>{{ loop(pg.children) }}</ol>{% endif %}
-    {% if level.pop(0) %}{% endif %}</li>
-{% endfor %}
-#}
-
-{% set level = [] %}
+<ol>
 {% for pg in pages if not pg.no_toc recursive %}
-    {% if level.append(1) %}{% endif %}
-    {% if not pg_meta.max_depth or level|length <= pg_meta.max_depth %}
-        <ol>
-        <li class="toc-item-{{ level|length }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((level|length - 1) * 4, true) }}</a> {{ pg.suffix|e }}
-        {% if pg.children %}{{ loop(pg.children) }}{% endif %}</li>
-        </ol>
+  {% if level.append(1) %}{% endif %}
+  {% if not pg_meta.max_depth or level|length <= pg_meta.max_depth %}
+    <li class="toc-item-{{ level|length }}"><a href="{{ pg.id|e }}.xhtml">{{ pg.heading|e|indent((level|length - 1) * 2, true) }}</a> {{ pg.suffix|e }}
+    {% if pg.children %}
+      <ol>
+      {{ loop(pg.children) }}
+      </ol>
     {% endif %}
-    {% if level.pop(0) %}{% endif %}
+    </li>
+  {% endif %}
+  {% if level.pop(0) %}{% endif %}
 {% endfor %}
 </ol>
 </nav>
