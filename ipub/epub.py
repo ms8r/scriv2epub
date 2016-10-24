@@ -87,7 +87,7 @@ def build_img_inventory(epubdir, imgdir, opfdir):
                    'jpeg': 'jpeg',
                    'png': 'png',
                    'gif': 'gif',
-                   'svg': 'svg'}
+                   'svg': 'svg+xml'}
 
     logging.info('building image inventory...')
     img_dir = os.path.join(epubdir, imgdir)
