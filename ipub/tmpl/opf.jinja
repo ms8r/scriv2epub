@@ -53,7 +53,7 @@
     <item href="{{ css_file|default('css/stylesheet.css')|e }}" id="css-epub" media-type="text/css" />
     {% if images %}
     {% for img in images %}
-    <item href="{{ img.href|e }}" id="{{ img.format }}_{{ img.id|e }}" media-type="image/{{ img.format }}" />
+    <item href="{{ img.href|e }}" id="{{ img.format|replace("+", "_") }}_{{ img.id|e }}" media-type="image/{{ img.format }}" />
     {% endfor %}
     {% endif %}
 
