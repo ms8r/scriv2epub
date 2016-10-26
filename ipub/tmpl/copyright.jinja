@@ -3,6 +3,7 @@
 {% block body %}
 
 <p class="center-par-tb-extra-space">{{ title|e }}</p>
+{% if subtitle is defined %}<p class="subtitle">{{ subtitle|e }}</p>{% endif %}
 <p class="center-par-tb-extra-space">{{ copyright|d('Copyright 2016') }}{% if author is defined %} by {{ author|e }} {% endif %}</p>
 {% if authorweb is defined %}
     <p class="center-par-tb-extra-space">{{ autherweb|e }}</p>
