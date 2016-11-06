@@ -3,7 +3,6 @@
 {% block body %}
 
 <p class="center-par-tb-extra-space">{{ title|e }}</p>
-{% if subtitle is defined %}<p class="subtitle">{{ subtitle|e }}</p>{% endif %}
 <p class="center-par-tb-extra-space">{{ copyright|d('Copyright 2016') }}{% if author is defined %} by {{ author|e }} {% endif %}</p>
 {% if authorweb is defined %}
     <p class="center-par-tb-extra-space">{{ autherweb|e }}</p>
@@ -14,7 +13,7 @@
 {% if authorlist is defined %}
 <p class="center-par-tb-space">
 {% for authorname in authorlist %}
-   &copy; {{ authorname|e }}{% if not loop.last %}, {% endif %}
+   &copy;&nbsp;{{ authorname|e }}{% if not loop.last %}, {% endif %}
 {% endfor %}
 </p>
 {% endif %}
