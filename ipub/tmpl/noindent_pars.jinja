@@ -25,7 +25,11 @@
 
 {% if pg_meta.end_raw %}{{ pg_meta.end_raw|markdown(par_style="no-indent") }}{% endif %}
 
-{% if pg_meta.end_img %}<p class="center"><img src="{{ pg_meta.end_img.url|e }}" alt="{{ pg_meta.end_img.alt|e }}" /></p>{% endif %}
+{% if pg_meta.end_img %}
+<div class="end-img">
+    <p class="center"><img src="{{ pg_meta.end_img.url|e }}" alt="{{ pg_meta.end_img.alt|e }}" /></p>
+</div>
+{% endif %}
 
 {% endblock %}
 
