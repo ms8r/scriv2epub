@@ -15,7 +15,9 @@
         <p class="author">by {{ pg_meta.author|e }}</p>
     {% endif %}
     {% if pg_meta.img is defined %}
+    <div {% if pg_meta.img_class is defined %}class="{{ pg_meta.img_class }}"{% endif %}>
         <p class="center"><img src="{{ pg_meta.img|e }}" alt="{{ pg_meta.title|e }}" /></p>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

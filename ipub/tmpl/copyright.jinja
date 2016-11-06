@@ -11,6 +11,13 @@
 {% if authoremail is defined %}
     <p class="center-par-tb-extra-space">{{ authoremail|e }}</p>
 {% endif %}
+{% if authorlist is defined %}
+<p class="center-par-tb-space">
+{% for authorname in authorlist %}
+   &copy; {{ authorname|e }}{% if not loop.last %}, {% endif %}
+{% endfor %}
+</p>
+{% endif %}
 {% if editor is defined %}
 {% if editor.name is defined %}<p class="center-par-tb-extra-space">Editing by {{ editor.name|e }}
 {% if editor.web is defined %}<br />{{ editor.web }}{% endif %}
