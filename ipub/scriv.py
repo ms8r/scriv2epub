@@ -137,7 +137,7 @@ def chapters_to_dict(chapters, src_dir='Files/Docs', src_type='chapter',
     def augment_ch(chapters):
         for ch in chapters:
             id_str = ch['scrivTitle'].lower()
-            id_str = re.sub(r'[ \-&]', '_', id_str)
+            id_str = re.sub(r'[ \-&/]', '_', id_str)
             id_str = re.sub(r'[,.;:\"\'*#@%!$?]', '', id_str)
             suffix = 0
             while id_str in ids:
@@ -241,7 +241,7 @@ def to_yaml(projdir, scrivxml, rtfdir, toptitle, typefilter, src_type, hoffset,
     foo = output if output else sys.stdout
     yaml.dump(ch, stream=foo, default_flow_style=False)
     if output:
-            output.close()
+        output.close()
 
 
 def body2md(bodydir, startnum, stopnum, mdprefix, hoffset, headings, yamlout):
