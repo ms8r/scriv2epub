@@ -24,7 +24,9 @@
         <p class="series">{{ series|e }}</p>
     {% endif %}
     {% if img is defined %}
+    <div class="title-page-img">
         <p class="center-par-tb-extra-space"><img src="{{ img|e }}" alt="{{ title|e }}" /></p>
+    </div>
     {% endif %}
 </div>
 {% endblock %}
