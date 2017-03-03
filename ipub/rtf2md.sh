@@ -12,5 +12,7 @@ unrtf --html $1 | \
     sed 's/\\$/\n/g' | \
     # remove any left over spans
     sed 's/<\/\?span[^>]*>//g' | \
+    # fix italics broken onto new line
+    ipitfix | \
     # insert space after smushed italics '*'
     sed 's/\([\.,;:\!\?…*]\)\*\([a-zA-Z0-9“]\)/\1 \*\2/g' > $2
