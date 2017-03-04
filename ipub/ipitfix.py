@@ -1,32 +1,46 @@
 #!/usr/bin/env python
 
-"""Fixes "hanging italics" in markdown files created from Scrivener RTFs.
+"""Fixes "hanging italics" in markdown files created from Scdrivener RTFs.
 
 If a paragraph contains an uneven number of '*' (not counting '\*') an '*' will
 be appended at the end and an '*' will be stripped from the start of the next
-non-empty line.
+non-empty line. Also corrects italics formatting strtching over multiple
+paragraphs.
 """
 
 import re
 import fileinput
 
+def ast_count(line):
+    return len(re.findall(r'\*', line))
+
+def esc_ast_count(line):
+    return len(re.findall(r'\\\*', line))
+
+def it_ast_count(line):
+    return ast_count(line) - esc_ast_count(line)
+
 def open_italics(line):
-    md_stars = re.findall(r'\*', line)
-    real_stars = re.findall(r'\\\*', line)
-    return (len(md_stars) - len(real_stars)) % 2
+    return (it_ast_count(line) % 2) != 0
 
-
-orphan = False
-for line in fileinput.input():
-    if re.match(r'^\s*$', line):
-        print(line.strip())
-        continue
-    if orphan:
-        line = line.strip().lstrip('*')
-        orphan = False
-    if open_italics(line):
-        print('{0}*'.format(line.strip()))
-        orphan = True
-    else:
-        print(line.strip())
+with fileinput.input() as input_:
+    orphan = False
+    for line in input_:
+        if open_italics(line):
+            line = '{0}*\n'.format(line.rstrip())
+            orphan = True
+            while orphan:
+                nl = next(input_)
+                if re.match(r'^\s*$', nl):
+                    line += nl
+                    continue
+                if open_italics(nl):
+                    if nl.strip().startswith('*'):
+                        line += nl.replace('*', '', 1)
+                    else:
+                        line += '*{0}'.format(nl)
+                    orphan = False
+                else:
+                    line += '*{0}*\n'.format(nl.rstrip())
+        print(line.rstrip())
 
