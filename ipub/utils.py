@@ -3,6 +3,17 @@ import re
 import subprocess
 from urllib.parse import urlsplit, urlunsplit, urlencode, parse_qsl
 import logging
+from cookiecutter.main import cookiecutter
+
+def cc_create(tmpl, extra_context=None, output_dir='.', no_input=False):
+    """
+    Create new book project from cookiecutter template.
+    """
+    if extra_context is None:
+        extra_context = {}
+
+    cookiecutter(tmpl,  no_input=no_input, extra_context=extra_context,
+            output_dir=output_dir)
 
 
 def merge_dicts(*dict_args):

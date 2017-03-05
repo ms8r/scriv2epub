@@ -9,11 +9,24 @@ Run `python ipub.py -h` for more info
 
 import argparse
 import logging
+import json
 
-from ipub import epub, scriv, latex
+from ipub import epub, scriv, latex, utils
 
 
 logging.basicConfig(level=logging.INFO)
+
+def setup_parser_create(p):
+    p.add_argument('--template', required=True, help="""cookiecutter template
+            to use""")
+    p.add_argument('--json', type=argparse.FileType('r'), default=None,
+            help="""JSON file with additional context""")
+    p.add_argument('--target', default='.',
+            help="""directory in which to set up new project; defaults to
+            current directory""")
+    p.add_argument('--no_input', action='store_true', help="""if specified
+            cookiecutter will not ask for user input""")
+
 
 def setup_parser_init(p):
     p.add_argument('--target', default='.',
@@ -203,6 +216,20 @@ def handle_init(args):
     epub.init(args.target)
 
 
+def handle_create(args):
+    """
+    Creates new book project from cookiecutter template.
+    """
+    if args.json:
+        extra_context = json.load(args.json)
+        args.json.close()
+    else:
+        extra_context = {}
+
+    utils.cc_create(args.template, extra_context=extra_context,
+            output_dir=args.target, no_input=args.no_input)
+
+
 def handle_genep(args):
     """
     Generates the files required for an EPUB ebook
@@ -216,6 +243,7 @@ def handle_genep(args):
 # the handler function's doc string as help text) and then the appropriate
 # setup handler is called to add the details.
 _task_handler = {'init':        (handle_init, setup_parser_init),
+                 'create':      (handle_create, setup_parser_create),
                  'scriv2md':    (handle_scriv2md, setup_parser_scriv2md),
                  'scrivx2yaml': (handle_scrivx2yaml,
                                  setup_parser_scrivx2yaml),
