@@ -215,20 +215,19 @@ def gen_from_tmpl(pg, pages, meta, tmpl_env, epubdir, srcdir, htmldir,
     if not pg_data:
         # look for supplementary YAML file with page data,
         # first in current dir, then in epubdir, then in yincl:
+        fname = '{0}.yaml'.format(pg['yaml'] if 'yaml' in pg else pg['id'])
         try:
-            with open(pg['id'] + '.yaml', 'r') as foi:
+            with open(fname, 'r') as foi:
                 pg_data = yaml.load(foi)
         except FileNotFoundError as e:
             logging.warning(e)
         try:
-            with open(os.path.join(epubdir, pg['id'] + '.yaml'),
-                      'r') as foi:
+            with open(os.path.join(epubdir, fname), 'r') as foi:
                 pg_data = yaml.load(foi)
         except FileNotFoundError as e:
             logging.warning(e)
         try:
-            with open(os.path.join(yaml_incl_dir, pg['id'] +
-                      '.yaml'), 'r') as foi:
+            with open(os.path.join(yaml_incl_dir, fname), 'r') as foi:
                 pg_data = yaml.load(foi)
         except FileNotFoundError as e:
             logging.warning(e)
