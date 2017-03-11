@@ -20,7 +20,7 @@
 {% if editor is defined %}
 {% if editor.name is defined %}<p class="center-par-tb-extra-space">Editing by {{ editor.name|e }}
 {% if editor.web is defined %}<br />{{ editor.web }}{% endif %}
-{% if editor.proof is defined %}</p><p class="center-par-tb-space">Proofreading by{{ editor.proof }}{% endif %}
+{% if editor.proof is defined %}</p><p class="center-par-tb-space">Proofreading by {{ editor.proof }}{% endif %}
 </p>
 {% endif %}
 {% endif %}
