@@ -115,17 +115,18 @@ def mkbook(metayaml, book, tmpl, yincl):
         if not pg_data:
             # look for supplementary YAML file with page data,
             # first in current dir, then in yincl:
+            fname = '{0}.yaml'.format(pg['yaml'] if 'yaml' in pg else pg['id'])
             try:
-                with open(pg['id'] + '.yaml', 'r') as foi:
+                with open(fname, 'r') as foi:
                     pg_data = yaml.load(foi)
             except FileNotFoundError as e:
                 logging.warning(e)
             try:
-                with open(os.path.join(yincl, pg['id'] +
-                          '.yaml'), 'r') as foi:
+                with open(os.path.join(yincl, fname), 'r') as foi:
                     pg_data = yaml.load(foi)
             except FileNotFoundError as e:
                 logging.warning(e)
+
         tmpl = tmplEnv.get_template(tmpl_name + params._TEMPLATE_EXT)
         outfile = os.path.join(pg['id'] + '.tex')
         logging.info('generating %s...', outfile)

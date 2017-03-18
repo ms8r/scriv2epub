@@ -1,0 +1,15 @@
+<% macro title_list(series) -%>
+    <% if series.series %>{\LARGE <& series.series &>}\plainbreak{0.5}<% endif %>
+    <% if series.slogan %>{\large\itshape <& series.slogan &>}\plainbreak{0.5}<% endif %>
+    <% if series.print_img %>\includegraphics[width=0.75\linewidth]{<& series.print_img &>}\plainbreak{0.5}<% endif %>
+    <% for t in series.titlelist %>
+        <& t.title &><% if t.tclause %> <& t.tclause &><% endif %><% if t.subtitle %>\\<& t.subtitle &><% endif %>
+        \plainbreak{0.75}
+    <% endfor %>
+    <% if series.addons %>\plainbreak{0.5}<& series.addonsep &>
+    <% for a in series.addons %>
+        <& a.title &><% if a.tclause %> <& a.tclause &><% endif %><% if a.subtitle %>\\<& a.subtitle &><% endif %>
+        \plainbreak{0.75}
+    <% endfor %>
+    <% endif %>
+<%- endmacro %>
