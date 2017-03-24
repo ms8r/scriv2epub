@@ -35,14 +35,11 @@ Passed in variables:
 \begin{center}
 
 <% for series in pg_data if series.id == series_id %>
-    <%- if not loop.first -%>
-       \newpage 
-    <%- endif %>
     <& title_list(series) &>
 <% endfor %>
 
 <% if pg_meta.urltext %>
-\plainbreak{1}
+\plainbreak{2}
 visit <& pg_meta.urltext &>
 <% endif %>
 
