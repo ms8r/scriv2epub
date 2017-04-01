@@ -4,5 +4,6 @@
 *.pyc
 *~
 non-git
+Blitz
 __pychache__
 cenv
