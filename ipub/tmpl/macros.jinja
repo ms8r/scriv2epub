@@ -1,5 +1,5 @@
 {% macro title_list(series) -%}
-    {% if series.series %}<h3 class="chapter-heading">{% if series.url %}<a href="{{ series.url|e }}">{% endif %}{{ series.series|e }}{% if series.url %}</a>{% endif %}</h3>{% endif %}
+    {% if series.series %}<h3 class="chapter-heading center">{% if series.url %}<a href="{{ series.url|e }}">{% endif %}{{ series.series|e }}{% if series.url %}</a>{% endif %}</h3>{% endif %}
     {% if series.slogan %}<p class="center-par-b-space italic-par">{{ series.slogan|e }}</p>{% endif %}
     {% if series.img %}<p class="center-par"><img width="400" src="{{ series.img|e }}" alt="{{ series.series|e }}" /></p>{% endif %}
     {% for t in series.titlelist %}
