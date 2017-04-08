@@ -1,17 +1,16 @@
 {% extends "xhtml_skeleton.jinja" %}
 {% block body %}
-<div class="center">
-    <p class="title">{{ title|e }}</p>
+    <p class="title center">{{ title|e }}</p>
     {% if subtitle is defined %}
-        <p class="subtitle">{{ subtitle|e }}</p>
+        <p class="subtitle center">{{ subtitle|e }}</p>
     {% endif %}
     {% if author is defined %}
-        <p>by</p>
-        <p class="author">{{ author|e }}</p>
+        <p class="center">by</p>
+        <p class="author center">{{ author|e }}</p>
     {% endif %}
     {%- if authorlist is defined %}
-        <p>by</p>
-        <p class="author">
+        <p class="center">by</p>
+        <p class="author center">
       {%- for aut in authorlist -%}
         {{ aut }}{% if not loop.last %}<br />{% endif %}
       {%- endfor -%}
@@ -21,12 +20,11 @@
         <p class="center-par">{{ subplain|e }}</p>
     {% endif %}
     {% if series is defined %}
-        <p class="series">{{ series|e }}</p>
+        <p class="series center">{{ series|e }}</p>
     {% endif %}
     {% if img is defined %}
     <div class="title-page-img">
         <p class="center-par-tb-extra-space"><img src="{{ img|e }}" alt="{{ title|e }}" /></p>
     </div>
     {% endif %}
-</div>
 {% endblock %}
