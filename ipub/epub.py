@@ -152,8 +152,8 @@ def cp_static(pg, epubdir, srcdir, htmldir, **kwargs):
             foo.write(ht_text)
 
 
-def gen_chapter(pg, meta, tmpl_env, epubdir, srcdir, htmldir, dropcaps,
-                **kwargs):
+def gen_chapter(pg, meta, tmpl_env, epubdir, srcdir, htmldir, dropcaps=False,
+                asterism=False, **kwargs):
     """
     Generates HTML chapter file from md source.
     """
@@ -171,11 +171,15 @@ def gen_chapter(pg, meta, tmpl_env, epubdir, srcdir, htmldir, dropcaps,
     with open(pg['mdfile'], 'r') as foi:
         ht_text = markdown.markdown(foi.read(), extensions=['meta', 'smarty'])
     # styling for in-page section breaks:
-    for pat in break_re:
-        pat = r'<p>\s*(?P<first>{})\s*</p>'.format(pat)
-        ht_text = re.sub(
-                pat, '<p class="{}">\g<first></p>'.format(
-                params._IN_PG_SEC_BREAK_STYLE), ht_text)
+    for br_pat in break_re:
+        if asterism:
+            pat = r'<p[^>]*>\s*{0}\s*</p>'.format(br_pat)
+            repl = '\n<hr class="asterism" />\n'
+        else:
+            pat = r'<p>\s*(?P<first>{0})\s*</p>'.format(br_pat)
+            repl = '<p class="{0}">\g<first></p>'.format(
+                    params._IN_PG_SEC_BREAK_STYLE)
+        ht_text = re.sub(pat, repl, ht_text)
     ht_text = re.sub(r'<p>', r'<p class="{}">'.format(pg['parstyle']), ht_text)
     if dropcaps:
         ht_text = re.sub(
@@ -319,7 +323,7 @@ def md2ht(text, par_style=None, trim_tags=False):
 
 
 def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
-           dropcaps=False):
+           dropcaps=False, asterism=False):
     """
     Generates the files required for an EPUB ebook
     """
@@ -355,7 +359,8 @@ def mkbook(epubdir, srcdir, htmldir, imgdir, metayaml, mmyaml, yaml_incl_dir,
     # now content:
     kwargs = {'meta': meta, 'epubdir': epubdir, 'srcdir': srcdir,
              'htmldir': htmldir, 'tmpl_env': tmplEnv,
-             'yaml_incl_dir': yaml_incl_dir, 'dropcaps': dropcaps}
+             'yaml_incl_dir': yaml_incl_dir, 'dropcaps': dropcaps,
+             'asterism': asterism}
 
     def gen_content(pages, **kwargs):
         for pg in pages:
