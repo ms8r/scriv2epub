@@ -42,7 +42,7 @@ Passed in variables:
 {% block body %}
 {% from 'macros.jinja' import title_list %}
 <div class="center">
-    {% if pg_meta.heading %}<h2 class="chapter-heading">{{ pg_meta.heading|e }}</h2>{% endif %}
+    {% if pg_meta.heading %}<h2 class="chapter-heading center">{{ pg_meta.heading|e }}</h2>{% endif %}
     {% for series in pg_data if series.id == series_id %}
       {{ title_list(series) }}
     {% endfor %}

@@ -1,10 +1,10 @@
 {% macro title_list(series) -%}
-    {% if series.series %}<h3 class="chapter-heading">{% if series.url %}<a href="{{ series.url|e }}">{% endif %}{{ series.series|e }}{% if series.url %}</a>{% endif %}</h3>{% endif %}
-    {% if series.slogan %}<p class="center-par-b-space italic-par">{{ series.slogan|e }}</p>{% endif %}
+    {% if series.series %}<h3 class="series-heading">{% if series.url %}<a href="{{ series.url|e }}">{% endif %}{{ series.series|e }}{% if series.url %}</a>{% endif %}</h3>{% endif %}
+    {% if series.slogan %}<p class="series-slogan">{{ series.slogan|e }}</p>{% endif %}
     {% if series.img %}<p class="center-par"><img width="400" src="{{ series.img|e }}" alt="{{ series.series|e }}" /></p>{% endif %}
     {% for t in series.titlelist %}
         {% if t.img %}<p class="center-par">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}<img width="200" src="{{ t.img|e }}" alt="Cover image for {{ t.title|e }}" />{% if t.url %}</a>{% endif %}</p>{% endif %}
-        <p class="center-par">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}{% if t.tclause %} {{ t.tclause }}{% endif %}{% if t.subtitle %}<br />{{ t.subtitle|e }}{% endif %}</p>
+        <p class="title-listing">{% if t.url %}<a href="{{ t.url|e }}">{% endif %}{{ t.title|e }}{% if t.url %}</a>{% endif %}{% if t.tclause %} {{ t.tclause }}{% endif %}{% if t.subtitle %}<br />{{ t.subtitle|e }}{% endif %}</p>
         <p class="center-par">&nbsp;</p>
     {% endfor %}
     {% if series.addons %}<p class="center-par-tb-extra-space">{{ series.addonsep }}</p>

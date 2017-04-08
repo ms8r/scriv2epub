@@ -156,6 +156,11 @@ def setup_parser_genep(p):
     p.add_argument('--dropcaps', action='store_true',
             help="""causes first character in chapters to be formatted
             as dropcap""")
+    p.add_argument('--asterism', action='store_true',
+            help="""if specified replaces in page context changes marked by
+            ***, ###, <<<>>> (or variants of these including whitespace) with
+            an <hr class="asterism" /> element; this can be styled in CSS e.g.
+            to use a predefined image""")
 
 
 def handle_mmcat(args):
@@ -235,7 +240,8 @@ def handle_genep(args):
     Generates the files required for an EPUB ebook
     """
     epub.mkbook(args.epubdir, args.srcdir, args.htmldir, args.imgdir,
-            args.metayaml, args.mmyaml, args.yincl, args.dropcaps)
+            args.metayaml, args.mmyaml, args.yincl, args.dropcaps,
+            args.asterism)
 
 
 # The _task_handler dictionary maps each 'command' to a (task_handler,
