@@ -1,0 +1,14 @@
+{% extends "xhtml_skeleton.jinja" %}
+{% block body %}
+<div class="chapter-title">
+    <p class="title">{{ pg_meta.title|e }}</p>
+    {% if pg_meta.subtitle is defined %}
+        <p class="subtitle">{{ pg_meta.subtitle|e }}</p>
+    {% endif %}
+    {% if pg_meta.img is defined %}
+    <div {% if pg_meta.img_class is defined %}class="{{ pg_meta.img_class }}"{% endif %}>
+        <p class="center"><img src="{{ pg_meta.img|e }}" alt="{{ pg_meta.title|e }}" /></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

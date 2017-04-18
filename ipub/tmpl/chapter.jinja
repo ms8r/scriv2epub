@@ -15,9 +15,11 @@
     <h3 class="chapter-heading {{ pg_meta.subalign|default('center') }}">{{ pg_meta.subheading|e }}</h3>
 {% endif %}
 
+<div class="introlines">
 {% for line in pg_meta.introlines %}
-    <p class="{{ pg_meta.introstyle|default('introline left') }}">{{ line|e }}</p>
+    <p class="{{ pg_meta.introstyle|default('introline') }}">{{ line|e }}</p>
 {% endfor %}
+</div>
 
 
 {% if pg_meta.beg_raw %}{{ pg_meta.beg_raw|markdown(par_style="no-indent") }}{% endif %}
