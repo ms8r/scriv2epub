@@ -28,7 +28,10 @@
         <text>{{ pg.heading|e }}</text>
       </navLabel>
       <content src="{{ pg.id|e }}.xhtml"></content>
-      {% if pg.children %}{{ loop(pg.children)|indent(4, true) }}{% endif %}
+      {% if pg.children and (ncx_map_depth is not defined
+                             or loop.depth < ncx_map_depth) -%}
+        {{ loop(pg.children)|indent(2, true) }}
+      {% endif %}
     </navPoint>
   {% endfor %}
   </navMap>
