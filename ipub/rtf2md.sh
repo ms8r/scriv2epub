@@ -24,7 +24,8 @@ INFILE=$(basename $1)
 sed -e 's:</\?span[^>]*>::g' \
     -e 's:</\?font[^>]*>::g' \
     -e 's:<p [^>]*>:<p>:g' < $TMPDIR/${INFILE%.*}.html | \
-    pandoc --normalize --smart --wrap=none -f html -t markdown > $2
+    pandoc --normalize --smart --wrap=none -f html -t markdown | \
+    sed '/^\\[ ]*$/d' > $2
 
 rm $TMPDIR/${INFILE%.*}.html
 rmdir $TMPDIR
