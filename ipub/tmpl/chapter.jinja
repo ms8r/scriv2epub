@@ -23,6 +23,9 @@
 </div>
 {% endif %}
 
+{# intro block to allow extension by other special purpose templates #}
+{% block intro %}
+{% endblock %}
 
 {% if pg_meta.beg_raw %}{{ pg_meta.beg_raw|markdown(par_style="no-indent") }}{% endif %}
 
