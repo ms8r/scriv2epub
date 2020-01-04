@@ -1,7 +1,7 @@
 {% extends "chapter.jinja" %}
 
 {% block intro %}
-  {% if pg_meta.sp_img %}<p class="center-par"><img width="300" src="{{ pg_meta.sp_img }}" alt="Image for {{ pg_meta.heading|e }}" /></p>{% endif %}
+  {% if pg_meta.sp_img %}<p class="center-par"><img width="300" src="{{ pg_meta.sp_img }}" alt="{{ pg_meta.sp_title|e }} cover image" /></p>{% endif %}
   {% if pg_meta.sp_review %}
   <blockquote>
     <p>&ldquo;{{ pg_meta.sp_review|e }}&rdquo;</p>
