@@ -4,7 +4,7 @@
   {% if pg_meta.sp_img %}<p class="center-par"><img width="300" src="{{ pg_meta.sp_img }}" alt="{{ pg_meta.sp_title|e }} cover image" /></p>{% endif %}
   {% if pg_meta.sp_review %}
   <blockquote>
-    <p>&ldquo;{{ pg_meta.sp_review|e }}&rdquo;</p>
+    <p>&ldquo;{{ pg_meta.sp_review|trim|e }}&rdquo;</p>
     {% if pg_meta.sp_review_src %}<p class="quote-src"><cite>&ndash;{{ pg_meta.sp_review_src|e }}</cite></p>{% endif %}
   </blockquote>
   {% endif %}
