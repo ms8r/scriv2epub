@@ -33,6 +33,9 @@
         <dc:contributor opf:file-as="Last, First" opf:role="edt">{{ editor.name|e }}</dc:contributor>
       {% endif %}
     {% endif %}
+    {% if translator is defined %}
+      <dc:contributor opf:file-as="Last, First" opf:role="trl">{{ translator|e }}</dc:contributor>
+    {% endif %}
     {% if coverart is defined %}
       {% if coverart.name is defined %}
         <dc:contributor opf:file-as="Last, First" opf:role="art">{{ coverart.name|e }}</dc:contributor>

@@ -1,0 +1,49 @@
+{% extends "xhtml_skeleton.jinja" %}
+
+{% block body %}
+
+<p class="center-par-tb-extra-space">{{ title|e }}</p>
+<p class="center-par-tb-extra-space">{{ copyright|d('Copyright 2016') }}{% if author is defined %} von {{ author|e }} {% endif %}</p>
+{% if authorweb is defined %}
+    <p class="center-par-tb-extra-space">{{ autherweb|e }}</p>
+{% endif %}
+{% if authoremail is defined %}
+    <p class="center-par-tb-extra-space">{{ authoremail|e }}</p>
+{% endif %}
+{% if authorlist is defined %}
+<p class="center-par-tb-space">
+{% for authorname in authorlist %}
+   &copy;&nbsp;{{ authorname|e }}{% if not loop.last %}, {% endif %}
+{% endfor %}
+</p>
+{% endif %}
+{% if editor is defined %}
+{% if editor.name is defined %}<p class="center-par-tb-extra-space">Editing by {{ editor.name|e }}
+{% if editor.web is defined %}<br />{{ editor.web }}{% endif %}
+{% if editor.proof is defined %}</p><p class="center-par-tb-space">Proofreading by {{ editor.proof }}{% endif %}
+</p>
+{% endif %}
+{% endif %}
+{% if translator is defined %}<p class="center-par-tb-extra-space">Aus dem Englischen übersetzt von {{ translator|e }}
+</p>
+{% endif %}
+<p class="center-par-tb-extra-space"></p>
+{% if coverart is defined %}
+{% if coverart.name is defined %}<p class="center-par-tb-extra-space">Cover art by {{ coverart.name|e }}
+{% if coverart.web is defined %}<br />{{ coverart.web }}{% endif %}
+</p>
+{% endif %}
+{% endif %}
+
+<p class="center-par-tb-extra-space"></p>
+<p class="center-par-tb-extra-space">Das Werk einschließlich aller seiner Teile ist urheberrechtlich geschützt. Jede Verwertung, die nicht ausdrücklich vom Urheberrechtsgesetz zugelassen ist, bedarf der vorherigen Zustimmung des Autors. Das gilt insbesondere für Vervielfältigungen, Bearbeitungen, Übersetzungen, Mikroverfilmungen und die Einspeicherung und Verarbeitung in elektronischen Systemen.</p>
+
+{% if not pg_meta.nodisclaimer %}
+<p class="center-par-tb-space">Die Ereignisse und die handelnden Personen in diesem Buch sind frei erfunden. Etwaige Ähnlichkeiten mit tatsächlichen Ereignissen oder lebenden Personen wären rein zufällig und unbeabsichtigt.</p>
+{% endif %}
+
+{% if pg_meta.end_raw %}
+{{ pg_meta.end_raw }}
+{% endif %}
+
+{% endblock %}
