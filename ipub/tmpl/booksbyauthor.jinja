@@ -65,7 +65,7 @@ Passed in variables:
 
     {% if pg_meta.urltext %}
     <p class="center-par">&nbsp;</p>
-    <p class="center-par-tb-space">visit {% if pg_meta.url %}<a href="{{ pg_meta.url }}">{% endif %}{{ pg_meta.urltext }}{% if pg_meta.url %}</a>{% endif %}</p>
+    <p class="center-par-tb-space">{% if language is defined and language == 'de' %}Mehr auf {% else %}visit {% endif %}{% if pg_meta.url %}<a href="{{ pg_meta.url }}">{% endif %}{{ pg_meta.urltext }}{% if pg_meta.url %}</a>{% endif %}.</p>
     {% endif %}
 </div>
 {% endblock %}

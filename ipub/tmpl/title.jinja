@@ -5,7 +5,11 @@
         <p class="subtitle center">{{ subtitle|e }}</p>
     {% endif %}
     {% if author is defined %}
+      {% if language is defined and language == "de" %}
+        <p class="center">von</p>
+      {% else %}
         <p class="center">by</p>
+      {% endif %}
         <p class="author center">{{ author|e }}</p>
     {% endif %}
     {%- if authorlist is defined %}
